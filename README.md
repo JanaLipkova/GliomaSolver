@@ -35,5 +35,8 @@ To run on SLURM system:
 ```sh
 bsub run.sh
 ```
-
+### References
+Please cite:
+* Lipkova et al.: *Personalized Radiotherapy Planning for Glioma Using Multimodal Bayesian Model Calibration*, preprint arXiv:1807.00499, (2018)
+* Rossinelli D, et al.: *Mrag-i2d: Multi-resolution adapted grids for remeshed vortex methods on multicore architectures.* Journal of Computational Physics 288:1–18, (2015).
     
