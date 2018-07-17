@@ -1,8 +1,9 @@
-_Store
+.DS_Store
 *.o
 *.swp
 ._*
 source/makefile/brain
 *.vtu
 *.vtk
+*.dat
 DeformationsXcode/*
