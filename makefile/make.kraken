@@ -1,0 +1,19 @@
+CC = g++ -O3 -Wno-deprecated
+OPENMP_FLAG= -fopenmp -fpermissive
+
+TBB_INC_DIR=/home/jana/Work/GliomaAdvance/lib/tbb40_20120613oss/include
+TBB_LIB_DIR=/home/jana/Work/GliomaAdvance/lib/tbb40_20120613oss/build/linux_intel64_gcc_cc4.6.1_libc2.5_kernel2.6.18_release
+
+#VTK_INC_DIR=/home/jana/Work/GliomaAdvance/lib/myVTK/include/vtk-5.4
+#VTK_LIB_DIR=/home/jana/Work/GliomaAdvance/lib/myVTK/lib/vtk-5.4
+
+VTK_INC_DIR=../../lib/myVTK/include/vtk-5.4/
+VTK_LIB_DIR=../../lib/myVTK/lib/vtk-5.4/
+
+export LD_LIBRARY_PATH:=$(VTK_LIB_DIR):$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH:=$(TBB_LIB_DIR):$(LD_LIBRARY_PATH)
+
+
+CPPFLAGS+= -I$(TBB_INC_DIR) -I$(VTK_INC_DIR) -I..
+
+
