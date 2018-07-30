@@ -33,7 +33,7 @@ Folder ```makefile/TumorGrowth``` contains script to run tumor growth in patient
 ```
 To run on SLURM system:
 ```sh
-bsub run.sh
+sbatch run.sh
 ```
 ### References
 Please cite:
