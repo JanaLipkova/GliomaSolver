@@ -5,6 +5,7 @@ Softer for simulating tumor growth in brain anatomy, including models:
 * others
 
 ### Instalations
+* you need to install vtk and tbb library
 * downloaded the UNIX compatible libraries here: http://tdo.sk/~janka/lib/ 
 * unpack libraries and store to a folder, i.e. /lib/ 
 * install tbb libraries by calling ```make clean && make```

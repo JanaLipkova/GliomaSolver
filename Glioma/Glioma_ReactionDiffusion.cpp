@@ -8,7 +8,6 @@
 
 #include "Glioma_ReactionDiffusion.h"
 
-// need biger stencil for the refinment !!!
 static int maxStencil[2][3] = {
     -1, -1, -1,
     +2, +2, +2
@@ -69,12 +68,14 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, int pID, Real& L)
     sprintf(dataFolder,"/home/jana/Work/GliomaAdvance/source/Anatomy/");
 #elif defined(LRZ_CLUSTER)
     sprintf(dataFolder,"/home/hpc/txh01/di49zin/GliomaAdvance/GliomaSolver/Anatomy/");
+#elif defined(JANA)
+    sprintf(dataFolder,"/Users/lipkova 1/WORK/GliomaSolver/Anatomy/");
 #else
-    sprintf(dataFolder,"../../Anatmoy/");
+    sprintf(dataFolder,"../Anatomy/");
 #endif
     
     sprintf(patientFolder, "%sPatient%02d/P%02d",dataFolder,pID,pID);
-    printf("Reading anatomy from: %s", patientFolder);
+    printf("Reading anatomy from: %s \n", patientFolder);
     
     sprintf(anatomy, "%s_GM.dat", patientFolder);
     MatrixD3D GM(anatomy);

@@ -13,6 +13,10 @@ CPPFLAGS += -D LRZ_CLUSTER
 include make.lrz
 endif
 
+ifneq "$(findstring Jana,$(shell hostname))" ""
+CPPFLAGS += -D JANA
+include make.jana
+endif
 
 # Compilations options
 ifeq "$(helmholtz)" "hypre"

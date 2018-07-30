@@ -6,4 +6,6 @@ source/makefile/brain
 *.vtu
 *.vtk
 *.dat
+brain
 DeformationsXcode/*
+GliomaSolverXcode/*

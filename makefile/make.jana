@@ -1,0 +1,19 @@
+CC = g++ -O3 -Wno-deprecated
+OPENMP_FLAG= -fopenmp 
+
+TBB_INC_DIR=/opt/intel/Compiler/11.1/084/Frameworks/tbb/include/
+TBB_LIB_DIR=/opt/intel/Compiler/11.1/084/Frameworks/tbb/ia32/cc4.0.1_os10.5.4/lib/ -ltbb -ltbbmalloc
+
+VTK_INC_DIR=/usr/local/include/vtk-5.6/
+VTK_LIB_DIR=/usr/local/lib/vtk-5.6/
+
+HYPRE_INC_DIR=/Users/lipkova/WORK/Glioma/Hypre/hypre-2.10.0b/src/hypre/include
+HYPRE_LIB_DIR=/Users/lipkova/WORK/Glioma/Hypre/hypre-2.10.0b/src/hypre/lib
+
+export DYLD_LIBRARY_PATH:=$(VTK_LIB_DIR):$(DYLD_LIBRARY_PATH)
+export DYLD_LIBRARY_PATH:=$(TBB_LIB_DIR):$(DYLD_LIBRARY_PATH)
+export DYLD_LIBRARY_PATH:=$(HYPRE_LIB_DIR):$(DYLD_LIBRARY_PATH)
+
+CPPFLAGS+= -I$(TBB_INC_DIR) -I$(VTK_INC_DIR) -I..
+
+
