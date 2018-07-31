@@ -14,6 +14,8 @@
 #include <xmmintrin.h>
 
 #include "Glioma_ReactionDiffusion.h"
+#include "Glioma_BrainDeformation.h"
+
 
 using namespace std;
 using namespace MRAG;
@@ -32,6 +34,8 @@ int main(int argc,const char ** argv)
     
     if(parser("-model").asString() == "RD")
         s = new Glioma_ReactionDiffusion(argc, (const char **)argv);
+    else if(parser("-model").asString() == "deform")
+        s = new Glioma_BrainDeformation(argc, (const char **)argv);
     else
         s = new Test(argc, (const char **)argv);
   

@@ -14,6 +14,8 @@
 #include "Matrix.h"
 
 #include "Operators/Glioma_ReactionDiffusionOperator.h"
+#include "Operators/HelmholtzSolver3D_Hypre.h"
+
 
 struct Cell
 {

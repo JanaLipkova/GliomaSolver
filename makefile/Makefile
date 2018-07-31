@@ -92,7 +92,7 @@ ifeq "$(helmholtz)" "hypre"
 	CC=mpic++
 	LD=$(CC)
 	CPPFLAGS += -I$(HYPRE_INC_DIR)
-	LIBS += -L$(HYPRE_LIB_DIR) -lHYPRE
+	LIBS += -L$(HYPRE_LIB_DIR) -lHYPRE -lm -lstdc++
 endif	
 
 
@@ -105,6 +105,7 @@ VPATH := ../Glioma/ ../MRAG/ ../MRAG/MRAGcore
 OBJECTS = \
 Glioma_main.o \
 Glioma_ReactionDiffusion.o\
+Glioma_BrainDeformation.o\
 MRAGBoundaryBlockInfo.o \
 MRAGProfiler.o \
 MRAGWavelets_StaticData.o \
