@@ -13,13 +13,12 @@
 #include "Glioma.h"
 #include "Matrix.h"
 
-#include "Operators/Glioma_ReactionDiffusionOperator.h"
-#include "Operators/HelmholtzSolver3D_Hypre.h"
-
+#include "Operators/ReactionDiffusionOperator.h"
+#include "Operators/PressureOperator.h"
+#include "Operators/AdvectionConvectionOperator.h"
 
 struct Cell
 {
-    
     /* tumor */
     Real phi;
     Real dphidt;
@@ -146,15 +145,21 @@ struct Cell
 	{
 		switch(i)
 		{
-            case 0: return phi;
-            case 1: return phi + 0.1 * p_g + 0.2 * p_w;
-            case 2: return p_w;
-            case 3: return p_g;
-            case 4: return p_csf;
-            case 5: return chi;
-            case 6: return ux;
-            case 7: return uy;
-            case 8: return uz;
+            case 0:  return phi;
+            case 1:  return phi + 0.1 * p_g + 0.2 * p_w;
+            case 2:  return p_w;
+            case 3:  return p_g;
+            case 4:  return p_csf;
+            case 6:  return wm;
+            case 7:   return gm;
+            case 8:  return csf;
+            case 9:  return ux * chi;
+            case 10: return uy * chi;
+            case 11: return uz * chi;
+            case 12: return p  * chi;
+            case 13: return f;
+            case 14: return chi;
+            case 15: return pff;
 
 			default: abort(); return 0;
 		}

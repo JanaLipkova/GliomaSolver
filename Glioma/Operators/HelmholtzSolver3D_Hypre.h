@@ -13,6 +13,8 @@
 #ifndef HelmholtzSolver3D_Hypre_h
 #define HelmholtzSolver3D_Hypre_h
 
+#include "../Glioma_Types.h"
+
 
 #include <mpi.h>
 #include <_hypre_utilities.h>
@@ -130,27 +132,27 @@ class HelmholtzSolver3D_Hypre
                             }
                             
                             // get entries of matrix
-                            Real psi  = lab(ix,iy,iz).psi * m;
-                            Real psiB = lab(ix  ,iy  ,iz-1).psi * mB;  //back
-                            Real psiF = lab(ix  ,iy  ,iz+1).psi * mF;  //front
-                            Real psiS = lab(ix,  iy-1,iz  ).psi * mS;
-                            Real psiN = lab(ix,  iy+1,iz  ).psi * mN;
-                            Real psiW = lab(ix-1,iy  ,iz  ).psi * mW;
-                            Real psiE = lab(ix+1,iy  ,iz  ).psi * mE;
+                            Real pff  = lab(ix,iy,iz).pff * m;
+                            Real pffB = lab(ix  ,iy  ,iz-1).pff * mB;  //back
+                            Real pffF = lab(ix  ,iy  ,iz+1).pff * mF;  //front
+                            Real pffS = lab(ix,  iy-1,iz  ).pff * mS;
+                            Real pffN = lab(ix,  iy+1,iz  ).pff * mN;
+                            Real pffW = lab(ix-1,iy  ,iz  ).pff * mW;
+                            Real pffE = lab(ix+1,iy  ,iz  ).pff * mE;
                             
                             // approximate intermidiet points
-                            _mean(psi, psiW, psiE, psiS, psiN, psiB, psiF);
+                            _mean(pff, pffW, pffE, pffS, pffN, pffB, pffF);
                             
                             Real kappa = kappaWM * lab(ix,iy,iz).p_w + kappaGM * lab(ix,iy,iz).p_g  + kappaCSF * lab(ix,iy,iz).p_csf;
                             
                             // fill in vector of matrix values
-                            values[idx  ] =   psiW + psiE + psiS + psiN + psiB + psiF + kappa*psi*h2;
-                            values[idx+1] = - psiW;
-                            values[idx+2] = - psiE;
-                            values[idx+3] = - psiS;
-                            values[idx+4] = - psiN;
-                            values[idx+5] = - psiB;
-                            values[idx+6] = - psiF;
+                            values[idx  ] =   pffW + pffE + pffS + pffN + pffB + pffF + kappa*pff*h2;
+                            values[idx+1] = - pffW;
+                            values[idx+2] = - pffE;
+                            values[idx+3] = - pffS;
+                            values[idx+4] = - pffN;
+                            values[idx+5] = - pffB;
+                            values[idx+6] = - pffF;
                             
                         }
             }

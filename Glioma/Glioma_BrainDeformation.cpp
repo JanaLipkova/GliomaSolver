@@ -35,13 +35,13 @@ static int maxStencil[2][3] = {
 
 Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): parser(argc, argv), helmholtz_solver3D(argc,argv)
 {
+    bVerbose  = parser("-verbose").asBool(1);
+    bProfiler = parser("-profiler").asBool(1);
     
-    printf("////////////////////////////////////////////////////////////////////////////////\n");
-    printf("//////////////////       Glioma Brain Deformations Model        ////////////////\n");
-    printf("////////////////////////////////////////////////////////////////////////////////\n");
-    
-    printf("mv test test_t%d_b%d_w%s\n", nThreads, blockSize, "w");
-    printf("RD INIT! nThreads=%d, blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", nThreads, blockSize, "w", blocksPerDimension, maxLevel);
+    if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
+    if(bVerbose) printf("//////////////////       Glioma Brain Deformations Model        ////////////////\n");
+    if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
+    if(bVerbose) printf("RD INIT! nThreads=%d, blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", nThreads, blockSize, "w", blocksPerDimension, maxLevel);
     
     refiner		= new Refiner_SpaceExtension();
     compressor	= new Compressor();
@@ -52,7 +52,6 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
-    bVerbose = parser("-verbose").asBool();
     pID =  parser("-pID").asInt();
     L = 1;
     
@@ -67,7 +66,6 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
     whenToWriteOffset	= parser("-dumpfreq").asDouble();
     whenToWrite			= whenToWriteOffset;
     numberOfIterations	= 0;
-    
 }
 
 Glioma_BrainDeformation::~Glioma_BrainDeformation()
@@ -96,7 +94,7 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
 #endif
     
     sprintf(patientFolder, "%sPatient%02d/P%02d",dataFolder,pID,pID);
-    printf("Reading anatomy from: %s", patientFolder);
+    printf("Reading anatomy from: %s \n", patientFolder);
     
     sprintf(anatomy, "%s_GM.dat", patientFolder);
     MatrixD3D GM(anatomy);
@@ -156,7 +154,7 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
                     mappedBrainY -= (int) ( (brainSizeMax - brainSizeY) * 0.5);
                     mappedBrainZ -= (int) ( (brainSizeMax - brainSizeZ) * 0.5);
                     
-                    if ( (mappedBrainX >= 0 && mappedBrainX < brainSizeX) && (mappedBrainY >= 0 && mappedBrainY < brainSizeY) && (mappedBrainZ => 0 && mappedBrainZ < brainSizeZ) )
+                    if ( (mappedBrainX >= 0 && mappedBrainX < brainSizeX) && (mappedBrainY >= 0 && mappedBrainY < brainSizeY) && (mappedBrainZ >= 0 && mappedBrainZ < brainSizeZ) )
                     {
                         pGM     = GM(mappedBrainX,mappedBrainY,mappedBrainZ);
                         pWM     = WM(mappedBrainX,mappedBrainY,mappedBrainZ);
@@ -177,10 +175,10 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
                             pWM    = pWM  / all;
                             pCSF   = pCSF / all;
                             
-                            pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;  // threashold to ensure hemispehre separation
-                            block(ix,iy,iz).p_csf = pCSF;
+                            //pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;  // threashold to ensure hemispehre separation
+                            //block(ix,iy,iz).p_csf = pCSF;
                             
-                            if(pCSF  < 1.)
+                            //if(pCSF  < 1.)
                             {
                                 block(ix,iy,iz).p_g   = pGM  / (pCSF + pWM + pGM);
                                 block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
@@ -209,7 +207,7 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
                         
                         // auxiliary functions
                         block(ix,iy,iz).pff = max(tau, pPFF);            //phase field func.
-                        block(ix,iy,iz).chi = (pPFF >= 0.5) ? 1. : 0.;    // domain char. func
+                        block(ix,iy,iz).chi = (pPFF >= 0.5) ? 1. : 0.;   // domain char. func
                     }
                 }
         
@@ -220,102 +218,106 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
 
 
 
-//#pragma mark TimeStepEstimation
-//double Glioma_BrainDeformation::_estimate_dt(double Diff_dt, double CFL)
-//{
-//    const Real maxvel = _compute_maxvel();
-//    const Real max_dx = (1./B::sizeX)*pow(0.5,grid->getCurrentMinLevel());
-//    const Real min_dx = (1./B::sizeX)*pow(0.5,grid->getCurrentMaxLevel());
-//    
-//    const double largest_dt = CFL * max_dx/(maxvel * _DIM);
-//    const double smallest_dt = CFL * min_dx/(maxvel * _DIM);
-//    
-//    assert(largest_dt >= smallest_dt);
-//    
-//    if (largest_dt <= Diff_dt)
-//        printf("Advection dominated time step Adts = %f, ADLdt=%f, Ddt=%f, returning=%f \n", smallest_dt, largest_dt, Diff_dt, (largest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt) );
-//    
-//    return (smallest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt);
-//}
-//
-//Real Glioma_BrainDeformation::_compute_maxvel()
-//{
-//    vector<BlockInfo> vInfo = grid->getBlocksInfo();
-//    const BlockCollection<B>& collecton = grid->getBlockCollection();
-//    
-//    map<int, Real> velocities;
-//    for(vector<BlockInfo>::iterator it=vInfo.begin(); it!=vInfo.end(); it++)
-//        velocities[it->blockID] = 0;
-//    
-//    
-//    GetUMax<_DIM> get_velocities(velocities);
-//    BlockProcessing::process(vInfo, collecton, get_velocities);
-//    
-//    Real maxvel = 0;
-//    for(map< int, Real>::iterator it=velocities.begin(); it!=velocities.end(); it++)
-//        maxvel = max(maxvel, it->second);
-//    
-//    return maxvel;
-//}
-//
-//#pragma mark MainOperators
-//void Glioma_BrainDeformation::_reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho, double dt)
-//{
-//    vector<BlockInfo> vInfo				= grid->getBlocksInfo();
-//    const BlockCollection<B>& collecton = grid->getBlockCollection();
-//    
-//    ReactionDiffusionOperator<_DIM>  rhs(Dw,Dg,rho);
-//    UpdateTumor                     <_DIM>  updateTumor(dt);
-//    UpdatePressureSource            <_DIM>  updatePressureSource(rho);
-//    
-//    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhs);
-//    BlockProcessing::process(vInfo, collecton, updateTumor, nParallelGranularity);
-//    BlockProcessing::process(vInfo, collecton, updatePressureSource, nParallelGranularity);
-//}
-//
-//void Glioma_BrainDeformation::_computeVelocities(BoundaryInfo* boundaryInfo, const bool bMobility, std::vector<Real>* mobility=NULL)
-//{
-//    if(bMobility)
-//        assert (mobility!=NULL);
-//    
-//    Real  Mcsf   = (bMobility) ? (*mobility)[0] : 1.;
-//    Real  Mwm    = (bMobility) ? (*mobility)[1] : 1.;
-//    Real  Mgm    = (bMobility) ? (*mobility)[2] : 1.;
-//    
-//    vector<BlockInfo> vInfo = grid->getBlocksInfo();
-//    const BlockCollection<B>& collecton = grid->getBlockCollection();
-//    
-//    PressureGradient<_DIM> grad(bMobility, Mwm, Mgm, Mcsf );
-//    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, grad);
-//}
-//
-//void Glioma_BrainDeformation::_tissueTumorAdvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt)
-//{
-//    vector<BlockInfo> vInfo				= grid->getBlocksInfo();
-//    const BlockCollection<B>& collecton = grid->getBlockCollection();
-//    
-//    TissueAdvectionWeno5 <_DIM>      rhsA;      // v grad(E) & v grad(tumor)
-//    TissueConvectivePart <_DIM>      rhsC;      // E div(v)
-//    UpdateTissue         <_DIM>      updateTissue(dt);
-//    
-//    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhsA);
-//    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhsC);
-//    BlockProcessing::process(vInfo, collecton, updateTissue, nParallelGranularity);
-//}
-//
-//
-//#pragma mark ingOutput
-//void Glioma_BrainDeformation:: _dump(int counter)
-//{
-//    if (parser("-vtk").asBool())
-//    {
-//        char filename[256];
-//        sprintf(filename,"%P%02d_data_%04d",pID,counter);
-//        
-//        IO_VTKNative3D<W,B, 12,0 > vtkdumper2;
-//        vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
-//    }
-//}
+#pragma mark TimeStepEstimation
+double Glioma_BrainDeformation::_estimate_dt(double Diff_dt, double CFL)
+{
+    const Real maxvel = _compute_maxvel();
+    const Real max_dx = (1./B::sizeX)*pow(0.5,grid->getCurrentMinLevel());
+    const Real min_dx = (1./B::sizeX)*pow(0.5,grid->getCurrentMaxLevel());
+    
+    const double largest_dt = CFL * max_dx/(maxvel * _DIM);
+    const double smallest_dt = CFL * min_dx/(maxvel * _DIM);
+    
+    assert(largest_dt >= smallest_dt);
+    
+    if (largest_dt <= Diff_dt)
+        printf("Advection dominated time step Adts = %f, ADLdt=%f, Ddt=%f, returning=%f \n", smallest_dt, largest_dt, Diff_dt, (largest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt) );
+    
+    return (smallest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt);
+}
+
+Real Glioma_BrainDeformation::_compute_maxvel()
+{
+    vector<BlockInfo> vInfo = grid->getBlocksInfo();
+    const BlockCollection<B>& collecton = grid->getBlockCollection();
+    
+    map<int, Real> velocities;
+    for(vector<BlockInfo>::iterator it=vInfo.begin(); it!=vInfo.end(); it++)
+        velocities[it->blockID] = 0;
+    
+    
+    GetUMax<_DIM> get_velocities(velocities);
+    BlockProcessing::process(vInfo, collecton, get_velocities);
+    
+    Real maxvel = 0;
+    for(map< int, Real>::iterator it=velocities.begin(); it!=velocities.end(); it++)
+        maxvel = max(maxvel, it->second);
+    
+    return maxvel;
+}
+
+#pragma mark MainOperators
+void Glioma_BrainDeformation::_computePressureSource(const int nParallelGranularity,const Real rho)
+{
+    vector<BlockInfo> vInfo				= grid->getBlocksInfo();
+    const BlockCollection<B>& collecton = grid->getBlockCollection();
+    
+    PressureSourceOperator<_DIM> pressureSource(rho);
+    BlockProcessing::process(vInfo, collecton, pressureSource, nParallelGranularity);
+}
+
+void Glioma_BrainDeformation::_computeVelocities(BoundaryInfo* boundaryInfo, const bool bMobility, std::vector<Real>* mobility=NULL)
+{
+    if(bMobility)
+        assert (mobility!=NULL);
+
+    Real  Mcsf   = (bMobility) ? (*mobility)[0] : 1.;
+    Real  Mwm    = (bMobility) ? (*mobility)[1] : 1.;
+    Real  Mgm    = (bMobility) ? (*mobility)[2] : 1.;
+
+    vector<BlockInfo> vInfo = grid->getBlocksInfo();
+    const BlockCollection<B>& collecton = grid->getBlockCollection();
+
+    PressureGradient<_DIM> grad(bMobility, Mwm, Mgm, Mcsf );
+    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, grad);
+}
+
+void Glioma_BrainDeformation::_reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho)
+{
+    vector<BlockInfo> vInfo				= grid->getBlocksInfo();
+    const BlockCollection<B>& collecton = grid->getBlockCollection();
+
+    ReactionDiffusionOperator<_DIM>  rhs(Dw,Dg,rho);
+    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhs);
+}
+
+void Glioma_BrainDeformation::_advectionConvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt)
+{
+    vector<BlockInfo> vInfo				= grid->getBlocksInfo();
+    const BlockCollection<B>& collecton = grid->getBlockCollection();
+
+    TissueTumorAdvectionWeno5 <_DIM> rhsA;      // v grad(E) & v grad(tumor)
+    TissueConvection          <_DIM> rhsB;      // E div(v)
+    TimeUpdate                <_DIM> update(dt);
+
+    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhsA);
+    blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhsB);
+    BlockProcessing::process(vInfo, collecton, update, nParallelGranularity);
+}
+
+
+#pragma mark ingOutput
+void Glioma_BrainDeformation:: _dump(int counter)
+{
+    if (parser("-vtk").asBool())
+    {
+        char filename[256];
+        sprintf(filename,"%P%02d_data_%04d",pID,counter);
+        
+        IO_VTKNative3D<W,B, 16,0 > vtkdumper2;
+        vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
+    }
+}
 
 
 void Glioma_BrainDeformation::run()
@@ -323,15 +325,15 @@ void Glioma_BrainDeformation::run()
     const int nParallelGranularity	= (grid->getBlocksInfo().size()<=8 ? 1 : 4);
     BoundaryInfo* boundaryInfo		= &grid->getBoundaryInfo();
     
-    
-    // reaction diffusion parameters
-    const double CFL    = parser("-CFL").asDouble();
+    // model parameters
+    const double CFL    = parser("-CFL").asDouble(0.8);
     const double tend   = parser("-tend").asDouble();  // [day]
     const double rho    = parser("-rho").asDouble();   // [1/day]
-    double Dw           = parser("-Dw").asDouble() / (L*L);
+    double Dw           = parser("-Dw").asDouble();
     Dw = Dw/(L*L);
     double Dg = 0.1*Dw;
     
+    double  h            = 1./(blockSize*blocksPerDimension);
     double  Diff_dt     = (h*h)/( 2.*_DIM * max(Dw, Dg) );
     double  dt          = Diff_dt;
     int     iCounter    = 1;
@@ -339,26 +341,25 @@ void Glioma_BrainDeformation::run()
     
     printf("Dg=%f, Dw=%f, dt= %f, rho=%f \n", Dg, Dw, dt, rho);
     
-//    // relaxation parameters
-//    const bool bCG          = 1;
-//    const bool bRelaxation  = 1;
-//    
-//    const Real kCSF = parser("-kCSF").asDouble(); //  [m.s / kg] * Kstar = [L* T* / M* ]
-//    const Real kWM  = parser("-kWM").asDouble();  //  [m.s / kg] * Kstar = [L* T* / M* ]
-//    const Real kGM  = parser("-kGM").asDouble();  //  [m.s / kg] * Kstar = [L* T* / M* ]
-//    
-//    vector<Real> kappa;
-//    kappa.push_back(kCSF);
-//    kappa.push_back(kWM);
-//    kappa.push_back(kGM);
-//    
-//    printf("kCSF=%f, kWM=%f, kGM=%f, bVerbose=%i \n", kCSF, kWM, kGM, bVerbose);
-//    
-//    
-//    // mobility parameters
-//    const bool bMobility = parser("-bMobility").asBool();
-//    vector<Real> mobility;   // CSF, WM, GM
-//    
+    // relaxation parameters
+    const bool bCG          = 1;
+    const bool bRelaxation  = 1;
+    
+    const Real kCSF = parser("-kCSF").asDouble(); //  [m.s / kg] * Kstar = [L* T* / M* ]
+    const Real kWM  = parser("-kWM").asDouble();  //  [m.s / kg] * Kstar = [L* T* / M* ]
+    const Real kGM  = parser("-kGM").asDouble();  //  [m.s / kg] * Kstar = [L* T* / M* ]
+    
+    vector<Real> kappa;
+    kappa.push_back(kCSF);
+    kappa.push_back(kWM);
+    kappa.push_back(kGM);
+    
+    printf("kCSF=%f, kWM=%f, kGM=%f, bVerbose=%i \n", kCSF, kWM, kGM, bVerbose);
+
+    // mobility parameters
+    const bool bMobility = parser("-bMobility").asBool(0);
+    vector<Real> mobility;   // CSF, WM, GM
+//
 //    if(bMobility)
 //    {
 //        const Real mCSF = parser("-mTissue").asDouble(); // [m^3 s/ kg] * Mstar = [L*^3 T* / M*]
@@ -367,35 +368,36 @@ void Glioma_BrainDeformation::run()
 //        
 //        mobility.push_back(mCSF);
 //        mobility.push_back(mWM);
-//        mobility.push_back(mGM);
-//        
-//        printf("mCSF=%f, mWM=%f, mGM=%f\n", mCSF, mWM, mGM);
-//    }
-//
-//
-//    while (t <= tend)
-//    {
-//        dt = _estimate_dt(Diff_dt, CFL);
-//        _reactionDiffusionStep(boundaryInfo, nParallelGranularity, Dw, Dg, rho, dt);
-//        helmholtz_solver3D(*grid, bVerbose, bCG, bRelaxation, &kappa, bMobility, &mobility);
-//        _computeVelocities(boundaryInfo, bMobility, &mobility);
-//        _tissueTumorAdvectionStep(boundaryInfo, nParallelGranularity,dt);
-//        
-//        t                   += dt   ;
-//        numberOfIterations  ++      ;
-//        
-//        if ( t >= ((double)(whenToWrite)) )
-//        {
-//            _dump(iCounter);
-//            whenToWrite = whenToWrite + whenToWriteOffset;
-//            iCounter++;
-//        }
-//            }
-//    
-//    _dump(iCounter);
+    //        mobility.push_back(mGM);
+    //
+    //        printf("mCSF=%f, mWM=%f, mGM=%f\n", mCSF, mWM, mGM);
+    //    }
     
-    profiler.printSummary();
-    printf("**** Dumping done\n");
-    printf("\n\n Run Finished \n\n");
+    
+    while (t <= tend)
+    {
+        dt = _estimate_dt(Diff_dt, CFL);
+        _computePressureSource(nParallelGranularity,rho);
+        helmholtz_solver3D(*grid, bVerbose, bCG, bRelaxation, &kappa, bMobility, &mobility);
+        _computeVelocities(boundaryInfo, bMobility, &mobility);
+        _reactionDiffusionStep(boundaryInfo, nParallelGranularity, Dw, Dg, rho);
+        _advectionConvectionStep(boundaryInfo, nParallelGranularity, dt);
+        
+        t                   += dt   ;
+        numberOfIterations  ++      ;
+        
+        if ( t >= ((double)(whenToWrite)) )
+        {
+            _dump(iCounter);
+            whenToWrite = whenToWrite + whenToWriteOffset;
+            iCounter++;
+        }
+    }
+    
+    _dump(iCounter);
+    
+    if(bVerbose) profiler.printSummary();
+    if(bVerbose) printf("**** Dumping done\n");
+    if(bVerbose) printf("\n\n Run Finished \n\n");
 }
 

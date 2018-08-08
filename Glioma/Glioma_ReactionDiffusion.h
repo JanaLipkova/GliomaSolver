@@ -32,13 +32,13 @@ private:
     bool                                    isDone;
     bool                                    bAdaptivity;
     bool                                    bVerbose;
+    bool                                    bProfiler;
     int                                     pID;
     Real                                    L;
     
     static void _ic(Grid<W,B>& grid, int pID, Real& L);
-    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho, double dt);
+    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho,double dt);
     void		_dump(int counter);
-
 
 public:
     Glioma_ReactionDiffusion(int argc, const char ** argv);

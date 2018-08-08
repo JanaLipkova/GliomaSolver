@@ -15,10 +15,11 @@ static int maxStencil[2][3] = {
 
 Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv): parser(argc, argv)
 {
-    bVerbose = parser("-verbose").asBool();
+    bVerbose  = parser("-verbose").asBool(1);
+    bProfiler = parser("-dumpfreq").asBool(1);
     
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
-    if(bVerbose) printf("//////////////////             Glioma Reaction Diffusion            ////////////////\n");
+    if(bVerbose) printf("//////////////////          Glioma Reaction Diffusion           ////////////////\n");
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("RD INIT! nThreads=%d, blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", nThreads, blockSize, "w", blocksPerDimension, maxLevel);
     
@@ -32,7 +33,7 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
     stSorter.connect(*grid);
     
     bAdaptivity = parser("-adaptive").asBool();
-    pID =  parser("-pID").asInt();
+    pID         = parser("-pID").asInt();
     L = 1;
     
     _ic(*grid, pID, L);
@@ -42,7 +43,6 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
     whenToWriteOffset	= parser("-dumpfreq").asDouble();
     whenToWrite			= whenToWriteOffset;
     numberOfIterations	= 0;
-    
 }
 
 Glioma_ReactionDiffusion::~Glioma_ReactionDiffusion()
@@ -71,7 +71,7 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, int pID, Real& L)
 #elif defined(JANA)
     sprintf(dataFolder,"/Users/lipkova 1/WORK/GliomaSolver/Anatomy/");
 #else
-    sprintf(dataFolder,"../Anatomy/");
+    sprintf(dataFolder,"../../Anatmoy/");
 #endif
     
     sprintf(patientFolder, "%sPatient%02d/P%02d",dataFolder,pID,pID);
@@ -107,6 +107,8 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, int pID, Real& L)
     const Real tumorRadius = 0.005;
     const Real smooth_sup  = 2.;		// suppor of smoothening, over how many gp to smooth
     
+    Real pGM, pWM, pCSF;
+    
     vector<BlockInfo> vInfo = grid.getBlocksInfo();
     
     for(int i=0; i<vInfo.size(); i++)
@@ -135,53 +137,47 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, int pID, Real& L)
                     mappedBrainY -= (int) ( (brainSizeMax - brainSizeY) * 0.5);
                     mappedBrainZ -= (int) ( (brainSizeMax - brainSizeZ) * 0.5);
                     
-                    Real PGt, PWt, Pcsf;
-                    
-                    if ( (mappedBrainX < 0 || mappedBrainX >= brainSizeX) || (mappedBrainY < 0 || mappedBrainY >= brainSizeY) || (mappedBrainZ < 0 || mappedBrainZ >= brainSizeZ) )                    {
-                        PGt = 0.;
-                        PWt = 0.;
-                        Pcsf = 0.;
-                    }
-                    else
+                    if ( (mappedBrainX >= 0 && mappedBrainX < brainSizeX) & (mappedBrainY >= 0 && mappedBrainY < brainSizeY) && (mappedBrainZ >= 0 && mappedBrainZ < brainSizeZ) )
                     {
-                        PGt     =  GM(mappedBrainX,mappedBrainY,mappedBrainZ);
-                        PWt     =  WM(mappedBrainX,mappedBrainY,mappedBrainZ);
-                        Pcsf    = CSF(mappedBrainX,mappedBrainY,mappedBrainZ);
-                    }
-                    
-                    
-                    // Anatomy
-                    double all = PWt + PGt + Pcsf;
-
-                    if(all > 0)
-                    {
-                        // normalize
-                        PGt    = PGt  / all;
-                        PWt    = PWt  / all;
-                        Pcsf   = Pcsf / all;
+                        pGM     =  GM( mappedBrainX,mappedBrainY,mappedBrainZ);
+                        pWM     =  WM( mappedBrainX,mappedBrainY,mappedBrainZ);
+                        pCSF    =  CSF(mappedBrainX,mappedBrainY,mappedBrainZ);
                         
-                        Pcsf = ( Pcsf > 0.1 ) ? 1. : Pcsf;  // threasholding to ensure hemisphere separations
-                        block(ix,iy,iz).p_csf = Pcsf;
+                        // Anatomy
+                        double all = pWM + pGM + pCSF;
                         
-                        if(Pcsf  < 1.)
+                        if(all > 0)
                         {
-                            block(ix,iy,iz).p_csf  = Pcsf / (Pcsf + PWt + PGt);
-                            block(ix,iy,iz).p_w    = PWt  / (Pcsf + PWt + PGt);
-                            block(ix,iy,iz).p_g    = PGt  / (Pcsf + PWt + PGt);
+                            // normalize
+                            pGM    = pGM  / all;
+                            pWM    = pWM  / all;
+                            pCSF   = pCSF / all;
+                            
+                            pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;  // enhance csf for hemisphere separation
+                            block(ix,iy,iz).p_csf = pCSF;
+                            
+                            if(pCSF  < 1.)
+                            {
+                                block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM); // low level mixing for nicer visualisation
+                                block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
+                                block(ix,iy,iz).p_g   = pGM  / (pCSF + pWM + pGM);
+                            }
+                            
                         }
+                        
+                        // tumor
+                        const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};
+                        const Real dist = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);    // distance of curent voxel from tumor center
+                        const Real psi = (dist - tumorRadius)*iw;
+                        
+                        if ((psi < -1) && (pGM + pWM >0.001))		// we are in tumor
+                            block(ix,iy,iz).phi = 1.0;
+                        else if(( (-1 <= psi) && (psi <= 1) )&& (pGM + pWM >0) )
+                            block(ix,iy,iz).phi = 1.0 * 0.5 * (1 - psi - sin(M_PI*psi)/(M_PI));
+                        else
+                            block(ix,iy,iz).phi = 0.0;
+                        
                     }
-                    
-                    // tumor
-                    const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};
-                    const Real dist = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);    // distance of curent voxel from tumor center
-                    const Real psi = (dist - tumorRadius)*iw;
-                    
-                    if ((psi < -1)&& ((PGt>0.001) || (PWt >0.001)) )		// we are in tumor
-                        block(ix,iy,iz).phi = 1.0;
-                    else if(( (-1 <= psi) && (psi <= 1) )&& ((PGt>0) || (PWt >0)) )
-                        block(ix,iy,iz).phi = 1.0 * 0.5 * (1 - psi - sin(M_PI*psi)/(M_PI));
-                    else
-                        block(ix,iy,iz).phi = 0.0;
                     
                 }
         
@@ -198,7 +194,7 @@ void Glioma_ReactionDiffusion::_reactionDiffusionStep(BoundaryInfo* boundaryInfo
     vector<BlockInfo> vInfo				= grid->getBlocksInfo();
     const BlockCollection<B>& collecton = grid->getBlockCollection();
     
-    Glioma_ReactionDiffusionOperator<_DIM>  rhs(Dw,Dg,rho);
+    ReactionDiffusionOperator<_DIM>  rhs(Dw,Dg,rho);
     UpdateTumor                     <_DIM>  updateTumor(dt);
     
     blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhs);
@@ -212,27 +208,16 @@ void Glioma_ReactionDiffusion:: _dump(int counter)
     if (parser("-vtk").asBool())
     {
         char filename[256];
-        sprintf(filename,"P_%02d_data%04d",pID, counter);
+        sprintf(filename,"P%02d_data_%04d",pID, counter);
         
-        if( _DIM == 2)
-        {
-            IO_VTKNative<W,B, 2,0 > vtkdumper2;
-            vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
-        }
-        else
-        {
-            IO_VTKNative3D<W,B, 9,0 > vtkdumper2;
-            vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
-        }
+        IO_VTKNative3D<W,B, 5,0 > vtkdumper2;
+        vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
     }
-    
 }
 
 
 void Glioma_ReactionDiffusion::run()
 {
-    
-    bool bProfiler = 0;
     const int nParallelGranularity	= (grid->getBlocksInfo().size()<=8 ? 1 : 4);
     BoundaryInfo* boundaryInfo		= &grid->getBoundaryInfo();
     
@@ -251,13 +236,11 @@ void Glioma_ReactionDiffusion::run()
     double dt           = 0.99 * h*h / ( 2.* _DIM * max(Dw, Dg) );
     if(bVerbose)  printf("Dg=%e, Dw=%e, dt= %f, rho=%f , h=%f\n", Dg, Dw, dt, rho,h);
     
-    
     while (t <= tend)
     {
         if(bProfiler) profiler.getAgent("RD_Step").start();
         _reactionDiffusionStep(boundaryInfo, nParallelGranularity, Dw, Dg, rho, dt);
         if(bProfiler) profiler.getAgent("RD_Step").stop();
-        
         
         t                   += dt   ;
         numberOfIterations  ++      ;
@@ -274,7 +257,6 @@ void Glioma_ReactionDiffusion::run()
             iCounter++;
             whenToWrite = whenToWrite + whenToWriteOffset;
             if(bVerbose) printf("Dumping data at time t=%f\n", t);
-            
         }
     }
     

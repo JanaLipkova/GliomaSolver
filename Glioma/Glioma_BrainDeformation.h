@@ -33,15 +33,17 @@ private:
     bool                                    isDone;
     bool                                    bAllowAdaptivity;
     bool                                    bVerbose;
+    bool                                    bProfiler;
     int                                     pID;
     Real                                    L;
     
     static void _ic(Grid<W,B>& grid, int pID, Real& L);
     double      _estimate_dt(double Diff_dt, double CFL);
     Real        _compute_maxvel();
-    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho, double dt);
+    void        _computePressureSource(const int nParallelGranularity, const Real rho);
     void        _computeVelocities(BoundaryInfo* boundaryInfo ,const bool bMobility, std::vector<Real>* mobility);
-    void        _tissueTumorAdvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt);
+    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho);
+    void        _advectionConvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt);
     void		_dump(int counter);
     
     HelmholtzSolver3D_Hypre helmholtz_solver3D;

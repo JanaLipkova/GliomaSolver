@@ -8,14 +8,15 @@
  */
 
 
-#include "Test.h"
-
 #include <iostream>
 #include <xmmintrin.h>
 
+#include "Test.h"
 #include "Glioma_ReactionDiffusion.h"
-#include "Glioma_BrainDeformation.h"
 
+#ifdef HYPRE
+#include "Glioma_BrainDeformation.h"
+#endif
 
 using namespace std;
 using namespace MRAG;
@@ -34,8 +35,10 @@ int main(int argc,const char ** argv)
     
     if(parser("-model").asString() == "RD")
         s = new Glioma_ReactionDiffusion(argc, (const char **)argv);
+#ifdef HYPRE
     else if(parser("-model").asString() == "deform")
         s = new Glioma_BrainDeformation(argc, (const char **)argv);
+#endif 
     else
         s = new Test(argc, (const char **)argv);
   

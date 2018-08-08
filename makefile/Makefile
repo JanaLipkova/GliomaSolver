@@ -20,7 +20,7 @@ endif
 
 # Compilations options
 ifeq "$(helmholtz)" "hypre"
-	CPPFLAGS += -D_MULTIGRID_
+	CPPFLAGS += -DHYPRE
 endif
 
 ifeq "$(config)" "production"
@@ -92,7 +92,7 @@ ifeq "$(helmholtz)" "hypre"
 	CC=mpic++
 	LD=$(CC)
 	CPPFLAGS += -I$(HYPRE_INC_DIR)
-	LIBS += -L$(HYPRE_LIB_DIR) -lHYPRE -lm -lstdc++
+	LIBS += -L$(HYPRE_LIB_DIR) -lHYPRE 
 endif	
 
 
@@ -105,12 +105,14 @@ VPATH := ../Glioma/ ../MRAG/ ../MRAG/MRAGcore
 OBJECTS = \
 Glioma_main.o \
 Glioma_ReactionDiffusion.o\
-Glioma_BrainDeformation.o\
 MRAGBoundaryBlockInfo.o \
 MRAGProfiler.o \
 MRAGWavelets_StaticData.o \
 Test.o\
 
+ifeq "$(helmholtz)" "hypre"
+OBJECTS += Glioma_BrainDeformation.o
+endif
 
 brain: $(OBJECTS)
 	$(CC) $^ -o $@ $(LIBS)
