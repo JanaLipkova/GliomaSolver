@@ -7,6 +7,17 @@
 //
 
 
+/*
+ Computes rhs of the reaction-diffusio equation for tumor:
+ //  ------------------------------------
+ //    ∂φ / ∂t = ∇( D∇φ) + ρ * φ(1-φ)
+ //     + no flux BC
+ //
+ //     φ - tumor density
+ //     ρ - tumor proliferation rate
+ //     D - diffusivity
+ //  ------------------------------------
+ */
 template<int nDim = 3>
 struct ReactionDiffusionOperator
 {
@@ -37,48 +48,48 @@ struct ReactionDiffusionOperator
     {
         double h		= info.h[0];
         double ih2		= 1./(h*h);
-        Real df[6];  // diffusion coefficient
-        Real n[6];   // domain charact. func, n=0 -> outside, n=1 inside domain: use to apply BC
+        Real df[6];    // diffusion coefficient
+        Real chf[6];   // domain charact. func, chf=0 -> outside, chf=1 inside domain: use to apply BC
+        Real df_loc;   // diffusion at the current point (local)
         
         if(nDim == 2)
         {
             for(int iy=0; iy<BlockType::sizeY; iy++)
                 for(int ix=0; ix<BlockType::sizeX; ix++)
                 {
-                    df[0] = 0.0; df[1] = 0.0; df[2] = 0.0; df[3] = 0.0;
-                    
                     // check if we are in the brain domain = wm+gm + tumor
                     // need to include tumor for case of brain deformations, to deal with case where there is 100% tumor -> no healthy brain tissue but we are still in the brain
-                    Real tissue = lab(ix, iy).p_w + lab(ix, iy).p_g + lab(ix, iy).phi;
-                    if ( tissue > 0.)
+                    if ( lab(ix, iy).p_w + lab(ix, iy).p_g + lab(ix, iy).phi > 0.)
                     {
-                        // Harmonic averages of piecewise constant diffusion coefficients
-                        // TRICK: double x = 1./0; then double y = 1./x is 0 what is cooool
-                        // so we directly obtain diffusion zero for gp out of domain :)))
-                        df[0] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy).p_w*Dw + lab(ix, iy).p_g*Dg) ) + (1.0 / (lab(ix-1, iy).p_w*Dw + lab(ix-1, iy).p_g*Dg) ) ) );
-                        df[1] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy).p_w*Dw + lab(ix, iy).p_g*Dg) ) + (1.0 / (lab(ix+1, iy).p_w*Dw + lab(ix+1, iy).p_g*Dg) ) ) );
-                        df[2] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy).p_w*Dw + lab(ix, iy).p_g*Dg) ) + (1.0 / (lab(ix, iy-1).p_w*Dw + lab(ix, iy-1).p_g*Dg) ) ) );
-                        df[3] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy).p_w*Dw + lab(ix, iy).p_g*Dg) ) + (1.0 / (lab(ix, iy+1).p_w*Dw + lab(ix, iy+1).p_g*Dg) ) ) );
+                        df_loc = lab(ix  ,iy  ).p_w * Dw + lab(ix  ,iy  ).p_g * Dg;
+                        df[0]  = lab(ix-1,iy  ).p_w * Dw + lab(ix-1,iy  ).p_g * Dg;
+                        df[1]  = lab(ix+1,iy  ).p_w * Dw + lab(ix+1,iy  ).p_g * Dg;
+                        df[2]  = lab(ix  ,iy-1).p_w * Dw + lab(ix  ,iy-1).p_g * Dg;
+                        df[3]  = lab(ix  ,iy+1).p_w * Dw + lab(ix  ,iy+1).p_g * Dg;
+                        
+                        _harmonic_mean(df, df_loc);
+                        
+                        // include phi to n to account for the case where phi=1, but tissue=0 due to deformation
+                        chf[0] = lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_g + lab(ix-1, iy  ).phi;
+                        chf[1] = lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_g + lab(ix+1, iy  ).phi;
+                        chf[2] = lab(ix  , iy-1).p_w + lab(ix  , iy-1).p_g + lab(ix  , iy-1).phi;
+                        chf[3] = lab(ix  , iy+1).p_w + lab(ix  , iy+1).p_g + lab(ix  , iy+1).phi;
+                        
+                        _applyNoFluxBC(df,chf);
+                        
+                        // diffusion fluxes
+                        double diffusionFluxIn  = ih2 * (df[0]*lab(ix-1, iy).phi +
+                                                         df[1]*lab(ix+1, iy).phi +
+                                                         df[2]*lab(ix, iy-1).phi +
+                                                         df[3]*lab(ix, iy+1).phi  );
+                        
+                        double diffusionFluxOut = -( (df[0] + df[1] + df[2] + df[3]) * lab(ix, iy).phi * ih2 );
+                        double reactionFlux		= rho * lab(ix,iy).phi * ( 1. - lab(ix,iy).phi );
+                        
+                        o(ix, iy).dphidt =   diffusionFluxOut + diffusionFluxIn + reactionFlux ;
                     }
-                    
-                    // include phi to n to account for the case where u=1, but tissue=0 due to deformation
-                    n[0] = lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_g + lab(ix-1, iy  ).phi;
-                    n[1] = lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_g + lab(ix+1, iy  ).phi;
-                    n[2] = lab(ix  , iy-1).p_w + lab(ix  , iy-1).p_g + lab(ix  , iy-1).phi;
-                    n[3] = lab(ix  , iy+1).p_w + lab(ix  , iy+1).p_g + lab(ix  , iy+1).phi;
-                    
-                    _applyNoFluxBC(df,n);
-                    
-                    // diffusion fluxes
-                    double diffusionFluxIn  = ih2 * (df[0]*lab(ix-1, iy).phi +
-                                                     df[1]*lab(ix+1, iy).phi +
-                                                     df[2]*lab(ix, iy-1).phi +
-                                                     df[3]*lab(ix, iy+1).phi  );
-                    
-                    double diffusionFluxOut = -( (df[0] + df[1] + df[2] + df[3]) * lab(ix, iy).phi * ih2 );
-                    double reactionFlux		= rho * lab(ix,iy).phi * ( 1. - lab(ix,iy).phi );
-                    
-                    o(ix, iy).dphidt =   diffusionFluxOut + diffusionFluxIn + reactionFlux ;
+                    else
+                        o(ix, iy).dphidt = 0.;
                     
                 }
         }
@@ -88,51 +99,67 @@ struct ReactionDiffusionOperator
                 for(int iy=0; iy<BlockType::sizeY; iy++)
                     for(int ix=0; ix<BlockType::sizeX; ix++)
                     {
-                        df[0] = 0.0; df[1] = 0.0; df[2] = 0.0; df[3] = 0.0; df[4] = 0.0; df[5] = 0.0;
-                        
                         // check if we are in the brain domain
-                        Real tissue = lab(ix,iy,iz).p_w + lab(ix,iy,iz).p_g + lab(ix,iy,iz).phi;
-                        if ( tissue > 0.)
+                        if ( lab(ix,iy,iz).p_w + lab(ix,iy,iz).p_g + lab(ix,iy,iz).phi > 0.)
                         {
-                            // Harmonic averages of piecewise constant diffusion coefficients
-                            // TRICK: double x = 1./0; then double y = 1./x is 0 what is cooool
-                            // so we directly obtain diffusion zero for gp out of domain :)))
-                            df[0] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy, iz).p_w*Dw + lab(ix, iy, iz).p_g*Dg) ) + (1.0 / (lab(ix-1, iy, iz).p_w*Dw + lab(ix-1, iy, iz).p_g*Dg) ) ) );
-                            df[1] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy, iz).p_w*Dw + lab(ix, iy, iz).p_g*Dg) ) + (1.0 / (lab(ix+1, iy, iz).p_w*Dw + lab(ix+1, iy, iz).p_g*Dg) ) ) );
-                            df[2] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy, iz).p_w*Dw + lab(ix, iy, iz).p_g*Dg) ) + (1.0 / (lab(ix, iy-1, iz).p_w*Dw + lab(ix, iy-1, iz).p_g*Dg) ) ) );
-                            df[3] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy, iz).p_w*Dw + lab(ix, iy, iz).p_g*Dg) ) + (1.0 / (lab(ix, iy+1, iz).p_w*Dw + lab(ix, iy+1, iz).p_g*Dg) ) ) );
-                            df[4] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy, iz).p_w*Dw + lab(ix, iy, iz).p_g*Dg) ) + (1.0 / (lab(ix, iy, iz-1).p_w*Dw + lab(ix, iy, iz-1).p_g*Dg) ) ) );
-                            df[5] = 2.0*(1.0 / ( (1.0 / (lab(ix, iy, iz).p_w*Dw + lab(ix, iy, iz).p_g*Dg) ) + (1.0 / (lab(ix, iy, iz+1).p_w*Dw + lab(ix, iy, iz+1).p_g*Dg) ) ) );
-
+                            df_loc = lab(ix  ,iy  ,iz  ).p_w * Dw + lab(ix  ,iy  ,iz  ).p_g * Dg;
+                            df[0]  = lab(ix-1,iy  ,iz  ).p_w * Dw + lab(ix-1,iy  ,iz  ).p_g * Dg;
+                            df[1]  = lab(ix+1,iy  ,iz  ).p_w * Dw + lab(ix+1,iy  ,iz  ).p_g * Dg;
+                            df[2]  = lab(ix  ,iy-1,iz  ).p_w * Dw + lab(ix  ,iy-1,iz  ).p_g * Dg;
+                            df[3]  = lab(ix  ,iy+1,iz  ).p_w * Dw + lab(ix  ,iy+1,iz  ).p_g * Dg;
+                            df[4]  = lab(ix  ,iy  ,iz-1).p_w * Dw + lab(ix  ,iy  ,iz-1).p_g * Dg;
+                            df[5]  = lab(ix  ,iy  ,iz+1).p_w * Dw + lab(ix  ,iy  ,iz+1).p_g * Dg;
+                            
+                            _harmonic_mean(df, df_loc);
+                            
+                            chf[0] = lab(ix-1,iy,  iz  ).p_w + lab(ix-1,iy,  iz  ).p_g + lab(ix-1,iy,  iz  ).phi;
+                            chf[1] = lab(ix+1,iy,  iz  ).p_w + lab(ix+1,iy,  iz  ).p_g + lab(ix+1,iy,  iz  ).phi;
+                            chf[2] = lab(ix  ,iy-1,iz  ).p_w + lab(ix  ,iy-1,iz  ).p_g + lab(ix  ,iy-1,iz  ).phi;
+                            chf[3] = lab(ix  ,iy+1,iz  ).p_w + lab(ix  ,iy+1,iz  ).p_g + lab(ix  ,iy+1,iz  ).phi;
+                            chf[4] = lab(ix  ,iy,  iz-1).p_w + lab(ix  ,iy,  iz-1).p_g + lab(ix  ,iy,  iz-1).phi;
+                            chf[5] = lab(ix  ,iy,  iz+1).p_w + lab(ix  ,iy,  iz+1).p_g + lab(ix  ,iy,  iz+1).phi;
+                            
+                            _applyNoFluxBC(df,chf);
+                            
+                            // diffusion fluxes
+                            double diffusionFluxIn  = ih2 * (df[0]*lab(ix-1, iy, iz).phi +
+                                                             df[1]*lab(ix+1, iy, iz).phi +
+                                                             df[2]*lab(ix, iy-1, iz).phi +
+                                                             df[3]*lab(ix, iy+1, iz).phi +
+                                                             df[4]*lab(ix, iy, iz-1).phi +
+                                                             df[5]*lab(ix, iy, iz+1).phi   );
+                            
+                            double diffusionFluxOut = -( (df[0] + df[1] + df[2] + df[3] + df[4] + df[5]) * lab(ix, iy, iz).phi * ih2 );
+                            double reactionFlux		= rho * lab(ix,iy,iz).phi * ( 1. - lab(ix,iy,iz).phi );
+                            
+                            o(ix, iy, iz).dphidt =   diffusionFluxOut + diffusionFluxIn + reactionFlux ;
                         }
-                        
-                        n[0] = lab(ix-1,iy,  iz  ).p_w + lab(ix-1,iy,  iz  ).p_g + lab(ix-1,iy,  iz  ).phi;
-                        n[1] = lab(ix+1,iy,  iz  ).p_w + lab(ix+1,iy,  iz  ).p_g + lab(ix+1,iy,  iz  ).phi;
-                        n[2] = lab(ix  ,iy-1,iz  ).p_w + lab(ix  ,iy-1,iz  ).p_g + lab(ix  ,iy-1,iz  ).phi;
-                        n[3] = lab(ix  ,iy+1,iz  ).p_w + lab(ix  ,iy+1,iz  ).p_g + lab(ix  ,iy+1,iz  ).phi;
-                        n[4] = lab(ix  ,iy,  iz-1).p_w + lab(ix  ,iy,  iz-1).p_g + lab(ix  ,iy,  iz-1).phi;
-                        n[5] = lab(ix  ,iy,  iz+1).p_w + lab(ix  ,iy,  iz+1).p_g + lab(ix  ,iy,  iz+1).phi;
-
-                        _applyNoFluxBC(df,n);
-                        
-                        // diffusion fluxes
-                        double diffusionFluxIn  = ih2 * (df[0]*lab(ix-1, iy, iz).phi +
-                                                         df[1]*lab(ix+1, iy, iz).phi +
-                                                         df[2]*lab(ix, iy-1, iz).phi +
-                                                         df[3]*lab(ix, iy+1, iz).phi +
-                                                         df[4]*lab(ix, iy, iz-1).phi +
-                                                         df[5]*lab(ix, iy, iz+1).phi   );
-                        
-                        double diffusionFluxOut = -( (df[0] + df[1] + df[2] + df[3] + df[4] + df[5]) * lab(ix, iy, iz).phi * ih2 );
-                        double reactionFlux		= rho * lab(ix,iy,iz).phi * ( 1. - lab(ix,iy,iz).phi );
-                        
-                        o(ix, iy, iz).dphidt =   diffusionFluxOut + diffusionFluxIn + reactionFlux ;
-                        
+                        else
+                            o(ix, iy, iz).dphidt = 0.;
                     }
 
         }
     }
     
+    
+    // Di,j = 2 * (Di * Dj / (Di + Dj)
+    // set Di,j to zero if (Di + Dj = 0) i.e. no update and avoid division by zero
+    inline void _harmonic_mean( Real (&df)[6], Real df_loc) const
+    {
+        Real eps = 1.0e-08; // to avoid divisin by zero
+        
+        df[0] = (df[0] + df_loc < eps) ? 0. : 2. * df[0] * df_loc / (df[0] + df_loc);
+        df[1] = (df[1] + df_loc < eps) ? 0. : 2. * df[1] * df_loc / (df[1] + df_loc);
+        df[2] = (df[2] + df_loc < eps) ? 0. : 2. * df[2] * df_loc / (df[2] + df_loc);
+        df[3] = (df[3] + df_loc < eps) ? 0. : 2. * df[3] * df_loc / (df[3] + df_loc);
+        
+        if(nDim > 2)
+        {
+            df[4] = (df[4] + df_loc < eps) ? 0. : 2. * df[4] * df_loc / (df[4] + df_loc);
+            df[5] = (df[5] + df_loc < eps) ? 0. : 2. * df[5] * df_loc / (df[5] + df_loc);
+        }
+        
+    }
     
     inline void _applyNoFluxBC( Real (&df)[6], Real n[6] ) const
     {

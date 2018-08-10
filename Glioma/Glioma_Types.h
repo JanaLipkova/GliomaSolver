@@ -16,6 +16,7 @@
 #include "Operators/ReactionDiffusionOperator.h"
 #include "Operators/PressureOperator.h"
 #include "Operators/AdvectionConvectionOperator.h"
+#include "Operators/TimeUpdateOperator.h"
 
 struct Cell
 {
@@ -35,7 +36,7 @@ struct Cell
     Real omega, domegadt;
     
     // pressure + auxiliary functions for pressure source, phase filed funtion, charact. function
-    Real p;
+    Real p, dpdt;
     Real f;
     Real pff, dpffdt;   // pahse field function of whole anatomy, of tissue
     Real chi;
@@ -56,6 +57,7 @@ struct Cell
         dwmdt = dgmdt = dcsfdt = 0.0;
 		ux = uy = uz  = 0.0;
 		p        = 0.0;
+        dpdt     = 0.0;
 		omega	 = 0.0;
 		domegadt = 0.0;
 		eps      = 0.0;
@@ -67,7 +69,7 @@ struct Cell
 
     }
 	
-    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real omega_, Real domegadt_, Real eps_, Real tmp_ , Real f_, Real pff_, Real dpffdt_, Real chi_)
+    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real eps_, Real tmp_ , Real f_, Real pff_, Real dpffdt_, Real chi_)
 	{
 		phi		 = phi_	    ;
 		dphidt	 = dphidt_  ;
@@ -84,6 +86,7 @@ struct Cell
 		uy		 = uy_	    ;
 		uz		 = uz_	    ;
 		p		 = p_       ;
+        dpdt     = dpdt_    ;
 		omega    = omega_   ;
 		domegadt = domegadt_;
 		eps      = eps_     ;
@@ -111,6 +114,7 @@ struct Cell
 		uy		 += t.uy	  ;
 		uz		 += t.uz	  ;
 		p		 += t.p 	  ;
+        dpdt     += t.dpdt    ;
 		omega    += t.omega	  ;
 		domegadt += t.domegadt;
 		eps      += t.eps     ;
@@ -150,16 +154,17 @@ struct Cell
             case 2:  return p_w;
             case 3:  return p_g;
             case 4:  return p_csf;
-            case 6:  return wm;
-            case 7:   return gm;
-            case 8:  return csf;
-            case 9:  return ux * chi;
-            case 10: return uy * chi;
-            case 11: return uz * chi;
-            case 12: return p  * chi;
+            case 5:  return wm;
+            case 6:  return gm;
+            case 7:  return csf;
+            case 8:  return ux * chi;
+            case 9:  return uy * chi;
+            case 10: return uz * chi;
+            case 11: return p  * chi;
+            case 12: return chi;
             case 13: return f;
-            case 14: return chi;
-            case 15: return pff;
+            case 14: return pff;
+
 
 			default: abort(); return 0;
 		}
@@ -186,6 +191,7 @@ inline Cell operator*(const Cell& p, Real v)
 	c.uy        = p.uy       *v;
 	c.uz        = p.uz       *v;
 	c.p         = p.p        *v;
+    c.dpdt      = p.dpdt     *v;
 	c.omega     = p.omega    *v;
 	c.domegadt	= p.domegadt *v;
 	c.eps       = p.eps      *v;
@@ -212,11 +218,7 @@ template <typename T, int i>
 inline Real RD_projector_impl_wav(const T&t)
 {
 	//return i==0 ? (Real)(t.phi) : (Real)(t.p_w);  // for refinment w.r.t 2 channels
-#ifdef LiverModel
-    return (Real)(t.psi) ;
-#else
     return (Real)(t.phi) ;
-#endif
 
 }
 
@@ -259,8 +261,8 @@ static const int resJump  = 1;    // modulo(maxLevel,resJum) = 0, !!! and reJump
 const double refinement_tolerance	= 1e-3;
 const double compression_tolerance	= 1e-5;
 
-typedef		Block< Cell, blockSize, blockSize, blockSizeZ>					B;
-typedef		_WAVELET_TYPE															W;
+typedef		Block< Cell, blockSize, blockSize, blockSizeZ>	B;
+typedef		_WAVELET_TYPE									W;
 
 typedef Matrix::D3D<double> MatrixD3D;
 typedef Matrix::D2D<double> MatrixD2D;

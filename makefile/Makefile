@@ -31,9 +31,10 @@ endif
 #MRAG grid parameters
 dim ?= 3
 bpd ?= 8
+#bpd ?= 16
 bs ?= 16
 
-CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd) 
+CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd)  
 
 ifeq "$(dim)" "2"
 	bsz ?= 1
@@ -106,6 +107,7 @@ OBJECTS = \
 Glioma_main.o \
 Glioma_ReactionDiffusion.o\
 MRAGBoundaryBlockInfo.o \
+Glioma_BrainDeformationTimeRelaxation.o \
 MRAGProfiler.o \
 MRAGWavelets_StaticData.o \
 Test.o\

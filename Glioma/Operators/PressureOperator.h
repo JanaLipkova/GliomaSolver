@@ -166,3 +166,193 @@ struct PressureGradient
 };
 
 
+
+/*
+  Computes rhs of the pressure equation with time relaxation:
+ //  ------------------------------------
+ //    β ∂p / ∂t = ∇( M∇p) + ρ * φ(1-φ)
+ //     + no flux BC
+ //
+ //     φ - tumor density
+ //     ρ - tumor proliferation rate
+ //     β - tissue compresibily
+ //     M  - mobility (=hydraulic conductivity, i.e. easy with which pressure propaget through tissue)
+ //  ------------------------------------
+ */
+template<int nDim = 3>
+struct PressureTimeRelaxationOperator
+{
+    int stencil_start[3];
+    int stencil_end[3];
+    
+    const Real mWM, mGM, mCSF, bWM, bGM, bCSF; // mobility and compressibility
+    const Real rho; // tumor proliferation
+    
+    PressureTimeRelaxationOperator(const Real mCSF_, const Real mWM_, const Real mGM_, const Real bCSF_, const Real bWM_, const Real bGM_, const Real rho_): mCSF(mCSF_), mWM(mWM_), mGM(mGM_), bCSF(bCSF_), bWM(bWM_), bGM(bGM_), rho(rho_)
+    {
+        stencil_start[0] = stencil_start[1]= -1;
+        stencil_end[0]   = stencil_end[1]  = +2;
+        stencil_start[2] = nDim==3 ? -1: 0;
+        stencil_end[2]   = nDim==3 ? +2:+1;
+    }
+    
+    PressureTimeRelaxationOperator(const PressureTimeRelaxationOperator& copy): mCSF(copy.mCSF), mWM(copy.mWM), mGM(copy.mGM), bCSF(copy.bCSF), bWM(copy.bWM), bGM(copy.bGM), rho(copy.rho)
+    {
+        stencil_start[0] = stencil_start[1]= -1;
+        stencil_end[0]   = stencil_end[1]  = +2;
+        stencil_start[2] = nDim==3 ? -1:0;
+        stencil_end[2]   = nDim==3?+2:+1;
+    }
+    
+    
+    template<typename LabType, typename BlockType>
+    inline void operator()(LabType& lab, const BlockInfo& info, BlockType& o) const
+    {
+        double h		= info.h[0];
+        double ih2		= 1./(h*h);
+        
+        Real mob[6];   // mobility coefficient
+        Real chf[6];   // domain charact. func, chf=0 -> outside, chf=1 inside domain: use to apply BC
+        Real mobLoc;   // to store mobility at current point (local)
+        
+        // K=buld modulus (defined as inverse of compressibility) to reduce amount od divisions
+        const Real ibCSF = 1./bCSF;
+        const Real ibWM =  1./bWM;
+        const Real ibGM =  1./bGM;
+        Real ib;
+        
+        if(nDim == 2)
+        {
+            for(int iy=0; iy<BlockType::sizeY; iy++)
+                for(int ix=0; ix<BlockType::sizeX; ix++)
+                {
+                    if( lab(ix,iy).chi > 0.)
+                    {
+                        ib     = lab(ix,iy).p_w * ibWM + lab(ix,iy).p_g * ibGM + lab(ix,iy).p_csf * ibCSF;
+                        mobLoc = lab(ix,iy).p_w * mWM  + lab(ix,iy).p_g * mGM  + lab(ix,iy).p_csf * mCSF;
+                      
+                        mob[0]  = lab(ix-1,iy  ).p_w * mWM + lab(ix-1,iy  ).p_g * mGM + lab(ix-1,iy  ).p_csf * mCSF;
+                        mob[1]  = lab(ix+1,iy  ).p_w * mWM + lab(ix+1,iy  ).p_g * mGM + lab(ix+1,iy  ).p_csf * mCSF;
+                        mob[2]  = lab(ix  ,iy-1).p_w * mWM + lab(ix  ,iy-1).p_g * mGM + lab(ix  ,iy-1).p_csf * mCSF;
+                        mob[3]  = lab(ix  ,iy+1).p_w * mWM + lab(ix  ,iy+1).p_g * mGM + lab(ix  ,iy+1).p_csf * mCSF;
+
+                        _harmonic_mean(mob, mobLoc);
+                        
+                        chf[0] = lab(ix-1,iy  ).chi;
+                        chf[1] = lab(ix+1,iy  ).chi;
+                        chf[2] = lab(ix,  iy-1).chi;
+                        chf[3] = lab(ix,  iy+1).chi;
+                        
+                        _applyNoFluxBC(mob, chf);
+                        
+                        // diffusion fluxes
+                        double diffusionFluxIn  = ih2 * (mob[0]*lab(ix-1, iy).p +
+                                                         mob[1]*lab(ix+1, iy).p +
+                                                         mob[2]*lab(ix, iy-1).p +
+                                                         mob[3]*lab(ix, iy+1).p  );
+                        
+                        double diffusionFluxOut = -( (mob[0] + mob[1] + mob[2] + mob[3]) * lab(ix, iy).p * ih2 );
+                        double reactionFlux		= rho * lab(ix,iy).phi * ( 1. - lab(ix,iy).phi );
+                        
+                        o(ix, iy).dpdt =   ib * (diffusionFluxOut + diffusionFluxIn + reactionFlux) ;
+                        
+                    }
+                    else
+                        o(ix, iy).dpdt = 0.;
+                    
+                    
+                }
+        }
+        else
+        {
+            for(int iz=0; iz<BlockType::sizeZ; iz++)
+                for(int iy=0; iy<BlockType::sizeY; iy++)
+                    for(int ix=0; ix<BlockType::sizeX; ix++)
+                    {
+                        if ( lab(ix,iy,iz).chi > 0.)
+                        {
+                            ib     = lab(ix,iy,iz).p_w * ibWM + lab(ix,iy,iz).p_g * ibGM + lab(ix,iy,iz).p_csf * ibCSF;
+                            mobLoc = lab(ix,iy,iz).p_w * mWM  + lab(ix,iy,iz).p_g * mGM  + lab(ix,iy,iz).p_csf * mCSF;
+                            
+                            mob[0]  = lab(ix-1,iy  ,iz  ).p_w * mWM + lab(ix-1,iy  ,iz  ).p_g * mGM + lab(ix-1,iy  ,iz  ).p_csf * mCSF;
+                            mob[1]  = lab(ix+1,iy  ,iz  ).p_w * mWM + lab(ix+1,iy  ,iz  ).p_g * mGM + lab(ix+1,iy  ,iz  ).p_csf * mCSF;
+                            mob[2]  = lab(ix  ,iy-1,iz  ).p_w * mWM + lab(ix  ,iy-1,iz  ).p_g * mGM + lab(ix  ,iy-1,iz  ).p_csf * mCSF;
+                            mob[3]  = lab(ix  ,iy+1,iz  ).p_w * mWM + lab(ix  ,iy+1,iz  ).p_g * mGM + lab(ix  ,iy+1,iz  ).p_csf * mCSF;
+                            mob[4]  = lab(ix  ,iy  ,iz-1).p_w * mWM + lab(ix  ,iy  ,iz-1).p_g * mGM + lab(ix  ,iy  ,iz-1).p_csf * mCSF;
+                            mob[5]  = lab(ix  ,iy  ,iz+1).p_w * mWM + lab(ix  ,iy  ,iz+1).p_g * mGM + lab(ix  ,iy  ,iz+1).p_csf * mCSF;
+                            
+                            _harmonic_mean(mob, mobLoc);
+                            
+                            chf[0] = lab(ix-1,iy  ,iz  ).chi;
+                            chf[1] = lab(ix+1,iy  ,iz  ).chi;
+                            chf[2] = lab(ix,  iy-1,iz  ).chi;
+                            chf[3] = lab(ix,  iy+1,iz  ).chi;
+                            chf[4] = lab(ix,  iy  ,iz-1).chi;
+                            chf[5] = lab(ix,  iy  ,iz+1).chi;
+                            
+                            _applyNoFluxBC(mob, chf);
+                            
+                            // diffusion fluxes
+                            double diffusionFluxIn  = ih2 * (mob[0]*lab(ix-1, iy, iz).p +
+                                                             mob[1]*lab(ix+1, iy, iz).p +
+                                                             mob[2]*lab(ix, iy-1, iz).p +
+                                                             mob[3]*lab(ix, iy+1, iz).p +
+                                                             mob[4]*lab(ix, iy, iz-1).p +
+                                                             mob[5]*lab(ix, iy, iz+1).p   );
+                            
+                            double diffusionFluxOut = -( (mob[0] + mob[1] + mob[2] + mob[3] + mob[4] + mob[5]) * lab(ix, iy, iz).p * ih2 );
+                            double reactionFlux		= rho * lab(ix,iy,iz).phi * ( 1. - lab(ix,iy,iz).phi );
+                            
+                            o(ix, iy, iz).dpdt =  ib * ( diffusionFluxOut + diffusionFluxIn + reactionFlux );
+                            
+                        }
+                        else
+                            o(ix, iy, iz).dpdt = 0.;
+                        
+                    }
+            
+        }
+    }
+    
+    // Di,j = 2 * (Di * Dj / (Di + Dj)
+    // set Di,j to zero if (Di + Dj = 0) i.e. no update and avoid division by zero
+    inline void _harmonic_mean( Real (&m)[6], Real m_loc) const
+    {
+        Real eps = 1.0e-08; // to avoid divisin by zero
+        
+        m[0] = (m[0] + m_loc < eps) ? 0. : 2. * m[0] * m_loc / (m[0] + m_loc);
+        m[1] = (m[1] + m_loc < eps) ? 0. : 2. * m[1] * m_loc / (m[1] + m_loc);
+        m[2] = (m[2] + m_loc < eps) ? 0. : 2. * m[2] * m_loc / (m[2] + m_loc);
+        m[3] = (m[3] + m_loc < eps) ? 0. : 2. * m[3] * m_loc / (m[3] + m_loc);
+        
+        if(nDim > 2)
+        {
+            m[4] = (m[4] + m_loc < eps) ? 0. : 2. * m[4] * m_loc / (m[4] + m_loc);
+            m[5] = (m[5] + m_loc < eps) ? 0. : 2. * m[5] * m_loc / (m[5] + m_loc);
+        }
+        
+    }
+    
+    inline void _applyNoFluxBC( Real (&mob)[6], Real chf[6] ) const
+    {
+        // n is domain char. func, use to apply bc by modifying the df term by the ghost point
+        Real eps = 0.1;
+        
+        if(chf[0] < eps){mob[1] *= 2.0; }
+        if(chf[1] < eps){mob[0] *= 2.0; }
+        if(chf[2] < eps){mob[3] *= 2.0; }
+        if(chf[3] < eps){mob[2] *= 2.0; }
+        
+        if(nDim > 2)
+        {
+            if(chf[4] < eps){mob[5] *= 2.0; }
+            if(chf[5] < eps){mob[4] *= 2.0; }
+        }
+    }
+    
+};
+
+
+
+
+

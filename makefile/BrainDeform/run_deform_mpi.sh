@@ -50,5 +50,5 @@ echo "In the directory: $PWD"
 echo "Running program with total $SLURM_NTASKS MPI tasks,  each with $SLURM_CPUS_PER_TASK."
 
 
-mpirun ./$program -nthreads $SLURM_CPUS_ON_NODE -model $model -verbose $verbose -profiler $profiler -pID $pID -vtk $vtk -bDumpIC $bDumpIC -dumpfreq $dumpfreq -CFL $CFL -tend $tend -rho $rho -Dw $Dw -kCSF $kCSF -kWM $kWM -kGM $kGM -bMobility $bMobility
+mpirun -n 4  ./$program -nthreads $SLURM_CPUS_ON_NODE -model $model -verbose $verbose -profiler $profiler -pID $pID -vtk $vtk -bDumpIC $bDumpIC -dumpfreq $dumpfreq -CFL $CFL -tend $tend -rho $rho -Dw $Dw -kCSF $kCSF -kWM $kWM -kGM $kGM -bMobility $bMobility
 

@@ -13,7 +13,6 @@
 #include "Glioma_Types.h"
 #include "Operators/HelmholtzSolver3D_Hypre.h"
 
-
 class Glioma_BrainDeformation: public Glioma
 {
 private:
@@ -34,6 +33,7 @@ private:
     bool                                    bAllowAdaptivity;
     bool                                    bVerbose;
     bool                                    bProfiler;
+    bool                                    bVTK;
     int                                     pID;
     Real                                    L;
     
@@ -42,7 +42,7 @@ private:
     Real        _compute_maxvel();
     void        _computePressureSource(const int nParallelGranularity, const Real rho);
     void        _computeVelocities(BoundaryInfo* boundaryInfo ,const bool bMobility, std::vector<Real>* mobility);
-    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho);
+    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const Real Dw, const Real Dg, const Real rho);
     void        _advectionConvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt);
     void		_dump(int counter);
     

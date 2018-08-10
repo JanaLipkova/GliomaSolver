@@ -1,19 +1,19 @@
 //
-//  Glioma_HG_UQ.h
-//  GliomaXcode
+//  Glioma_BrainDeformationTimeRelaxation.h
+//  GliomaSolverXcode
 //
-//  Created by Lipkova on 10/06/15.
-//  Copyright (c) 2015 Lipkova. All rights reserved.
+//  Created by Lipkova on 08/08/18.
+//  Copyright (c) 2018 Lipkova. All rights reserved.
 //
 
-#ifndef _Glioma_ReactionDiffusion_
-#define _Glioma_ReactionDiffusion_
+#ifndef __Glioma_BrainDeformationTimeRelaxation__
+#define __Glioma_BrainDeformationTimeRelaxation__
 
 #pragma once
 #include "Glioma_Types.h"
 
 
-class Glioma_ReactionDiffusion: public Glioma
+class Glioma_BrainDeformationTimeRelaxation: public Glioma
 {
 private:
     Grid<W, B>								* grid;
@@ -38,14 +38,21 @@ private:
     Real                                    L;
     
     static void _ic(Grid<W,B>& grid, int pID, Real& L);
-    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho,double dt);
+    double      _estimate_dt(double dt, double CFL);
+    Real        _compute_maxvel();
+    void        _computeVelocities(BoundaryInfo* boundaryInfo ,const bool bMobility, std::vector<Real>* mobility);
+    void        _pressureStep(BoundaryInfo* boundaryInfo, std::vector<Real> mobility, std::vector<Real> beta, const Real rho);
+    void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const Real Dw, const Real Dg, const Real rho);
+    void        _advectionConvectionStep(BoundaryInfo* boundaryInfo);
+    void        _timeUpdate(const int nParallelGranularity, const Real dt);
     void		_dump(int counter);
-
+    
+    
 public:
-    Glioma_ReactionDiffusion(int argc, const char ** argv);
-    ~Glioma_ReactionDiffusion();
+    Glioma_BrainDeformationTimeRelaxation(int argc, const char ** argv);
+    ~Glioma_BrainDeformationTimeRelaxation();
     void run();
     
 };
 
-#endif /* defined(_Glioma_ReactionDiffusion_) */
+#endif /* defined(__Glioma_BrainDeformationTimeRelaxation__) */

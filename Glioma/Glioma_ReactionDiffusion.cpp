@@ -32,6 +32,7 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
+    bVTK        = parser("-vtk").asBool();
     bAdaptivity = parser("-adaptive").asBool();
     pID         = parser("-pID").asInt();
     L = 1;
@@ -51,9 +52,7 @@ Glioma_ReactionDiffusion::~Glioma_ReactionDiffusion()
 }
 
 
-#pragma mark InitialConditions
-
-
+#pragma mark InitialCondition
 // Patient 01 data
 // 1) read in anatomies - rescaled to [0,1]^3
 // 2) read in tumor center of mass + initialize tumor around
@@ -111,6 +110,7 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, int pID, Real& L)
     
     vector<BlockInfo> vInfo = grid.getBlocksInfo();
     
+#pragma omp paraller for
     for(int i=0; i<vInfo.size(); i++)
     {
         BlockInfo& info = vInfo[i];
@@ -205,7 +205,7 @@ void Glioma_ReactionDiffusion::_reactionDiffusionStep(BoundaryInfo* boundaryInfo
 #pragma mark DumpingOutput
 void Glioma_ReactionDiffusion:: _dump(int counter)
 {
-    if (parser("-vtk").asBool())
+    if(bVTK)
     {
         char filename[256];
         sprintf(filename,"P%02d_data_%04d",pID, counter);
@@ -222,9 +222,9 @@ void Glioma_ReactionDiffusion::run()
     BoundaryInfo* boundaryInfo		= &grid->getBoundaryInfo();
     
     /* Tumor growth parameters*/
-    Real Dw = 0.0013;
-    Real rho = 0.025;
-    double tend = 300;
+    Real Dw     = (Real) parser("-Dw").asDouble(0.0013);
+    Real rho    = (Real) parser("-rho").asDouble(0.025);
+    double tend = parser("-Tend").asDouble(300);
     
     /*rescale*/
     Dw = Dw/(L*L);
@@ -256,7 +256,7 @@ void Glioma_ReactionDiffusion::run()
             _dump(iCounter);
             iCounter++;
             whenToWrite = whenToWrite + whenToWriteOffset;
-            if(bVerbose) printf("Dumping data at time t=%f\n", t);
+            if( (bVerbose) && (bVTK)) printf("Dumping data at time t=%f\n", t);
         }
     }
     
