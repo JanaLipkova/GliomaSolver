@@ -57,15 +57,13 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
     pID  = parser("-pID").asInt();
     L = 1;
     
-//    _ic(*grid, pID, L);
+    _ic(*grid, pID, L);
     
     
-//    if(parser("-bDumpIC").asBool(0))
-//        _dump(0);
+    if(parser("-bDumpIC").asBool(0))
+        _dump(0);
     
-    printf("Starting MPI INIt \n");
     MPI_Init(&argc, (char ***)&argv);
-    printf("MPI INIT done \n");
     
     isDone              = false;
     whenToWriteOffset	= parser("-dumpfreq").asDouble();
