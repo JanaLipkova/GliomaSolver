@@ -38,6 +38,7 @@ private:
     Real                                    L;
     
     static void _ic(Grid<W,B>& grid, int pID, Real& L);
+    static void _icSphere3Parts(Grid<W,B>& grid, Real& L );
     double      _estimate_dt(double dt, double CFL);
     Real        _compute_maxvel();
     void        _computeVelocities(BoundaryInfo* boundaryInfo ,const bool bMobility, std::vector<Real>* mobility);

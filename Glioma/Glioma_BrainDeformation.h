@@ -38,6 +38,7 @@ private:
     Real                                    L;
     
     static void _ic(Grid<W,B>& grid, int pID, Real& L);
+    static void _icSphere3Parts(Grid<W,B>& grid, Real& L);
     double      _estimate_dt(double Diff_dt, double CFL);
     Real        _compute_maxvel();
     void        _computePressureSource(const int nParallelGranularity, const Real rho);

@@ -57,7 +57,10 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
     pID  = parser("-pID").asInt();
     L = 1;
     
-    _ic(*grid, pID, L);
+    if(pID == 100)
+        _icSphere3Parts(*grid, L);
+    else
+        _ic(*grid, pID, L);
     
     
     if(parser("-bDumpIC").asBool(0))
@@ -81,6 +84,81 @@ Glioma_BrainDeformation::~Glioma_BrainDeformation()
 
 
 #pragma mark InitialConditions
+/* 3 componten structure: WM, GM, CSF + Tumor*/
+void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
+{
+    std::cout <<" Test case: Sphere with 3 components"<< std::endl;
+    
+    const double AnatmoyRadius	= 0.4;
+    const double tumorRad		= 0.1;    // tumor radius
+    const double smooth_sup		= 3.;     // support, over how many grid points to smooth
+    
+    const double tau        = 1.e-10;     // cut of phase field function on LHS
+    const Real center[3]   = {0.5, 0.5, 0.5};
+    
+    L = 20;
+    
+    vector<BlockInfo> vInfo = grid.getBlocksInfo();
+    
+    for(int i=0; i<vInfo.size(); i++)
+    {
+        BlockInfo& info = vInfo[i];
+        B& block = grid.getBlockCollection()[info.blockID];
+        
+        double h    = vInfo[0].h[0];
+        double eps  = 1.1 * h;             // phase field fun. smoothening
+        double iw = 1./(smooth_sup * h);   // width of tumor smoothening
+        
+        for(int iz=0; iz<B::sizeZ; iz++)
+            for(int iy=0; iy<B::sizeY; iy++)
+                for(int ix=0; ix<B::sizeX; ix++)
+                {
+                    Real x[3];
+                    info.pos(x, ix, iy,iz);
+                    
+                    const Real p[3]  = { x[0] - center[0], x[1] - center[1], x[2] - center[2]};
+                    const Real dist  = sqrt( p[0]*p[0] + p[1]*p[1] +p[2]*p[2] );
+                    const Real r     = dist - AnatmoyRadius;    // sign distance function
+                    const Real tmp   = (dist - tumorRad) * iw;
+                    
+                    // tumor
+                    if (tmp < -1)
+                        block(ix,iy,iz).phi = 1.0;
+                    else if( (-1 <= tmp) && (tmp <= 1) )
+                        block(ix,iy,iz).phi = 0.5 * (1 - tmp - sin(M_PI * tmp) / (M_PI) );
+                    
+                    // compontents of pressure eq.
+                    const double pff = 0.5 * (1. - tanh(3.*r / eps)) ;
+                    block(ix,iy,iz).pff = max(pff,tau);
+                    block(ix,iy,iz).chi = (r<= 0) ? 1. : 0.;
+                    block(ix,iy,iz).p   = 0.;
+                    
+                    // anatomy
+                    const Real theta = atan2((x[1]-0.5), (x[0]-0.5) ) * 180. / (M_PI);
+                    
+                    if (block(ix,iy,iz).pff > tau)
+                    {
+                        if ((0<=theta)&&(theta < 120))
+                            block(ix,iy,iz).p_w = 1.;
+                        else if ((-120 <= theta)&&(theta < 0))
+                            block(ix,iy,iz).p_g = 1.;
+                        else
+                            block(ix,iy,iz).p_csf = 1.;
+                        
+                        block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
+                        block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
+                        block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
+                        
+                    }
+                }
+        
+        grid.getBlockCollection().release(info.blockID);
+    }
+    
+}
+
+
+
 void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
 {
     char dataFolder   [200];
@@ -331,7 +409,7 @@ void Glioma_BrainDeformation::run()
     // model parameters
     const double CFL    = parser("-CFL").asDouble(0.8);
     const double tend   = parser("-tend").asDouble();  // [day]
-    const double rho    = parser("-rho").asDouble();   // [1/day]
+    const double rho    = parser("-rho").asDouble(1);   // [1/day]
     double Dw           = parser("-Dw").asDouble();
     Dw = Dw/(L*L);
     double Dg = 0.1*Dw;
@@ -362,20 +440,15 @@ void Glioma_BrainDeformation::run()
     // mobility parameters
     const bool bMobility = parser("-bMobility").asBool(0);
     vector<Real> mobility;   // CSF, WM, GM
-    //
-    //    if(bMobility)
-    //    {
-    //        const Real mCSF = parser("-mTissue").asDouble(); // [m^3 s/ kg] * Mstar = [L*^3 T* / M*]
-    //        const Real mWM = mCSF;
-    //        const Real mGM = mCSF;
-    //
-    //        mobility.push_back(mCSF);
-    //        mobility.push_back(mWM);
-    //        mobility.push_back(mGM);
-    //
-    //        printf("mCSF=%f, mWM=%f, mGM=%f\n", mCSF, mWM, mGM);
-    //    }
     
+    if(bMobility)
+    {
+        mobility.push_back(parser("-mCSF").asDouble(1)); //[m^3 s/ kg] * Mstar = [L*^3 T* / M*]
+        mobility.push_back(parser("-mWM").asDouble(1));
+        mobility.push_back(parser("-mGM").asDouble(1));
+        
+        printf("mCSF=%f, mWM=%f, mGM=%f\n", mobility[0], mobility[1], mobility[2]);
+    }
     
     while (t <= tend)
     {
@@ -395,7 +468,7 @@ void Glioma_BrainDeformation::run()
         printf("Pressure source computed \n");
         
         if(bProfiler) profiler.getAgent("Helmholtz").start();
-        //        helmholtz_solver3D(*grid, bVerbose, bCG, bRelaxation, &kappa, bMobility, &mobility);
+        helmholtz_solver3D(*grid, bVerbose, bCG, bRelaxation, &kappa, bMobility, &mobility);
         if(bProfiler) profiler.getAgent("Helmholtz").stop();
         
         printf("Helmholtz step complited \n");
