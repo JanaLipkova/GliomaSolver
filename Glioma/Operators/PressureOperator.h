@@ -73,6 +73,8 @@ struct PressureGradient
     inline void operator()(LabType& lab, const BlockInfo& info, BlockType& o) const
     {
         
+        Real eps = 0.01;
+        
         const Real ih = 1./(info.h[0]);
         
         if(nDim==2)
@@ -80,7 +82,7 @@ struct PressureGradient
             for(int iy=0; iy<BlockType::sizeY; iy++)
                 for(int ix=0; ix<BlockType::sizeX; ix++)
                 {
-                    if(lab(ix,iy).chi > 0)
+                    if(lab(ix,iy).chi > 0.)
                     {
                         Real pS = lab(ix,  iy-1).p;
                         Real pN = lab(ix,  iy+1).p;
@@ -94,7 +96,8 @@ struct PressureGradient
                         _mean(p, pW, pE, pS, pN, tmp1, tmp2);
                         
                         Real M = (bMobility) ? (Mwm * lab(ix,iy).p_w + Mgm * lab(ix,iy).p_g + Mcsf * lab(ix,iy).p_csf) : 1.;
-                        
+                        M = M * (1. - o(ix,iy).phi);
+
                         o(ix,iy).ux = -ih * M * (pE - pW) * lab(ix,iy).chi;
                         o(ix,iy).uy = -ih * M * (pN - pS) * lab(ix,iy).chi;
                     }
@@ -112,7 +115,8 @@ struct PressureGradient
                 for(int iy=0; iy<BlockType::sizeY; iy++)
                     for(int ix=0; ix<BlockType::sizeX; ix++)
                     {
-                        if(lab(ix,iy,iz).chi > 0)
+                        // want zero velocity inside the regions with 100 tumor
+                        if(lab(ix,iy,iz).chi > 0.)
                         {
                             Real pB = lab(ix  ,iy  ,iz-1).p;
                             Real pF = lab(ix  ,iy  ,iz+1).p;
@@ -126,10 +130,12 @@ struct PressureGradient
                             _mean(p, pW, pE, pS, pN, pB, pF);
                             
                             Real M = (bMobility) ? (Mwm * lab(ix,iy,iz).p_w + Mgm * lab(ix,iy,iz).p_g + Mcsf * lab(ix,iy,iz).p_csf) : 1.;
-                            
+                            M = M * (1. - o(ix,iy,iz).phi);
+
                             o(ix,iy,iz).ux = -ih * M * (pE - pW) * lab(ix,iy,iz).chi;
                             o(ix,iy,iz).uy = -ih * M * (pN - pS) * lab(ix,iy,iz).chi;
                             o(ix,iy,iz).uz = -ih * M * (pF - pB) * lab(ix,iy,iz).chi;
+                            
                         }
                         else
                         {
@@ -168,7 +174,7 @@ struct PressureGradient
 
 
 /*
-  Computes rhs of the pressure equation with time relaxation:
+ Computes rhs of the pressure equation with time relaxation:
  //  ------------------------------------
  //    β ∂p / ∂t = ∇( M∇p) + ρ * φ(1-φ)
  //     + no flux BC
@@ -221,6 +227,8 @@ struct PressureTimeRelaxationOperator
         const Real ibGM =  1./bGM;
         Real ib;
         
+        const Real eps = 0.0001;
+        
         if(nDim == 2)
         {
             for(int iy=0; iy<BlockType::sizeY; iy++)
@@ -228,14 +236,15 @@ struct PressureTimeRelaxationOperator
                 {
                     if( lab(ix,iy).chi > 0.)
                     {
-                        ib     = lab(ix,iy).p_w * ibWM + lab(ix,iy).p_g * ibGM + lab(ix,iy).p_csf * ibCSF;
-                        mobLoc = lab(ix,iy).p_w * mWM  + lab(ix,iy).p_g * mGM  + lab(ix,iy).p_csf * mCSF;
-                      
-                        mob[0]  = lab(ix-1,iy  ).p_w * mWM + lab(ix-1,iy  ).p_g * mGM + lab(ix-1,iy  ).p_csf * mCSF;
-                        mob[1]  = lab(ix+1,iy  ).p_w * mWM + lab(ix+1,iy  ).p_g * mGM + lab(ix+1,iy  ).p_csf * mCSF;
-                        mob[2]  = lab(ix  ,iy-1).p_w * mWM + lab(ix  ,iy-1).p_g * mGM + lab(ix  ,iy-1).p_csf * mCSF;
-                        mob[3]  = lab(ix  ,iy+1).p_w * mWM + lab(ix  ,iy+1).p_g * mGM + lab(ix  ,iy+1).p_csf * mCSF;
-
+                        // multiply by (1 - phi): if phi=0 relax as tissue, if phi = 1, do not relax pressure, if phi in (0,1) make tissue relax the pressure not the tumor
+                        ib      = (1. - lab(ix,iy).phi ) * (lab(ix,iy).p_w * ibWM + lab(ix,iy).p_g * ibGM + lab(ix,iy).p_csf * ibCSF);
+                        mobLoc  = (1. - lab(ix,iy).phi ) * (lab(ix,iy).p_w * mWM  + lab(ix,iy).p_g * mGM  + lab(ix,iy).p_csf * mCSF);
+                        
+                        mob[0]  = (1. - lab(ix,iy).phi ) * (lab(ix-1,iy  ).p_w * mWM + lab(ix-1,iy  ).p_g * mGM + lab(ix-1,iy  ).p_csf * mCSF);
+                        mob[1]  = (1. - lab(ix,iy).phi ) * (lab(ix+1,iy  ).p_w * mWM + lab(ix+1,iy  ).p_g * mGM + lab(ix+1,iy  ).p_csf * mCSF);
+                        mob[2]  = (1. - lab(ix,iy).phi ) * (lab(ix  ,iy-1).p_w * mWM + lab(ix  ,iy-1).p_g * mGM + lab(ix  ,iy-1).p_csf * mCSF);
+                        mob[3]  = (1. - lab(ix,iy).phi ) * (lab(ix  ,iy+1).p_w * mWM + lab(ix  ,iy+1).p_g * mGM + lab(ix  ,iy+1).p_csf * mCSF);
+                        
                         _harmonic_mean(mob, mobLoc);
                         
                         chf[0] = lab(ix-1,iy  ).chi;
@@ -271,15 +280,16 @@ struct PressureTimeRelaxationOperator
                     {
                         if ( lab(ix,iy,iz).chi > 0.)
                         {
-                            ib     = lab(ix,iy,iz).p_w * ibWM + lab(ix,iy,iz).p_g * ibGM + lab(ix,iy,iz).p_csf * ibCSF;
-                            mobLoc = lab(ix,iy,iz).p_w * mWM  + lab(ix,iy,iz).p_g * mGM  + lab(ix,iy,iz).p_csf * mCSF;
+                            // multiply by (1 - phi): if phi=0 relax as tissue, if phi = 1, do not relax pressure, if phi in (0,1) make tissue relax the pressure not the tumor
+                            ib     = (1. - lab(ix,iy,iz).phi ) * (lab(ix,iy,iz).p_w * ibWM + lab(ix,iy,iz).p_g * ibGM + lab(ix,iy,iz).p_csf * ibCSF);
+                            mobLoc = (1. - lab(ix,iy,iz).phi ) * (lab(ix,iy,iz).p_w * mWM  + lab(ix,iy,iz).p_g * mGM  + lab(ix,iy,iz).p_csf * mCSF);
                             
-                            mob[0]  = lab(ix-1,iy  ,iz  ).p_w * mWM + lab(ix-1,iy  ,iz  ).p_g * mGM + lab(ix-1,iy  ,iz  ).p_csf * mCSF;
-                            mob[1]  = lab(ix+1,iy  ,iz  ).p_w * mWM + lab(ix+1,iy  ,iz  ).p_g * mGM + lab(ix+1,iy  ,iz  ).p_csf * mCSF;
-                            mob[2]  = lab(ix  ,iy-1,iz  ).p_w * mWM + lab(ix  ,iy-1,iz  ).p_g * mGM + lab(ix  ,iy-1,iz  ).p_csf * mCSF;
-                            mob[3]  = lab(ix  ,iy+1,iz  ).p_w * mWM + lab(ix  ,iy+1,iz  ).p_g * mGM + lab(ix  ,iy+1,iz  ).p_csf * mCSF;
-                            mob[4]  = lab(ix  ,iy  ,iz-1).p_w * mWM + lab(ix  ,iy  ,iz-1).p_g * mGM + lab(ix  ,iy  ,iz-1).p_csf * mCSF;
-                            mob[5]  = lab(ix  ,iy  ,iz+1).p_w * mWM + lab(ix  ,iy  ,iz+1).p_g * mGM + lab(ix  ,iy  ,iz+1).p_csf * mCSF;
+                            mob[0]  = (1. - lab(ix,iy,iz).phi ) * (lab(ix-1,iy  ,iz  ).p_w * mWM + lab(ix-1,iy  ,iz  ).p_g * mGM + lab(ix-1,iy  ,iz  ).p_csf * mCSF);
+                            mob[1]  = (1. - lab(ix,iy,iz).phi ) * (lab(ix+1,iy  ,iz  ).p_w * mWM + lab(ix+1,iy  ,iz  ).p_g * mGM + lab(ix+1,iy  ,iz  ).p_csf * mCSF);
+                            mob[2]  = (1. - lab(ix,iy,iz).phi ) * (lab(ix  ,iy-1,iz  ).p_w * mWM + lab(ix  ,iy-1,iz  ).p_g * mGM + lab(ix  ,iy-1,iz  ).p_csf * mCSF);
+                            mob[3]  = (1. - lab(ix,iy,iz).phi ) * (lab(ix  ,iy+1,iz  ).p_w * mWM + lab(ix  ,iy+1,iz  ).p_g * mGM + lab(ix  ,iy+1,iz  ).p_csf * mCSF);
+                            mob[4]  = (1. - lab(ix,iy,iz).phi ) * (lab(ix  ,iy  ,iz-1).p_w * mWM + lab(ix  ,iy  ,iz-1).p_g * mGM + lab(ix  ,iy  ,iz-1).p_csf * mCSF);
+                            mob[5]  = (1. - lab(ix,iy,iz).phi ) * (lab(ix  ,iy  ,iz+1).p_w * mWM + lab(ix  ,iy  ,iz+1).p_g * mGM + lab(ix  ,iy  ,iz+1).p_csf * mCSF);
                             
                             _harmonic_mean(mob, mobLoc);
                             

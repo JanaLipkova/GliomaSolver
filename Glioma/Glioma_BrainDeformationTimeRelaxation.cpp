@@ -86,7 +86,7 @@ void Glioma_BrainDeformationTimeRelaxation::_icSphere3Parts(Grid<W,B>& grid, Rea
     std::cout <<" Test case: Sphere with 3 components"<< std::endl;
     
     const double AnatmoyRadius	= 0.4;
-    const double tumorRad		= 0.1;    // tumor radius
+    const double tumorRad		= 0.005;//0.1;    // tumor radius
     const double smooth_sup		= 3.;     // support, over how many grid points to smooth
     
     const double tau        = 1.e-10;     // cut of phase field function on LHS
@@ -132,14 +132,16 @@ void Glioma_BrainDeformationTimeRelaxation::_icSphere3Parts(Grid<W,B>& grid, Rea
                     // anatomy
                     const Real theta = atan2((x[1]-0.5), (x[0]-0.5) ) * 180. / (M_PI);
                     
-                    if (block(ix,iy,iz).pff > tau)
+                    if (block(ix,iy,iz).pff > 0.1)
                     {
-                        if ((0<=theta)&&(theta < 120))
-                            block(ix,iy,iz).p_w = 1.;
-                        else if ((-120 <= theta)&&(theta < 0))
-                            block(ix,iy,iz).p_g = 1.;
-                        else
-                            block(ix,iy,iz).p_csf = 1.;
+//                        if ((0<=theta)&&(theta < 120))
+//                            block(ix,iy,iz).p_w = 1.;
+//                        else if ((-120 <= theta)&&(theta < 0))
+//                            block(ix,iy,iz).p_g = 1.;
+//                        else
+//                            block(ix,iy,iz).p_csf = 1.;
+                        
+                        block(ix,iy,iz).p_w = 1.;
                         
                         block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
                         block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;

@@ -136,7 +136,7 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
                     // anatomy
                     const Real theta = atan2((x[1]-0.5), (x[0]-0.5) ) * 180. / (M_PI);
                     
-                    if (block(ix,iy,iz).pff > tau)
+                    if (block(ix,iy,iz).chi > tau)
                     {
                         if ((0<=theta)&&(theta < 120))
                             block(ix,iy,iz).p_w = 1.;
