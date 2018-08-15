@@ -32,7 +32,8 @@ endif
 dim ?= 3
 bpd ?= 8
 #bpd ?= 16
-bs ?= 16
+#bs ?= 16
+bs=8
 
 CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd)  
 
@@ -98,8 +99,8 @@ endif
 
 
 
-CPPFLAGS += -I../Glioma/ -I../MRAG/ -I../Glioma/Operators/
-VPATH := ../Glioma/ ../MRAG/ ../MRAG/MRAGcore
+CPPFLAGS += -I../Glioma/ -I../MRAG/ -I../Glioma/Operators/ -I../Glioma/Tests/
+VPATH := ../Glioma/ ../MRAG/ ../MRAG/MRAGcore ../Glioma/Tests/
 .DEFAULT_GOAL := brain
 
 ########################################################################	
@@ -113,7 +114,8 @@ MRAGWavelets_StaticData.o \
 Test.o\
 
 ifeq "$(helmholtz)" "hypre"
-OBJECTS += Glioma_BrainDeformation.o
+OBJECTS += Glioma_BrainDeformation.o 
+#OBJECTS += HelmholtzTest.o 
 endif
 
 brain: $(OBJECTS)

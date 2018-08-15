@@ -11,7 +11,10 @@
 #include <iostream>
 #include <xmmintrin.h>
 
-#include "Test.h"
+#include "../Tests/Test.h"
+//#include "../Tests/HelmholtzTest.h"
+
+
 #include "Glioma_ReactionDiffusion.h"
 #include "Glioma_BrainDeformationTimeRelaxation.h"
 
@@ -41,7 +44,9 @@ int main(int argc,const char ** argv)
 #ifdef HYPRE
     else if(parser("-model").asString() == "deform")
         s = new Glioma_BrainDeformation(argc, (const char **)argv);
-#endif 
+//    else if(parser("-model").asString() == "helmholtzTest")
+//        s = new HelmholtzTest(argc, (const char **)argv);
+#endif
     else
         s = new Test(argc, (const char **)argv);
   

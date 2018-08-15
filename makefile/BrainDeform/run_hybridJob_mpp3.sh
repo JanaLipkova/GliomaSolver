@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH -o myjob.%j.%N.out
 #SBATCH -D .
-#SBATCH -J Htest
+#SBATCH -J DefTest
 #SBATCH --get-user-env 
 #SBATCH --clusters=mpp3
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=16
 # cpus per task max value: mpp1 = 16, mpp2=28, mpp3=64 
 #SBATCH --export=NONE
-#SBATCH --time=00:20:00
+#SBATCH --time=01:00:00
 
 # modules:
 source /etc/profile.d/modules.sh
@@ -32,10 +32,10 @@ program=brain
 model=deform
 adaptive=0
 verbose=1
-profiler=0
-pID=0
-bDumpIC=1
-dumpfreq=10
+profiler=1
+pID=100
+bDumpIC=0
+dumpfreq=1
 vtk=1
 CFL=0.8
 tend=600
@@ -47,8 +47,8 @@ kGM=1
 bMobility=0
 
 echo "In the directory: $PWD"
-echo "Running program with total $SLURM_NTASKS MPI tasks,  each with $SLURM_CPUS_PER_TASK."
+echo "Running program with total $SLURM_NTASKS MPI tasks, each with $SLURM_CPUS_PER_TASK threads."
 
 
-mpirun -n 4  ./$program -nthreads $SLURM_CPUS_ON_NODE -model $model -verbose $verbose -profiler $profiler -pID $pID -vtk $vtk -bDumpIC $bDumpIC -dumpfreq $dumpfreq -CFL $CFL -tend $tend -rho $rho -Dw $Dw -kCSF $kCSF -kWM $kWM -kGM $kGM -bMobility $bMobility
+mpirun -n 1  ./$program -nthreads $SLURM_CPUS_ON_NODE -model $model -verbose $verbose -profiler $profiler -pID $pID -vtk $vtk -bDumpIC $bDumpIC -dumpfreq $dumpfreq -CFL $CFL -tend $tend -rho $rho -Dw $Dw -kCSF $kCSF -kWM $kWM -kGM $kGM -bMobility $bMobility
 

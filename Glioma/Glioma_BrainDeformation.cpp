@@ -87,7 +87,7 @@ Glioma_BrainDeformation::~Glioma_BrainDeformation()
 /* 3 componten structure: WM, GM, CSF + Tumor*/
 void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
 {
-    std::cout <<" Test case: Sphere with 3 components"<< std::endl;
+    std::cout <<" Test case: Sphere with 3 components \n"<< std::endl;
     
     const double AnatmoyRadius	= 0.4;
     const double tumorRad		= 0.1;    // tumor radius
@@ -138,12 +138,14 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
                     
                     if (block(ix,iy,iz).chi > tau)
                     {
-                        if ((0<=theta)&&(theta < 120))
-                            block(ix,iy,iz).p_w = 1.;
-                        else if ((-120 <= theta)&&(theta < 0))
-                            block(ix,iy,iz).p_g = 1.;
-                        else
-                            block(ix,iy,iz).p_csf = 1.;
+//                        if ((0<=theta)&&(theta < 120))
+//                            block(ix,iy,iz).p_w = 1.;
+//                        else if ((-120 <= theta)&&(theta < 0))
+//                            block(ix,iy,iz).p_g = 1.;
+//                        else
+//                            block(ix,iy,iz).p_csf = 1.;
+                        
+                        block(ix,iy,iz).p_w = 1.;
                         
                         block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
                         block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
@@ -201,7 +203,7 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
     double brainHz = 1.0 / ((double)(brainSizeMax-1)); // should be w.r.t. longest dimension for correct aspect ratio
     
     // tumour parameters
-    const Real tumorRadius = 0.01;
+    const Real tumorRadius = 0.005;//0.01;
     const Real smooth_sup  = 3.;		// suppor of smoothening, over how many gp to smooth
     const Real c[3] = { 0.6, 0.7, 0.5};
     
@@ -393,7 +395,7 @@ void Glioma_BrainDeformation:: _dump(int counter)
     if (bVTK)
     {
         char filename[256];
-        sprintf(filename,"%P%02d_data_%04d",pID,counter);
+        sprintf(filename,"P%02d_data_%04d",pID,counter);
         
         IO_VTKNative3D<W,B, 15,0 > vtkdumper2;
         vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
@@ -420,7 +422,7 @@ void Glioma_BrainDeformation::run()
     int     iCounter    = 1;
     double  t           = 0.;
     
-    printf("Dg=%f, Dw=%f, dt= %f, rho=%f \n", Dg, Dw, dt, rho);
+    printf("Dg=%e, Dw=%e, dt= %e, rho=%e \n", Dg, Dw, dt, rho);
     
     // relaxation parameters
     const bool bCG          = 1;
@@ -452,44 +454,29 @@ void Glioma_BrainDeformation::run()
     
     while (t <= tend)
     {
-        
-        printf("IC complited \n");
-        
         if(bProfiler) profiler.getAgent("TimeStep").start();
         dt = _estimate_dt(Diff_dt, CFL);
         if(bProfiler) profiler.getAgent("TimeStep").stop();
-        
-        printf("Dt estimeted as = %e \n", dt);
         
         if(bProfiler) profiler.getAgent("PressureSource").start();
         _computePressureSource(nParallelGranularity,rho);
         if(bProfiler) profiler.getAgent("PressureSource").stop();
         
-        printf("Pressure source computed \n");
-        
         if(bProfiler) profiler.getAgent("Helmholtz").start();
         helmholtz_solver3D(*grid, bVerbose, bCG, bRelaxation, &kappa, bMobility, &mobility);
         if(bProfiler) profiler.getAgent("Helmholtz").stop();
-        
-        printf("Helmholtz step complited \n");
         
         if(bProfiler) profiler.getAgent("Velocity").start();
         _computeVelocities(boundaryInfo, bMobility, &mobility);
         if(bProfiler) profiler.getAgent("Velocity").stop();
         
-        printf("Velocity computation complited \n");
-        
         if(bProfiler) profiler.getAgent("RD").start();
         _reactionDiffusionStep(boundaryInfo, Dw, Dg, rho);
         if(bProfiler) profiler.getAgent("RD").stop();
         
-        printf("RD step complited \n");
-        
         if(bProfiler) profiler.getAgent("Advect-Conv").start();
         _advectionConvectionStep(boundaryInfo, nParallelGranularity, dt);
         if(bProfiler) profiler.getAgent("Advect-Conv").stop();
-        
-        printf("Advection step complited \n");
         
         
         t                   += dt   ;

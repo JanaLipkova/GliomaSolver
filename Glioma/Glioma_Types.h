@@ -38,11 +38,11 @@ struct Cell
     // pressure + auxiliary functions for pressure source, phase filed funtion, charact. function
     Real p, dpdt;
     Real f;
-    Real pff, dpffdt;   // pahse field function of whole anatomy, of tissue
+    Real pff;   // pahse field function of whole anatomy, of tissue
     Real chi;
     
     // other helper fields
-	Real eps;
+	Real exact;
 	Real tmp;
 
     
@@ -60,16 +60,15 @@ struct Cell
         dpdt     = 0.0;
 		omega	 = 0.0;
 		domegadt = 0.0;
-		eps      = 0.0;
+		exact      = 0.0;
 		tmp      = 0.0;
 		f        = 0.0;
 		pff		 = 0.0;
-		dpffdt   = 0.0;
         chi      = 0.0;
 
     }
 	
-    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real eps_, Real tmp_ , Real f_, Real pff_, Real dpffdt_, Real chi_)
+    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real exact_, Real tmp_ , Real f_, Real pff_, Real chi_)
 	{
 		phi		 = phi_	    ;
 		dphidt	 = dphidt_  ;
@@ -89,11 +88,10 @@ struct Cell
         dpdt     = dpdt_    ;
 		omega    = omega_   ;
 		domegadt = domegadt_;
-		eps      = eps_     ;
+		exact    = exact_     ;
 		tmp      = tmp_     ;
 		f        = f_       ;
 		pff		 = pff_	    ;
-		dpffdt   = dpffdt_  ;
         chi      = chi_     ;
     }
 	
@@ -117,11 +115,10 @@ struct Cell
         dpdt     += t.dpdt    ;
 		omega    += t.omega	  ;
 		domegadt += t.domegadt;
-		eps      += t.eps     ;
+		exact    += t.exact     ;
 		tmp      += t.tmp	  ;
 		f        += t.f		  ;
 		pff		 += t.pff     ;
-		dpffdt   += t.dpffdt  ;
         chi      += t.chi     ;
 	}
 	
@@ -194,11 +191,10 @@ inline Cell operator*(const Cell& p, Real v)
     c.dpdt      = p.dpdt     *v;
 	c.omega     = p.omega    *v;
 	c.domegadt	= p.domegadt *v;
-	c.eps       = p.eps      *v;
+	c.exact     = p.exact    *v;
 	c.tmp       = p.tmp      *v;
 	c.f         = p.f        *v;
 	c.pff		= p.pff		 *v;
-	c.dpffdt    = p.dpffdt   *v;
     c.chi       = p.chi      *v;
    
 	return c;

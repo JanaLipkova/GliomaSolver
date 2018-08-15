@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include "Glioma.h"
+#include "../Glioma.h"
 
 using namespace MRAG;
 
