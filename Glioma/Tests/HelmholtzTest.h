@@ -10,7 +10,7 @@
 #pragma once
 #include "../Glioma_Types.h"
 #include "../Operators/HelmholtzSolver3D_Hypre.h"
-//#include "../Operators/HelmholtzSolver2D_Hypre.h"
+#include "../Operators/HelmholtzSolver2D_Hypre.h"
 
 class HelmholtzTest: public Glioma
 {
@@ -35,10 +35,10 @@ private:
     
     static void _ic_Square(Grid<W,B>& grid);
     void		_computeError();
-    void        _dumpOutput(int counter);
+    void        _dump(int counter);
     
-    Glioma_HelmholtzSolver3D_Hypre helmholtz_solver3D;
-//    Glioma_HelmholtzSolver2D_Hypre helmholtz_solver2D;
+    HelmholtzSolver3D_Hypre helmholtz_solver3D;
+    HelmholtzSolver2D_Hypre helmholtz_solver2D;
     
 public:
     HelmholtzTest(int argc, const char ** argv);

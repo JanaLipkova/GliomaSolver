@@ -12,7 +12,7 @@
 #include <xmmintrin.h>
 
 #include "../Tests/Test.h"
-//#include "../Tests/HelmholtzTest.h"
+#include "../Tests/HelmholtzTest.h"
 
 
 #include "Glioma_ReactionDiffusion.h"
@@ -44,8 +44,8 @@ int main(int argc,const char ** argv)
 #ifdef HYPRE
     else if(parser("-model").asString() == "deform")
         s = new Glioma_BrainDeformation(argc, (const char **)argv);
-//    else if(parser("-model").asString() == "helmholtzTest")
-//        s = new HelmholtzTest(argc, (const char **)argv);
+    else if(parser("-model").asString() == "helmholtzTest")
+        s = new HelmholtzTest(argc, (const char **)argv);
 #endif
     else
         s = new Test(argc, (const char **)argv);

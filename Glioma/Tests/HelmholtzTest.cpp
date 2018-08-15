@@ -15,7 +15,7 @@ static int maxStencil[2][3] = {
 };
 
 
-HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), helmholtz_solver3D(argc,argv)
+HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), helmholtz_solver3D(argc,argv), helmholtz_solver2D(argc,argv)
 {
     bVerbose  = parser("-verbose").asBool(1);
     bProfiler = parser("-profiler").asBool(1);
@@ -36,6 +36,7 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
     stSorter.connect(*grid);
     
     _ic_Square(*grid);
+    _dump(0);
     
     MPI_Init(&argc, (char ***)&argv);
     
@@ -164,11 +165,11 @@ void HelmholtzTest:: _dump(int counter)
         sprintf(filename,"Data_%04d",counter);
         
         if( _DIM == 2){
-            IO_VTKNative<W,B, 2,0 > vtkdumper2;
+            IO_VTKNative<W,B, 5,0 > vtkdumper2;
             vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
         }
         else{
-            IO_VTKNative3D<W,B, 8,0 > vtkdumper2;
+            IO_VTKNative3D<W,B, 5,0 > vtkdumper2;
             vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
         }
     }

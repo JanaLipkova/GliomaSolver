@@ -115,7 +115,11 @@ Test.o\
 
 ifeq "$(helmholtz)" "hypre"
 OBJECTS += Glioma_BrainDeformation.o 
-#OBJECTS += HelmholtzTest.o 
+OBJECTS += HelmholtzTest.o 
+endif
+
+ifeq "$(tests)" "on"
+CPPFLAGS += -D_TESTS
 endif
 
 brain: $(OBJECTS)

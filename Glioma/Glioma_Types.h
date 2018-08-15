@@ -144,6 +144,18 @@ struct Cell
 	
 	Real giveMe(int i, Real h=0)
 	{
+        
+#ifdef TESTS
+        switch(i)
+        {
+            case 0: return p;
+            case 1: return exact;
+            case 2: return pff;
+            case 3: return chi;
+            case 4: return f;
+        }
+#else
+        
 		switch(i)
 		{
             case 0:  return phi;
@@ -165,6 +177,9 @@ struct Cell
 
 			default: abort(); return 0;
 		}
+        
+#endif
+        
 	}
 				
 	

@@ -128,24 +128,24 @@ class HelmholtzSolver2D_Hypre
                         }
 
                         // get entries of matrix
-                        Real psiS = lab(ix,  iy-1).psi * mS;
-                        Real psiN = lab(ix,  iy+1).psi * mN;
-                        Real psiW = lab(ix-1,iy  ).psi * mW;
-                        Real psiE = lab(ix+1,iy  ).psi * mE;
-                        Real psi = lab(ix,iy).psi * m;
+                        Real pffS = lab(ix,  iy-1).pff * mS;
+                        Real pffN = lab(ix,  iy+1).pff * mN;
+                        Real pffW = lab(ix-1,iy  ).pff * mW;
+                        Real pffE = lab(ix+1,iy  ).pff * mE;
+                        Real pff  = lab(ix,iy).pff * m;
 
                         
                         // approximate intermidiet points
-                        _mean(psi, psiW, psiE, psiS, psiN);
+                        _mean(pff, pffW, pffE, pffS, pffN);
                         
                         Real kappa = kappaWM * lab(ix,iy).p_w  + kappaGM * lab(ix,iy).p_g  + kappaCSF * lab(ix,iy).p_csf;
                         
                         // fill in vector of matrix values
-                        values[idx  ] =   psiW + psiE + psiS + psiN + kappa *psi*h2;
-                        values[idx+1] = - psiW;
-                        values[idx+2] = - psiE;
-                        values[idx+3] = - psiS;
-                        values[idx+4] = - psiN;
+                        values[idx  ] =   pffW + pffE + pffS + pffN + kappa *pff*h2;
+                        values[idx+1] = - pffW;
+                        values[idx+2] = - pffE;
+                        values[idx+3] = - pffS;
+                        values[idx+4] = - pffN;
                         
                     }
             }
