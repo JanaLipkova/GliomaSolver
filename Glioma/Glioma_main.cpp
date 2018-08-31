@@ -12,15 +12,16 @@
 #include <xmmintrin.h>
 
 #include "../Tests/Test.h"
-#include "../Tests/HelmholtzTest.h"
-
 
 #include "Glioma_ReactionDiffusion.h"
 #include "Glioma_BrainDeformationTimeRelaxation.h"
 
 #ifdef HYPRE
 #include "Glioma_BrainDeformation.h"
+#include "../Tests/HelmholtzTest.h"
 #endif
+
+#include "dat2VP.h"
 
 using namespace std;
 using namespace MRAG;
@@ -47,6 +48,8 @@ int main(int argc,const char ** argv)
     else if(parser("-model").asString() == "helmholtzTest")
         s = new HelmholtzTest(argc, (const char **)argv);
 #endif
+    else if(parser("-model").asString() == "VP")
+        s = new dat2VP(argc, (const char **)argv);
     else
         s = new Test(argc, (const char **)argv);
   

@@ -44,6 +44,9 @@ struct Cell
     // other helper fields
 	Real exact;
 	Real tmp;
+    
+    // Volume Perception
+    Real vp;
 
     
 	Cell()
@@ -65,10 +68,11 @@ struct Cell
 		f        = 0.0;
 		pff		 = 0.0;
         chi      = 0.0;
+        vp       = 0.0;
 
     }
 	
-    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real exact_, Real tmp_ , Real f_, Real pff_, Real chi_)
+    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real exact_, Real tmp_ , Real f_, Real pff_, Real chi_, Real vp_)
 	{
 		phi		 = phi_	    ;
 		dphidt	 = dphidt_  ;
@@ -88,11 +92,12 @@ struct Cell
         dpdt     = dpdt_    ;
 		omega    = omega_   ;
 		domegadt = domegadt_;
-		exact    = exact_     ;
+		exact    = exact_   ;
 		tmp      = tmp_     ;
 		f        = f_       ;
 		pff		 = pff_	    ;
         chi      = chi_     ;
+        vp       = vp_      ;
     }
 	
 	void operator += (Cell t)
@@ -115,11 +120,12 @@ struct Cell
         dpdt     += t.dpdt    ;
 		omega    += t.omega	  ;
 		domegadt += t.domegadt;
-		exact    += t.exact     ;
+		exact    += t.exact   ;
 		tmp      += t.tmp	  ;
 		f        += t.f		  ;
 		pff		 += t.pff     ;
         chi      += t.chi     ;
+        vp       += t.vp      ;
 	}
 	
 	
@@ -145,7 +151,7 @@ struct Cell
 	Real giveMe(int i, Real h=0)
 	{
         
-#ifdef TESTS
+#ifdef _TESTS
         switch(i)
         {
             case 0: return p;
@@ -153,12 +159,11 @@ struct Cell
             case 2: return pff;
             case 3: return chi;
             case 4: return f;
-        }
+        }        
 #else
-        
 		switch(i)
 		{
-            case 0:  return phi;
+            case 0:  return vp;//phi;
             case 1:  return phi + 0.1 * p_g + 0.2 * p_w;
             case 2:  return p_w;
             case 3:  return p_g;
@@ -211,6 +216,7 @@ inline Cell operator*(const Cell& p, Real v)
 	c.f         = p.f        *v;
 	c.pff		= p.pff		 *v;
     c.chi       = p.chi      *v;
+    c.vp        = p.vp       *v;
    
 	return c;
 }

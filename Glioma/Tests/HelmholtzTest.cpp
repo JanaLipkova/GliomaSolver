@@ -41,7 +41,6 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
     MPI_Init(&argc, (char ***)&argv);
     
     isDone              = false;
-    whenToWrite			= parser("-dumpfreq").asDouble();
     numberOfIterations	= 0;
 }
 

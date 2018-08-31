@@ -27,7 +27,6 @@ private:
     IO_VTK< W, B, RD_Projector_VTK >		vtk;
     BlockLab< B >							lab;
     int										numberOfIterations;
-    int							  		    whenToWrite;
     bool                                    isDone;
     bool                                    bVerbose;
     bool                                    bProfiler;

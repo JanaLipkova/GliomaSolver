@@ -7,7 +7,7 @@
 //  Copyright (c) 2015 Lipkova. All rights reserved.
 //  ------------------------------------
 //   - ∇( ψ ∇u) + ψu = ψf
-//     + periodic BC
+//     + periodic BC (automatic in MRAG)
 //  ------------------------------------
 
 #ifndef HelmholtzSolver3D_Hypre_h
