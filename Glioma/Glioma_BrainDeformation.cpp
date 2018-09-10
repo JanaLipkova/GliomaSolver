@@ -66,7 +66,7 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
     if(parser("-bDumpIC").asBool(0))
         _dump(0);
     
-    MPI_Init(&argc, (char ***)&argv);
+    //MPI_Init(&argc, (char ***)&argv);
     
     isDone              = false;
     whenToWriteOffset	= parser("-dumpfreq").asDouble();
@@ -77,7 +77,7 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
 
 Glioma_BrainDeformation::~Glioma_BrainDeformation()
 {
-    MPI_Finalize();
+    //MPI_Finalize();
     std::cout << "------Adios muchachos------" << std::endl;
 }
 

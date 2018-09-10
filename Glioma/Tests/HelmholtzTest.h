@@ -31,6 +31,7 @@ private:
     bool                                    bVerbose;
     bool                                    bProfiler;
     bool                                    bVTK;
+    bool                                    bHypreMPI;
     
     static void _ic_Square(Grid<W,B>& grid);
     void		_computeError();

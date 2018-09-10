@@ -358,10 +358,15 @@ class HelmholtzSolver2D_Hypre
     
 public:
     HelmholtzSolver2D_Hypre(int argc, const char ** argv): bAlreadyAllocated(false)
-    {    }
+    {
+        MPI_Init(&argc, (char ***)&argv);
+    
+    }
     
     ~HelmholtzSolver2D_Hypre()
-    {    }
+    {
+        MPI_Finalize();
+    }
     
     void setup_hypre()
     {
