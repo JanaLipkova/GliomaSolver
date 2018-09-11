@@ -17,7 +17,8 @@
 #include "Glioma_BrainDeformationTimeRelaxation.h"
 
 #ifdef HYPRE
-#include "Glioma_BrainDeformation.h"
+#include <mpi.h>
+//#include "Glioma_BrainDeformation.h"
 #include "../Tests/HelmholtzTest.h"
 #include "../Tests/HelmholtzTest_MPI.h"
 #endif
@@ -30,6 +31,10 @@ using namespace MRAG;
 int main(int argc,const char ** argv)
 {
     std::cout << std::endl << "MRAG Launched" << std::endl << std::endl;
+
+#ifdef HYPRE
+    MPI_Init(&argc, (char ***)&argv);
+#endif
     
     ArgumentParser parser(argc, argv);
     Environment::setup(max(1, parser("-nthreads").asInt()));
@@ -44,8 +49,8 @@ int main(int argc,const char ** argv)
     else if(parser("-model").asString() == "deformTime")
         s = new Glioma_BrainDeformationTimeRelaxation(argc, (const char **)argv);
 #ifdef HYPRE
-    else if(parser("-model").asString() == "deform")
-        s = new Glioma_BrainDeformation(argc, (const char **)argv);
+//    else if(parser("-model").asString() == "deform")
+//        s = new Glioma_BrainDeformation(argc, (const char **)argv);
     else if(parser("-model").asString() == "helmholtzTest")
         s = new HelmholtzTest(argc, (const char **)argv);
     else if(parser("-model").asString() == "helmholtzTestMPI")
@@ -62,7 +67,12 @@ int main(int argc,const char ** argv)
         s->run();
         t1=tbb::tick_count::now();
     }
-    
+   
+
+#ifdef HYPRE
+   MPI_Finalize();
+#endif
+ 
     printf("we spent: %2.2f \n",(t1-t0).seconds());	
     delete s;
     

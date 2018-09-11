@@ -7,7 +7,6 @@
 //
 
 #include "HelmholtzTest.h"
-#include <mpi.h>
 
 static int maxStencil[2][3] = {
     -1, -1, -1,
@@ -26,10 +25,9 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("RD INIT! nThreads=%d, blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", nThreads, blockSize, "w", blocksPerDimension, maxLevel);
     
-    refiner		= new Refiner_SpaceExtension();
+    refiner	= new Refiner_SpaceExtension();
     compressor	= new Compressor();
-    
-    grid = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
+    grid        = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
     grid->setCompressor(compressor);
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
@@ -37,15 +35,12 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
     _ic_Square(*grid);
     _dump(0);
     
-    MPI_Init(&argc, (char ***)&argv);
-    
     isDone              = false;
     numberOfIterations	= 0;
 }
 
 HelmholtzTest::~HelmholtzTest()
 {
-    MPI_Finalize();
     std::cout << "------Adios muchachos------" << std::endl;
 }
 

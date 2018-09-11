@@ -27,7 +27,9 @@ private:
     bool                                    bVerbose;
     bool                                    bProfiler;
     bool                                    bVTK;
-    
+    int                                     myid;
+    int                                     num_procs;
+     
     static void _ic_Square(Grid<W,B>& grid);
     void		_computeError();
     void        _dump(int counter);

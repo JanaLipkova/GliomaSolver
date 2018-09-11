@@ -88,21 +88,10 @@ class HelmholtzSolver3D_Hypre_MPI
     
 public:
     HelmholtzSolver3D_Hypre_MPI(int argc, const char ** argv): bAlreadyAllocated(false)
-    {
-        MPI_Init(&argc, (char ***)&argv);
-        printf("MPI Initialised in Hypre solver \n");
-
-        
-        MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-        MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-        printf("Hello world from processor rank %d out of %d processors\n", myid, num_procs);
-    }
+    { }
     
     ~HelmholtzSolver3D_Hypre_MPI()
-    {
-        MPI_Finalize();
-        printf("MPI Finalized in Hypre solver \n");
-    }
+    { }
     
     void _setup_hypre()
     {
@@ -132,6 +121,11 @@ public:
         this-> mCSF         = (bMobility) ? (*mobility)[0] : 1. ;
         this-> mWM          = (bMobility) ? (*mobility)[1] : 1. ;
         this-> mGM          = (bMobility) ? (*mobility)[2] : 1. ;
+
+
+        MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+        MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+        printf("Hello world from processor rank %d out of %d processors\n", myid, num_procs);
         
         
         printf("Calling set-up Hypre \n");
@@ -142,7 +136,7 @@ public:
         
         printf("Calling clean-up \n");
         _cleanUp();
-        
+      
     }
     
 };

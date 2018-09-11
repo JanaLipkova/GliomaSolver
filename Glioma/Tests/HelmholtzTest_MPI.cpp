@@ -33,10 +33,18 @@ HelmholtzTest_MPI::HelmholtzTest_MPI(int argc, const char ** argv): parser(argc,
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
-    _ic_Square(*grid);
-    _dump(0);
     
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    if(myid==0){
+    _ic_Square(*grid);
+    _dump(0); 
     isDone              = false;
+    }
+    //MPI_Init(&argc, (char ***)&argv);
+    //MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    //MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    //printf("Hello in Helmholtz Test world from processor rank %d out of %d processors\n", myid, num_procs);
+
 }
 
 HelmholtzTest_MPI::~HelmholtzTest_MPI()
@@ -161,13 +169,24 @@ void HelmholtzTest_MPI::_computeError()
 
 void HelmholtzTest_MPI::run()
 {
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    if(myid==0) printf("Compute hemlhotlz 1x \n");	
     helmholtz_solver3D_MPI(*grid, bVerbose);
     
+    if(myid==0){
     _dump(1);
     _computeError();
+    }
+
+    if(myid==0) printf("Compute hemlhotlz 2x \n");
+    helmholtz_solver3D_MPI(*grid, bVerbose);
+
+    if(myid==0)
+    {
     isDone = 1;
-    
     printf("**** Dumping done\n");
     printf("\n\n Run Finished \n\n");
+    }
 }
 
