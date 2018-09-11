@@ -15,8 +15,6 @@
 
 #include "../Glioma_Types.h"
 
-
-#include <mpi.h>
 #include <_hypre_utilities.h>
 #include <HYPRE_krylov.h>
 #include <HYPRE_sstruct_ls.h>

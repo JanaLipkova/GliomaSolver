@@ -14,18 +14,24 @@ static int maxStencil[2][3] = {
 };
 
 
-HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), helmholtz_solver3D(argc,argv), helmholtz_solver2D(argc,argv)
+HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv), helmholtz_solver2D(argc,argv), helmholtz_solver3D(argc,argv), helmholtz_solver3D_MPI(argc,argv)
 {
     bVerbose  = parser("-verbose").asBool(1);
     bProfiler = parser("-profiler").asBool(1);
     bVTK      = parser("-vtk").asBool(1);
     
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    
+    if(rank==0){
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("//////////////////        HELMHOLTZ TEST: USING HYPRE           ////////////////\n");
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
-    if(bVerbose) printf("RD INIT! nThreads=%d, blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", nThreads, blockSize, "w", blocksPerDimension, maxLevel);
+    if(bVerbose) printf("Set up: blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", blockSize, "w", blocksPerDimension, maxLevel);
+    if(bVerbose) printf("Currently supports only MPI paralelisation within one node, resp more nodes but all system fit in memory of each node! \n");
+    }
     
-    refiner	= new Refiner_SpaceExtension();
+    refiner     = new Refiner_SpaceExtension();
     compressor	= new Compressor();
     grid        = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
     grid->setCompressor(compressor);
@@ -174,12 +180,9 @@ void HelmholtzTest::_computeError()
 {
     
     printf("Computing error \n");
-    
     Real L1 = 0.0;
     Real L2 = 0.0;
     Real LI = 0.0;
-    
-    
     
     vector<BlockInfo> vInfo = grid->getBlocksInfo();
     
@@ -239,16 +242,22 @@ void HelmholtzTest::_computeError()
 void HelmholtzTest::run()
 {
     bool bCG=1;
-
-    if (_DIM == 2)
-        helmholtz_solver2D(*grid, bVerbose, bCG);
-    else
-        helmholtz_solver3D(*grid, bVerbose, bCG);
-
     
-    numberOfIterations++;
-    _dump(numberOfIterations);
-    _computeError();
+    // run 2 same calls, to see if Hypre construct+destructions works well
+    for (int i = 0; i<2; i++){
+        if (_DIM == 2)
+            helmholtz_solver2D(*grid, bVerbose, bCG);
+        else if(size==0)
+            helmholtz_solver3D(*grid, bVerbose, bCG);
+        else
+            helmholtz_solver3D_MPI(*grid, bVerbose);
+        
+        if(rank==0){
+            numberOfIterations++;
+            _dump(numberOfIterations);
+            _computeError();
+        }
+    }
 
     isDone = 1;
     

@@ -17,7 +17,6 @@
 #ifndef HelmholtzSolver2D_Hypre_h
 #define HelmholtzSolver2D_Hypre_h
 
-#include <mpi.h>
 #include <_hypre_utilities.h>
 #include <HYPRE_krylov.h>
 #include <HYPRE_sstruct_ls.h>

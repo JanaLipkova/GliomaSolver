@@ -117,7 +117,6 @@ Test.o\
 ifeq "$(helmholtz)" "hypre"
 #OBJECTS += Glioma_BrainDeformation.o 
 OBJECTS += HelmholtzTest.o 
-OBJECTS += HelmholtzTest_MPI.o
 endif
 
 ifeq "$(tests)" "on"

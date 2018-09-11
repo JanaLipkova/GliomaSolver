@@ -9,8 +9,10 @@
 
 #pragma once
 #include "../Glioma_Types.h"
-#include "../Operators/HelmholtzSolver3D_Hypre.h"
 #include "../Operators/HelmholtzSolver2D_Hypre.h"
+#include "../Operators/HelmholtzSolver3D_Hypre.h"
+#include "../Operators/HelmholtzSolver3D_Hypre_MPI.h"
+//#include "../Operators/HelmholtzSolver3D_HypreMPI.h"
 
 class HelmholtzTest: public Glioma
 {
@@ -31,13 +33,21 @@ private:
     bool                                    bVerbose;
     bool                                    bProfiler;
     bool                                    bVTK;
+    int                                     rank;
+    int                                     size;
+    
     
     static void _ic_Square(Grid<W,B>& grid);
     void		_computeError();
     void        _dump(int counter);
     
-    HelmholtzSolver3D_Hypre helmholtz_solver3D;
-    HelmholtzSolver2D_Hypre helmholtz_solver2D;
+    HelmholtzSolver2D_Hypre      helmholtz_solver2D;
+    HelmholtzSolver3D_Hypre      helmholtz_solver3D;
+    HelmholtzSolver3D_Hypre_MPI      helmholtz_solver3D_MPI;
+
+//    HelmholtzSolver3D_HypreMPI      helmholtz_solver2D;
+//    HelmholtzSolver3D_HypreMPI      helmholtz_solver3D;
+//    HelmholtzSolver3D_HypreMPI      helmholtz_solver3D_MPI;
     
 public:
     HelmholtzTest(int argc, const char ** argv);

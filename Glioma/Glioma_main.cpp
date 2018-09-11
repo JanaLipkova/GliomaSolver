@@ -20,7 +20,6 @@
 #include <mpi.h>
 //#include "Glioma_BrainDeformation.h"
 #include "../Tests/HelmholtzTest.h"
-#include "../Tests/HelmholtzTest_MPI.h"
 #endif
 
 #include "dat2VP.h"
@@ -31,17 +30,18 @@ using namespace MRAG;
 int main(int argc,const char ** argv)
 {
     std::cout << std::endl << "MRAG Launched" << std::endl << std::endl;
-
-#ifdef HYPRE
-    MPI_Init(&argc, (char ***)&argv);
-#endif
     
     ArgumentParser parser(argc, argv);
     Environment::setup(max(1, parser("-nthreads").asInt()));
     
-    Glioma * s = NULL;
-
+#ifdef HYPRE
+    MPI_Init(&argc, (char ***)&argv);
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    printf("Running with %d MPI processes \n", size);    
+#endif
     
+    Glioma * s = NULL;
     printf("INPUT IS %s\n", parser("-model").asString().data());
     
     if(parser("-model").asString() == "RD")
@@ -53,8 +53,6 @@ int main(int argc,const char ** argv)
 //        s = new Glioma_BrainDeformation(argc, (const char **)argv);
     else if(parser("-model").asString() == "helmholtzTest")
         s = new HelmholtzTest(argc, (const char **)argv);
-    else if(parser("-model").asString() == "helmholtzTestMPI")
-        s = new HelmholtzTest_MPI(argc, (const char **)argv);
 #endif
     else if(parser("-model").asString() == "VP")
         s = new dat2VP(argc, (const char **)argv);
