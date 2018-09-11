@@ -39,7 +39,7 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
     _ic_Square(*grid);
     _dump(0);
     
-//    MPI_Init(&argc, (char ***)&argv);
+    MPI_Init(&argc, (char ***)&argv);
     
     isDone              = false;
     numberOfIterations	= 0;
@@ -47,7 +47,7 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
 
 HelmholtzTest::~HelmholtzTest()
 {
-//    MPI_Finalize();
+    MPI_Finalize();
     std::cout << "------Adios muchachos------" << std::endl;
 }
 

@@ -382,14 +382,10 @@ class HelmholtzSolver3D_Hypre
     
 public:
     HelmholtzSolver3D_Hypre(int argc, const char ** argv): bAlreadyAllocated(false)
-    {
-        MPI_Init(&argc, (char ***)&argv);
-    }
+    {  }
     
     ~HelmholtzSolver3D_Hypre()
-    {
-        MPI_Finalize();
-    }
+    { }
     
     void setup_hypre()
     {
