@@ -19,6 +19,7 @@
 #ifdef HYPRE
 #include "Glioma_BrainDeformation.h"
 #include "../Tests/HelmholtzTest.h"
+#include "../Tests/HelmholtzTest_MPI.h"
 #endif
 
 #include "dat2VP.h"
@@ -47,6 +48,8 @@ int main(int argc,const char ** argv)
         s = new Glioma_BrainDeformation(argc, (const char **)argv);
     else if(parser("-model").asString() == "helmholtzTest")
         s = new HelmholtzTest(argc, (const char **)argv);
+    else if(parser("-model").asString() == "helmholtzTestMPI")
+        s = new HelmholtzTest_MPI(argc, (const char **)argv);
 #endif
     else if(parser("-model").asString() == "VP")
         s = new dat2VP(argc, (const char **)argv);

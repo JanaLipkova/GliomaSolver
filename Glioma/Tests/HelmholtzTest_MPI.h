@@ -1,32 +1,28 @@
 //
-//  HelmholtzTest.h
+//  HelmholtzTest_MPI.h
 //  GliomaSolver
 //
-//  Created by Lipkova on 31/03/15.
-//  Copyright (c) 2015 Lipkova. All rights reserved.
+//  Created by Lipkova on 11/09/18.
+//  Copyright (c) 2018 Lipkova. All rights reserved.
 //
-
 
 #pragma once
 #include "../Glioma_Types.h"
-#include "../Operators/HelmholtzSolver3D_Hypre.h"
-#include "../Operators/HelmholtzSolver2D_Hypre.h"
+#include "../Operators/HelmholtzSolver3D_Hypre_MPI.h"
 
-class HelmholtzTest: public Glioma
+class HelmholtzTest_MPI: public Glioma
 {
 private:
     Grid<W, B>								* grid;
     BlockProcessing							blockProcessing;
     Refiner_SpaceExtension					*refiner;
     Compressor								*compressor;
-    //	BlockFWT<W, B, RD_Projector_Wavelets,true, 2>	blockfwt;  // use this if want refinment based on more channels
-    BlockFWT<W, B, RD_Projector_Wavelets>	blockfwt;			// refinment based on single channel
+    BlockFWT<W, B, RD_Projector_Wavelets>	blockfwt;			
     SpaceTimeSorter							stSorter;
     Profiler								profiler;
     ArgumentParser							parser;
     IO_VTK< W, B, RD_Projector_VTK >		vtk;
     BlockLab< B >							lab;
-    int										numberOfIterations;
     bool                                    isDone;
     bool                                    bVerbose;
     bool                                    bProfiler;
@@ -36,12 +32,11 @@ private:
     void		_computeError();
     void        _dump(int counter);
     
-    HelmholtzSolver3D_Hypre helmholtz_solver3D;
-    HelmholtzSolver2D_Hypre helmholtz_solver2D;
+    HelmholtzSolver3D_Hypre_MPI helmholtz_solver3D_MPI;
     
 public:
-    HelmholtzTest(int argc, const char ** argv);
-    ~HelmholtzTest();
+    HelmholtzTest_MPI(int argc, const char ** argv);
+    ~HelmholtzTest_MPI();
     void run();
     
 };

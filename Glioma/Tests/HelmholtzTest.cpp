@@ -20,7 +20,6 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
     bVerbose  = parser("-verbose").asBool(1);
     bProfiler = parser("-profiler").asBool(1);
     bVTK      = parser("-vtk").asBool(1);
-    bHypreMPI = parser("-hypreMPI").asBool();
     
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("//////////////////        HELMHOLTZ TEST: USING HYPRE           ////////////////\n");
@@ -29,7 +28,6 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc, argv), 
     
     refiner		= new Refiner_SpaceExtension();
     compressor	= new Compressor();
-    Environment::setup();
     
     grid = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
     grid->setCompressor(compressor);

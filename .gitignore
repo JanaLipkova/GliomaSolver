@@ -10,4 +10,4 @@ source/makefile/brain
 brain
 DeformationsXcode/*
 GliomaSolverXcode/*
-GliomaSolverXcode_mac/*
+GliomaSolverXcode*
