@@ -28,19 +28,15 @@ class HelmholtzSolver3D_Hypre
     HYPRE_StructVector   solution;
     HYPRE_StructSolver   solver;
     HYPRE_StructSolver   precond;
-    
-    
+     
     bool bAlreadyAllocated;
     bool bVerbose;
     bool bCG;     // conjugated gradients with SGM are preconditioning
     bool bRelaxation;
     bool bMobility;
 
-    
     Real kappaCSF, kappaWM, kappaGM;  // relaxation factors for diff. anatomies
     Real mWM, mGM, mCSF;      // hydralucit conductivuty (mobility)
-
-    tbb::tick_count t1,t0;
     
     int GridsizeX, GridsizeY,GridsizeZ ;
     Grid<W,B> * mrag_grid;
@@ -248,6 +244,7 @@ class HelmholtzSolver3D_Hypre
         
         if(bCG==0)
         {
+            printf("Not using bCG \n");
             // use SMG solver
             HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
             HYPRE_StructSMGSetMemoryUse(solver, 0);
@@ -263,7 +260,8 @@ class HelmholtzSolver3D_Hypre
             HYPRE_StructSMGSetLogging(solver, 1);
         }
         else
-        {
+        {   
+            printf("Using bCG \n");
             /* use CG with SMG as preconditioner */
             HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
             HYPRE_StructPCGSetMaxIter(solver, 200 );
@@ -356,44 +354,24 @@ class HelmholtzSolver3D_Hypre
         delete [ ] values;
     }
     
-    void inline _cleanUp()
-    {
-        HYPRE_StructGridDestroy(grid);
-        HYPRE_StructStencilDestroy(stencil);
-        HYPRE_StructMatrixDestroy(matrix);
-        HYPRE_StructVectorDestroy(rhs);
-        HYPRE_StructVectorDestroy(solution);
-        
-        
-        if(bCG==0)
-            HYPRE_StructSMGDestroy(solver);
-        else
-        {
-            HYPRE_StructPCGDestroy(solver);
-            HYPRE_StructSMGDestroy(precond);
-        }
-        
-        bAlreadyAllocated = false;
-
-    }
-    
     
 public:
-    HelmholtzSolver3D_Hypre(int argc, const char ** argv): bAlreadyAllocated(false)
+    HelmholtzSolver3D_Hypre(bool bCG_ = true ): bAlreadyAllocated(false), bCG(bCG_)
     {  }
     
     ~HelmholtzSolver3D_Hypre()
     { }
     
-    void setup_hypre()
+    void setup_hypre( )
     {
+
         //0. deallocation
         //1. setup della grid di merda
         //2. setup dello stencil del cazzo
         
         //0.
         if (bAlreadyAllocated)
-            _cleanUp();
+            cleanUp();
         
         GridsizeX = blocksPerDimension * B::sizeX;
         GridsizeY = blocksPerDimension * B::sizeY;
@@ -419,15 +397,39 @@ public:
         for (int entry = 0; entry < 7; entry++)
             HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
         
+       /*3. Set up solver */
+       _setup_solver();
+
         bAlreadyAllocated = true;
         if (bVerbose) printf("done with setup!\n"); //exit(0);
     }
+
+    void inline cleanUp()
+    {
+        HYPRE_StructGridDestroy(grid);
+        HYPRE_StructStencilDestroy(stencil);
+        HYPRE_StructMatrixDestroy(matrix);
+        HYPRE_StructVectorDestroy(rhs);
+        HYPRE_StructVectorDestroy(solution);
+
+
+        if(bCG==0)
+            HYPRE_StructSMGDestroy(solver);
+        else
+        {
+            HYPRE_StructPCGDestroy(solver);
+            HYPRE_StructSMGDestroy(precond);
+        }
+
+        bAlreadyAllocated = false;
+
+    }
     
-    void operator()(Grid<W,B>& input_grid, bool bVerbose=false, bool bCG=false, bool bRelaxation=false, std::vector<Real>* kappa = NULL, bool bMobility=false, std::vector<Real>* mobility = NULL)
+    void operator()(Grid<W,B>& input_grid, bool bVerbose=false, bool bRelaxation=false, std::vector<Real>* kappa = NULL, bool bMobility=false, std::vector<Real>* mobility = NULL)
     {
         mrag_grid           = &input_grid;
         this->bVerbose      = bVerbose;
-        this->bCG           = bCG;
+        //this->bCG           = bCG;
         this->bRelaxation   = bRelaxation;
         
 
@@ -447,19 +449,10 @@ public:
         this-> mGM          = (bMobility) ? (*mobility)[2] : 1. ;
 
         
-        if(bVerbose) printf("Relaxation factors: kappaCSF=%f  kappaWM=%f, kappaGM=%f\n", kappaCSF, kappaWM, kappaGM);
-        if(bVerbose) printf("Mobility factors:  mWM=%f, mGM=%f, mCSF=%f\n", mWM, mGM, mCSF);
-
-        
-        setup_hypre();
         _setupMatrix();
         _setupVectors();
-        _setup_solver();
         _solve();
         _getResultsOMP();
-        
-        _cleanUp();
-
         
     }
     

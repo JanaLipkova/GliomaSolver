@@ -2,12 +2,12 @@
 #SBATCH -o myjob.%j.%N.out
 #SBATCH -D .
 #SBATCH -J __J
-#SBATCH --clusters=mpp1
-#SBATCH --nodes=1-1
+#SBATCH --clusters=mpp3
+#SBATCH --nodes=1
 #SBATCH --cpus-per-task=2
 # if mpp1 is used replace above 28 by 16
 #SBATCH --export=NONE
-#SBATCH --time=00:15:00
+#SBATCH --time=00:05:00
 
 # modules:
 source /etc/profile.d/modules.sh
@@ -26,7 +26,7 @@ model=RD
 verbose=1
 adaptive=1
 pID=0
-vtk=1
+vtk=0
 dumpfreq=50
 
 

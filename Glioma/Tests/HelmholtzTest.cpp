@@ -14,7 +14,8 @@ static int maxStencil[2][3] = {
 };
 
 
-HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv), helmholtz_solver2D(argc,argv), helmholtz_solver3D(argc,argv), helmholtz_solver3D_MPI(argc,argv)
+//HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv), helmholtz_solver2D(argc,argv), helmholtz_solver3D(argc,argv), helmholtz_solver3D_MPI(argc,argv)
+HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv)
 {
     bVerbose  = parser("-verbose").asBool(1);
     bProfiler = parser("-profiler").asBool(1);
@@ -243,11 +244,24 @@ void HelmholtzTest::run()
 {
     bool bCG=1;
     
+   HelmholtzSolver3D_Hypre helmholtz_solver3D(bCG);
+   helmholtz_solver3D.setup_hypre();
+   
+   printf("solver set-up, first call \n");
+   helmholtz_solver3D(*grid, bVerbose);
+   _computeError();
+
+   printf("second call \n");
+   helmholtz_solver3D(*grid, bVerbose);
+   _computeError();
+
+  helmholtz_solver3D.cleanUp();
+/*
     // run 2 same calls, to see if Hypre construct+destructions works well
     for (int i = 0; i<2; i++){
         if (_DIM == 2)
             helmholtz_solver2D(*grid, bVerbose, bCG);
-        else if(size==0)
+        else if(size==1)
             helmholtz_solver3D(*grid, bVerbose, bCG);
         else
             helmholtz_solver3D_MPI(*grid, bVerbose);
@@ -258,7 +272,7 @@ void HelmholtzTest::run()
             _computeError();
         }
     }
-
+*/
     isDone = 1;
     
     printf("**** Dumping done\n");

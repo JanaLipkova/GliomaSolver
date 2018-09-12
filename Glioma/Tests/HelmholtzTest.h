@@ -41,13 +41,10 @@ private:
     void		_computeError();
     void        _dump(int counter);
     
-    HelmholtzSolver2D_Hypre      helmholtz_solver2D;
-    HelmholtzSolver3D_Hypre      helmholtz_solver3D;
-    HelmholtzSolver3D_Hypre_MPI      helmholtz_solver3D_MPI;
+   // HelmholtzSolver2D_Hypre      helmholtz_solver2D;
+   // HelmholtzSolver3D_Hypre      helmholtz_solver3D;
+   // HelmholtzSolver3D_Hypre_MPI      helmholtz_solver3D_MPI;
 
-//    HelmholtzSolver3D_HypreMPI      helmholtz_solver2D;
-//    HelmholtzSolver3D_HypreMPI      helmholtz_solver3D;
-//    HelmholtzSolver3D_HypreMPI      helmholtz_solver3D_MPI;
     
 public:
     HelmholtzTest(int argc, const char ** argv);
