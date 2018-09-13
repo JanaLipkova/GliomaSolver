@@ -13,8 +13,6 @@
 #ifndef HelmholtzSolver3D_Hypre_h
 #define HelmholtzSolver3D_Hypre_h
 
-#include "../Glioma_Types.h"
-
 #include <_hypre_utilities.h>
 #include <HYPRE_krylov.h>
 #include <HYPRE_sstruct_ls.h>
@@ -364,12 +362,7 @@ public:
     
     void setup_hypre( )
     {
-
         //0. deallocation
-        //1. setup della grid di merda
-        //2. setup dello stencil del cazzo
-        
-        //0.
         if (bAlreadyAllocated)
             cleanUp();
         
@@ -412,7 +405,6 @@ public:
         HYPRE_StructVectorDestroy(rhs);
         HYPRE_StructVectorDestroy(solution);
 
-
         if(bCG==0)
             HYPRE_StructSMGDestroy(solver);
         else
@@ -422,24 +414,20 @@ public:
         }
 
         bAlreadyAllocated = false;
-
     }
     
     void operator()(Grid<W,B>& input_grid, bool bVerbose=false, bool bRelaxation=false, std::vector<Real>* kappa = NULL, bool bMobility=false, std::vector<Real>* mobility = NULL)
     {
         mrag_grid           = &input_grid;
         this->bVerbose      = bVerbose;
-        //this->bCG           = bCG;
         this->bRelaxation   = bRelaxation;
         
-
         if (bRelaxation)
             assert (kappa!=NULL);
         
         this->kappaCSF      =  (bRelaxation) ? (*kappa)[0] : 1. ;
         this->kappaWM       =  (bRelaxation) ? (*kappa)[1] : 1. ;
         this->kappaGM       =  (bRelaxation) ? (*kappa)[2] : 1. ;
-        
         
         if(bMobility)
             assert (mobility!=NULL);
@@ -448,12 +436,10 @@ public:
         this-> mWM          = (bMobility) ? (*mobility)[1] : 1. ;
         this-> mGM          = (bMobility) ? (*mobility)[2] : 1. ;
 
-        
         _setupMatrix();
         _setupVectors();
         _solve();
         _getResultsOMP();
-        
     }
     
 };

@@ -22,7 +22,7 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv)
     bVTK      = parser("-vtk").asBool(1);
     
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     
     if(rank==0){
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
@@ -179,7 +179,6 @@ void HelmholtzTest:: _dump(int counter)
 #pragma mark ErrorComputatation
 void HelmholtzTest::_computeError()
 {
-    
     printf("Computing error \n");
     Real L1 = 0.0;
     Real L2 = 0.0;
@@ -236,7 +235,6 @@ void HelmholtzTest::_computeError()
     printf("========= PRESSURE ERRORS %d ========\n",res);
     printf("L1, L2, LI: %e %e %e\n",L1,L2,LI);       	
     printf("========= END PRESSURE ===========\n");
-    
 }
 
 
@@ -244,35 +242,48 @@ void HelmholtzTest::run()
 {
     bool bCG=1;
     
-   HelmholtzSolver3D_Hypre helmholtz_solver3D(bCG);
-   helmholtz_solver3D.setup_hypre();
-   
-   printf("solver set-up, first call \n");
-   helmholtz_solver3D(*grid, bVerbose);
-   _computeError();
+    // Initialise solvers
+    HelmholtzSolver2D_Hypre     helmholtz_solver2D(bCG);
+    HelmholtzSolver3D_Hypre     helmholtz_solver3D(bCG);
+    //HelmholtzSolver3D_Hypre_MPI helmholtz_solver3D_MPI(bCG);
 
-   printf("second call \n");
-   helmholtz_solver3D(*grid, bVerbose);
-   _computeError();
+    
+    // Set up suitable solver
+    if (_DIM == 2)
+        helmholtz_solver2D.setup_hypre();
+    else if(nprocs == 1)
+        helmholtz_solver3D.setup_hypre();
+//    else
+//        helmholtz_solver3D_MPI.setup_hypre();
 
-  helmholtz_solver3D.cleanUp();
-/*
-    // run 2 same calls, to see if Hypre construct+destructions works well
-    for (int i = 0; i<2; i++){
-        if (_DIM == 2)
-            helmholtz_solver2D(*grid, bVerbose, bCG);
-        else if(size==1)
-            helmholtz_solver3D(*grid, bVerbose, bCG);
-        else
-            helmholtz_solver3D_MPI(*grid, bVerbose);
+
+    // Test two repeated calls to check everything is correctly allocated/dealocate
+    for (int i = 0; i<2; i++)
+    {
+        printf("Call number %d \n", i);
+        if(_DIM == 2)
+            helmholtz_solver2D(*grid, bVerbose);
+        else if(nprocs == 1)
+            helmholtz_solver3D(*grid, bVerbose);
+      //  else
+      //      helmholtz_solver3D_MPI(*grid, bVerbose);
         
-        if(rank==0){
+        if(rank == 0){
             numberOfIterations++;
             _dump(numberOfIterations);
             _computeError();
         }
     }
-*/
+    
+    // Clean up
+    if (_DIM == 2)
+        helmholtz_solver2D.cleanUp();
+    else if(nprocs == 1)
+        helmholtz_solver3D.cleanUp();
+    //    else
+    //        helmholtz_solver3D_MPI.cleanUp();
+
+    
     isDone = 1;
     
     printf("**** Dumping done\n");

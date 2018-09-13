@@ -18,7 +18,7 @@
 #ifndef GliomaSolverXcode_HelmholtzSolver4D_Hypre_h
 #define GliomaSolverXcode_HelmholtzSolver4D_Hypre_h
 
-#include "../Glioma_Types.h"
+//#include "../Glioma_Types.h"
 
 #include <_hypre_utilities.h>
 #include <HYPRE_krylov.h>
@@ -47,8 +47,6 @@ class HelmholtzSolver3D_Hypre_MPI
     Real kappaCSF, kappaWM, kappaGM;  // relaxation factors for diff. anatomies
     Real mWM, mGM, mCSF;      // hydralucit conductivuty (mobility)
     
-    tbb::tick_count t1,t0;
-
     
 #pragma mark Helpers
     void setup_hypre()
