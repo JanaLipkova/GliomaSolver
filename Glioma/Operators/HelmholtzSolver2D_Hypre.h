@@ -267,7 +267,7 @@ class HelmholtzSolver2D_Hypre
         }
     }
     
-    void _solve()
+    void _solveSystem()
     {
         int num_iterations;
         double final_res_norm;
@@ -334,18 +334,35 @@ class HelmholtzSolver2D_Hypre
     
     
 public:
-    HelmholtzSolver2D_Hypre(bool bCG_): bAlreadyAllocated(false), bCG(bCG_)
+    HelmholtzSolver2D_Hypre(): bAlreadyAllocated(false)
     {  }
     
     ~HelmholtzSolver2D_Hypre()
     { }
     
-    void setup_hypre()
+    void setup_hypre(Grid<W,B>& input_grid, bool bVerbose=false, bool bCG=false, bool bRelaxation=false, std::vector<Real>* kappa = NULL, bool bMobility=false, std::vector<Real>* mobility = NULL)
     {
-        //0. deallocation
-        //1. setup della grid di merda
-        //2. setup dello stencil del cazzo
         
+        mrag_grid           = &input_grid;
+        this->bVerbose      = bVerbose;
+        this->bCG           = bCG;
+        this->bRelaxation   = bRelaxation;
+        
+        if (bRelaxation)
+            assert (kappa!=NULL);
+        
+        this->kappaCSF      =  (bRelaxation) ? (*kappa)[0] : 1. ;
+        this->kappaWM       =  (bRelaxation) ? (*kappa)[1] : 1. ;
+        this->kappaGM       =  (bRelaxation) ? (*kappa)[2] : 1. ;
+        
+        if(bMobility)
+            assert (mobility!=NULL);
+        
+        this-> mCSF         = (bMobility) ? (*mobility)[0] : 1. ;
+        this-> mWM          = (bMobility) ? (*mobility)[1] : 1. ;
+        this-> mGM          = (bMobility) ? (*mobility)[2] : 1. ;
+        
+        //0. deallocation
         if (bAlreadyAllocated)
             cleanUp();
         
@@ -380,6 +397,14 @@ public:
         if (bVerbose) printf("done with setup!\n"); //exit(0);
     }
     
+    void inline solve()
+    {
+        _setupMatrix();
+        _setupVectors();
+        _solveSystem();
+        _getResultsOMP();
+    }
+    
     void inline cleanUp()
     {
         HYPRE_StructGridDestroy(grid);
@@ -397,34 +422,6 @@ public:
         }
         
         bAlreadyAllocated = false;
-    }
-    
-    void operator()(Grid<W,B>& input_grid, bool bVerbose=false, bool bRelaxation=false, std::vector<Real>* kappa = NULL, bool bMobility=false, std::vector<Real>* mobility = NULL)
-    {
-        mrag_grid           = &input_grid;
-        this->bVerbose      = bVerbose;
-        this->bRelaxation   = bRelaxation;
-        
-        if (bRelaxation)
-            assert (kappa!=NULL);
-        
-        this->kappaCSF      =  (bRelaxation) ? (*kappa)[0] : 1. ;
-        this->kappaWM       =  (bRelaxation) ? (*kappa)[1] : 1. ;
-        this->kappaGM       =  (bRelaxation) ? (*kappa)[2] : 1. ;
-
-        
-        if(bMobility)
-            assert (mobility!=NULL);
-        
-        this-> mCSF         = (bMobility) ? (*mobility)[0] : 1. ;
-        this-> mWM          = (bMobility) ? (*mobility)[1] : 1. ;
-        this-> mGM          = (bMobility) ? (*mobility)[2] : 1. ;
-
-        
-        _setupMatrix();
-        _setupVectors();
-        _solve();
-        _getResultsOMP();
     }
     
 };
