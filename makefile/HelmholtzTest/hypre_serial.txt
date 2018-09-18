@@ -1,0 +1,71 @@
+In the directory: /home/jana/Work/GliomaAdvance/GliomaSolver/makefile/HelmholtzTest
+Running program on  nodes with total  MPI tasks, each with  resp 2 threads.
+
+MRAG Launched
+
+INITIALIZED THREADS=2 (_MRAG_TBB_NTHREADS_HINT is 6)
+Running with 1 MPI processes 
+INPUT IS helmholtzTest
+////////////////////////////////////////////////////////////////////////////////
+//////////////////        HELMHOLTZ TEST: USING HYPRE           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=8, maxLevel=3)
+Currently supports only MPI paralelisation within one node, resp more nodes but all system fit in memory of each node! 
+ Test case on a SQUARE
+Using bCG 
+done with setup!
+First call : 
+Hello from solver, bVerbose =1
+<b,b>: 4.909065e+01
+
+
+Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
+-----    ------------   ---------  ------------ 
+    1    2.730478e-01    0.038971    3.897079e-02
+    2    9.716196e-04    0.003558    1.386746e-04
+    3    2.188241e-05    0.022522    3.123170e-06
+    4    5.108376e-07    0.023345    7.290939e-08
+    5    1.316693e-08    0.025775    1.879253e-09
+    6    4.308880e-10    0.032725    6.149857e-11
+    7    1.254380e-11    0.029112    1.790316e-12
+    8    2.648509e-13    0.021114    3.780089e-14
+
+
+=========== HYPRE ===========
+Iterations = 8
+Final Relative Residual Norm = 3.78009e-14
+============================
+Computing error 
+========= PRESSURE ERRORS 64 ========
+L1, L2, LI: 2.316398e-01 8.703416e-02 1.953114e-01
+========= END PRESSURE ===========
+Second call : 
+Hello from solver, bVerbose =1
+<b,b>: 4.909065e+01
+
+
+Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
+-----    ------------   ---------  ------------ 
+    1    9.020600e-08    0.009403    1.287467e-08
+    2    1.650819e-09    0.018301    2.356135e-10
+    3    3.754632e-11    0.022744    5.358805e-12
+    4    8.556414e-13    0.022789    1.221216e-13
+
+
+=========== HYPRE ===========
+Iterations = 4
+Final Relative Residual Norm = 1.22122e-13
+============================
+Computing error 
+========= PRESSURE ERRORS 64 ========
+L1, L2, LI: 2.316398e-01 8.703416e-02 1.953114e-01
+========= END PRESSURE ===========
+**** Dumping done
+
+
+ Run Finished 
+
+we spent: 7.98 
+------Adios muchachos------
+
+MRAG Terminated

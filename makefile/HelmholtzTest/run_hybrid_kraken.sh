@@ -1,6 +1,6 @@
 # Threads:
-N=2
-M=2
+N=1
+M=8
 export OMP_NUM_THREADS=$N
 
 # brain simulation set up

@@ -29,7 +29,6 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv)
     if(bVerbose) printf("//////////////////        HELMHOLTZ TEST: USING HYPRE           ////////////////\n");
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("Set up: blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", blockSize, "w", blocksPerDimension, maxLevel);
-    if(bVerbose) printf("Currently supports only MPI paralelisation within one node, resp more nodes but all system fit in memory of each node! \n");
     }
     
     refiner     = new Refiner_SpaceExtension();
@@ -241,51 +240,35 @@ void HelmholtzTest::_computeError()
 void HelmholtzTest::run()
 {
     bool bCG=1;
+    HelmholtzSolver2D_Hypre helmholtz_solver2D;
+    HelmholtzSolver3D_Hypre helmholtz_solver3D;
+
+    HelmholtzSolver3D_Hypre_MPI helmholtz_solver3D_MPI;
+    helmholtz_solver3D_MPI.setup_hypre(*grid, rank, nprocs, bVerbose, bCG);
     
-    // Initialise solvers
-    HelmholtzSolver2D_Hypre     helmholtz_solver2D(bCG);
-    HelmholtzSolver3D_Hypre     helmholtz_solver3D(bCG);
-    //HelmholtzSolver3D_Hypre_MPI helmholtz_solver3D_MPI(bCG);
-
+    printf("First call : \n");
+    helmholtz_solver3D_MPI.solve();
     
-    // Set up suitable solver
-    if (_DIM == 2)
-        helmholtz_solver2D.setup_hypre();
-    else if(nprocs == 1)
-        helmholtz_solver3D.setup_hypre();
-//    else
-//        helmholtz_solver3D_MPI.setup_hypre();
-
-
-    // Test two repeated calls to check everything is correctly allocated/dealocate
-    for (int i = 0; i<2; i++)
-    {
-        printf("Call number %d \n", i);
-        if(_DIM == 2)
-            helmholtz_solver2D(*grid, bVerbose);
-        else if(nprocs == 1)
-            helmholtz_solver3D(*grid, bVerbose);
-      //  else
-      //      helmholtz_solver3D_MPI(*grid, bVerbose);
-        
-        if(rank == 0){
-            numberOfIterations++;
-            _dump(numberOfIterations);
-            _computeError();
-        }
+    if(rank == 0){
+        numberOfIterations++;
+        _dump(numberOfIterations);
+        _computeError();
     }
     
-    // Clean up
-    if (_DIM == 2)
-        helmholtz_solver2D.cleanUp();
-    else if(nprocs == 1)
-        helmholtz_solver3D.cleanUp();
-    //    else
-    //        helmholtz_solver3D_MPI.cleanUp();
-
+    printf("Second call : \n");
+    helmholtz_solver3D_MPI.solve();
+    
+    if(rank == 0){
+        numberOfIterations++;
+        _dump(numberOfIterations);
+        _computeError();
+    }
     
     isDone = 1;
-    
+    helmholtz_solver3D_MPI.clean();
+        
+    if(rank == 0){
     printf("**** Dumping done\n");
     printf("\n\n Run Finished \n\n");
+    }
 }
