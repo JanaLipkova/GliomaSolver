@@ -360,7 +360,7 @@ public:
     ~HelmholtzSolver3D_Hypre()
     { }
     
-    void setup_hypre(Grid<W,B>& input_grid, bool bVerbose=false, bool bCG=false, bool bRelaxation=false, std::vector<Real>* kappa = NULL, bool bMobility=false, std::vector<Real>* mobility = NULL )
+    void setup_hypre(Grid<W,B>& input_grid, int rank, int nprocs, bool bVerbose=false, bool bCG=false, bool bRelaxation=false, std::vector<Real>* kappa = NULL, bool bMobility=false, std::vector<Real>* mobility = NULL )
     {
         mrag_grid           = &input_grid;
         this->bVerbose      = bVerbose;
@@ -383,7 +383,7 @@ public:
         
         //0. deallocation
         if (bAlreadyAllocated)
-            cleanUp();
+            clean();
         
         GridsizeX = blocksPerDimension * B::sizeX;
         GridsizeY = blocksPerDimension * B::sizeY;
@@ -424,7 +424,7 @@ public:
         _getResultsOMP();
     }
     
-    void inline cleanUp()
+    void inline clean()
     {
         HYPRE_StructGridDestroy(grid);
         HYPRE_StructStencilDestroy(stencil);

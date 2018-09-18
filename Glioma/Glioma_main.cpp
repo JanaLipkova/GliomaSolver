@@ -29,17 +29,24 @@ using namespace MRAG;
 
 int main(int argc,const char ** argv)
 {
-    std::cout << std::endl << "MRAG Launched" << std::endl << std::endl;
-    
-    ArgumentParser parser(argc, argv);
-    Environment::setup(max(1, parser("-nthreads").asInt()));
     
 #ifdef HYPRE
     MPI_Init(&argc, (char ***)&argv);
-    int size;
+    int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    printf("Running with %d MPI processes \n", size);    
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    
+    if(rank==0){
+        printf("\n\n       MRAG Launched         \n\n");
+        printf("Running with %d MPI processes \n", size);
+    }
+#else
+    printf("\n\n       MRAG Launched         \n\n");
+
 #endif
+    
+    ArgumentParser parser(argc, argv);
+    Environment::setup(max(1, parser("-nthreads").asInt()));
     
     Glioma * s = NULL;
     printf("INPUT IS %s\n", parser("-model").asString().data());
@@ -68,13 +75,19 @@ int main(int argc,const char ** argv)
    
 
 #ifdef HYPRE
-   MPI_Finalize();
-#endif
- 
-    printf("we spent: %2.2f \n",(t1-t0).seconds());	
-    delete s;
+   delete s;
+    MPI_Finalize();
     
+    if(rank==0){
+        printf("we spent: %2.2f \n",(t1-t0).seconds());
+        std::cout << std::endl << "MRAG Terminated" << std::endl;
+    }
+#else
+    delete s;
+    printf("we spent: %2.2f \n",(t1-t0).seconds());
     std::cout << std::endl << "MRAG Terminated" << std::endl;
+#endif
+    
 }
 
 

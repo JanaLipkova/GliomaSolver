@@ -12,11 +12,10 @@
 //     M  - mobility
 //  ------------------------------------
 
-// Assume MPI withine one node, or multiple nodes but whole system fits into memory of each node -> no message sendings supported yet
-
 
 #ifndef GliomaSolverXcode_HelmholtzSolver3D_Hypre_MPI_h
 #define GliomaSolverXcode_HelmholtzSolver3D_Hypre_MPI_h
+
 class HelmholtzSolver3D_Hypre_MPI
 {
     HYPRE_StructGrid     hypre_grid;
@@ -46,22 +45,6 @@ class HelmholtzSolver3D_Hypre_MPI
     int blocksPerProcesor;
     int rank, nprocs;
     
-//    inline void _setup_grid()
-//    {
-//        /* 1. Set up a grid. Each processor describes the piece of the grid it owns */
-//        HYPRE_StructGridCreate(MPI_COMM_WORLD, 3, &grid);
-//        
-//        int ilower[3] = { 0, 0, 0 };
-//        int iupper[3] = { GridsizeX-1, GridsizeY-1, GridsizeZ -1 };
-//        HYPRE_StructGridSetExtents(grid, ilower, iupper);
-//        
-//        int periodicity[3] = { GridsizeX,GridsizeY, GridsizeZ };
-//        HYPRE_StructGridSetPeriodic(grid, periodicity);
-//        
-//        HYPRE_StructGridAssemble(grid);
-//
-//    }
-    
     /* Set up the grid */
     inline void _setup_grid()
     {
@@ -71,6 +54,7 @@ class HelmholtzSolver3D_Hypre_MPI
         // 2) For each processor set the mrag blocks it will own
         vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
         
+#pragma omp parallel for schedule(static)
         for(int i = 0; i < blocksPerProcesor; i++)
         {
             int blockID     = rank + (blocksPerProcesor - 1) * rank + i;
@@ -105,249 +89,120 @@ class HelmholtzSolver3D_Hypre_MPI
             HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
     }
     
-    
-    /* Set up a Struct Matrix */
+
     inline void _setupMatrix()
     {
-        /* Create an empty matrix object */
+        /* Create an empty matrix object + Indicate that the matrix coefficients are ready to be set */
         HYPRE_StructMatrixCreate(MPI_COMM_WORLD, hypre_grid, stencil, &matrix);
-        
-        /* Indicate that the matrix coefficients are ready to be set */
         HYPRE_StructMatrixInitialize(matrix);
         
-        /* Set the matrix coefficients.  Each processor assigns coefficients for the boxes in the grid that it owns. Note that the coefficients associated with each stencil entry may vary from grid point to grid point if desired. */
-        int ilower[3]           = { 0, 0, 0 };
-        int iupper[3]           = {GridsizeX-1, GridsizeY-1, GridsizeZ-1 };
+        /* Using 7 point stencil */
         int stencil_indices[7]  = {0,1,2,3,4,5,6}; // labels for the stencil entries, compatible with offsets defined in _hypre_setup()
-        
         const int nentries      = 7;
-        const int size3         = GridsizeX * GridsizeY * GridsizeZ;
-        const int nvalues       = size3 * nentries;
-        double * values         = new double [nvalues];
+        const int blockSize     = B::sizeX * B::sizeY * B::sizeZ;
+        const int nvalues       = nentries * blockSize;
         
-        _fillMatrixOMP<BlockLab<B> >(values);
+        /*Each processor fill the grid boxes it owns */
+         vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
         
-        HYPRE_StructMatrixSetBoxValues(matrix, ilower, iupper, nentries, stencil_indices, values);
+#pragma omp parallel for schedule(static)
+        for(int i = 0; i < blocksPerProcesor; i++)
+        {
+            int bID         = rank + (blocksPerProcesor - 1) * rank + i;
+            BlockInfo& info = vInfo[bID];
+            B& block        = mrag_grid->getBlockCollection()[info.blockID];
+            
+            int ilower[3]   = {info.index[0] * B::sizeX,
+                info.index[1] * B::sizeY,
+                info.index[2] * B::sizeZ };
+            
+            int iupper[3]   = { ilower[0] + B::sizeX - 1,
+                ilower[1] + B::sizeY - 1,
+                ilower[2] + B::sizeZ - 1};
+            
+            vector<double> values(nvalues);
+            
+            _fillMatrix<BlockLab<B> >(values, bID);
+            
+            HYPRE_StructMatrixSetBoxValues(matrix, ilower, iupper, nentries, stencil_indices, &values[0]);
+        }
         
-        /* This is a collective call finalizing the matrix assembly.
-         The matrix is now ``ready to be used'' */
+        /* This is a collective call finalizing the matrix assembly.The matrix is now ``ready to be used'' */
         HYPRE_StructMatrixAssemble(matrix);
-        
-        delete [] values;
     }
     
+    /* Fill the selected block*/
     template<typename BlockLabType>
-    void _fillMatrixOMP(double * values)
+    inline void _fillMatrix(vector<double>& values, int bID)
     {
+        // pick block bID
         vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
+        const BlockInfo info = vInfo[bID];
+        B& block = mrag_grid->getBlockCollection()[info.blockID];
+   
+        // pick corresponding block lab
         const BlockCollection<B>& coll = mrag_grid->getBlockCollection();
         const BoundaryInfo& binfo=mrag_grid->getBoundaryInfo();
         
         const int stencilStart[3] = { -1, -1, -1};
         const int stencilEnd[3]   = { +2, +2, +2};
         
-#pragma omp parallel
-        {
-            BlockLabType lab;
-            lab.prepare(coll, binfo, stencilStart, stencilEnd);
-            
-            
-#pragma omp for schedule(static)
-            for(int i=0;i<vInfo.size();i++)
-            {
-                lab.load(vInfo[i]);
-                const BlockInfo info = vInfo[i];
-                B& block = mrag_grid->getBlockCollection()[info.blockID];
-                
-                double h       = info.h[0];
-                double h2      = h*h;
-                Real m, mS, mN, mW, mE, mF, mB;
-                
-                for(int iz=0; iz<B::sizeZ; ++iz)
-                    for(int iy=0; iy<B::sizeY; ++iy)
-                        for(int ix=0; ix<B::sizeX; ++ix)
-                        {
-                            // get global index
-                            const int gix = ix + info.index[0] * B::sizeX;
-                            const int giy = iy + info.index[1] * B::sizeY;
-                            const int giz = iz + info.index[2] * B::sizeZ;
-                            
-                            const int idx = gix*7 + giy * 7 * blocksPerDimension * B::sizeX
-                            + giz * 7 * blocksPerDimension * B::sizeX * blocksPerDimension*B::sizeY;
-                            
-                            
-                            // compute mobility components
-                            if ((mWM == mGM) && (mWM == mCSF))
-                                m = mS = mN = mW = mE = mF = mB = mCSF;
-                            else
-                            {
-                                mB  = mWM * lab(ix,  iy,  iz-1).p_w + mGM * lab(ix,  iy,  iz-1).p_g + mCSF * lab(ix,  iy,  iz-1).p_csf;
-                                mF  = mWM * lab(ix,  iy,  iz+1).p_w + mGM * lab(ix,  iy,  iz+1).p_g + mCSF * lab(ix,  iy,  iz+1).p_csf;
-                                mS  = mWM * lab(ix,  iy-1,iz  ).p_w + mGM * lab(ix,  iy-1,iz  ).p_g + mCSF * lab(ix,  iy-1,iz  ).p_csf;
-                                mN  = mWM * lab(ix,  iy+1,iz  ).p_w + mGM * lab(ix,  iy+1,iz  ).p_g + mCSF * lab(ix,  iy+1,iz  ).p_csf;
-                                mW  = mWM * lab(ix-1,iy  ,iz  ).p_w + mGM * lab(ix-1,iy  ,iz  ).p_g + mCSF * lab(ix-1,iy  ,iz  ).p_csf;
-                                mE  = mWM * lab(ix+1,iy  ,iz  ).p_w + mGM * lab(ix+1,iy  ,iz  ).p_g + mCSF * lab(ix+1,iy  ,iz  ).p_csf;
-                                m   = mWM * lab(ix,  iy,  iz  ).p_w + mGM * lab(ix,  iy,  iz  ).p_g + mCSF * lab(ix,  iy,  iz  ).p_csf;
-                            }
-                            
-                            // get entries of matrix
-                            Real pff  = lab(ix,iy,iz).pff * m;
-                            Real pffB = lab(ix  ,iy  ,iz-1).pff * mB;  //back
-                            Real pffF = lab(ix  ,iy  ,iz+1).pff * mF;  //front
-                            Real pffS = lab(ix,  iy-1,iz  ).pff * mS;
-                            Real pffN = lab(ix,  iy+1,iz  ).pff * mN;
-                            Real pffW = lab(ix-1,iy  ,iz  ).pff * mW;
-                            Real pffE = lab(ix+1,iy  ,iz  ).pff * mE;
-                            
-                            // approximate intermidiet points
-                            _mean(pff, pffW, pffE, pffS, pffN, pffB, pffF);
-                            
-                            Real kappa = kappaWM * lab(ix,iy,iz).p_w + kappaGM * lab(ix,iy,iz).p_g  + kappaCSF * lab(ix,iy,iz).p_csf;
-                            
-                            // fill in vector of matrix values
-                            values[idx  ] =   pffW + pffE + pffS + pffN + pffB + pffF + kappa*pff*h2;
-                            values[idx+1] = - pffW;
-                            values[idx+2] = - pffE;
-                            values[idx+3] = - pffS;
-                            values[idx+4] = - pffN;
-                            values[idx+5] = - pffB;
-                            values[idx+6] = - pffF;
-                            
-                        }
-            }
-        }
+        BlockLabType lab;
+        lab.prepare(coll, binfo, stencilStart, stencilEnd);
+        lab.load(vInfo[bID]);
+
+        double h       = info.h[0];
+        double h2      = h*h;
+        Real m, mS, mN, mW, mE, mF, mB;
+        int idx = 0;
+        
+        for(int iz=0; iz<B::sizeZ; ++iz)
+            for(int iy=0; iy<B::sizeY; ++iy)
+                for(int ix=0; ix<B::sizeX; ++ix)
+                {
+                    // compute mobility components
+                    if ((mWM == mGM) && (mWM == mCSF))
+                        m = mS = mN = mW = mE = mF = mB = mCSF;
+                    else
+                    {
+                        mB  = mWM * lab(ix,  iy,  iz-1).p_w + mGM * lab(ix,  iy,  iz-1).p_g + mCSF * lab(ix,  iy,  iz-1).p_csf;
+                        mF  = mWM * lab(ix,  iy,  iz+1).p_w + mGM * lab(ix,  iy,  iz+1).p_g + mCSF * lab(ix,  iy,  iz+1).p_csf;
+                        mS  = mWM * lab(ix,  iy-1,iz  ).p_w + mGM * lab(ix,  iy-1,iz  ).p_g + mCSF * lab(ix,  iy-1,iz  ).p_csf;
+                        mN  = mWM * lab(ix,  iy+1,iz  ).p_w + mGM * lab(ix,  iy+1,iz  ).p_g + mCSF * lab(ix,  iy+1,iz  ).p_csf;
+                        mW  = mWM * lab(ix-1,iy  ,iz  ).p_w + mGM * lab(ix-1,iy  ,iz  ).p_g + mCSF * lab(ix-1,iy  ,iz  ).p_csf;
+                        mE  = mWM * lab(ix+1,iy  ,iz  ).p_w + mGM * lab(ix+1,iy  ,iz  ).p_g + mCSF * lab(ix+1,iy  ,iz  ).p_csf;
+                        m   = mWM * lab(ix,  iy,  iz  ).p_w + mGM * lab(ix,  iy,  iz  ).p_g + mCSF * lab(ix,  iy,  iz  ).p_csf;
+                    }
+                    
+                    // get entries of matrix
+                    Real pff  = lab(ix,iy,iz).pff * m;
+                    Real pffB = lab(ix  ,iy  ,iz-1).pff * mB;  //back
+                    Real pffF = lab(ix  ,iy  ,iz+1).pff * mF;  //front
+                    Real pffS = lab(ix,  iy-1,iz  ).pff * mS;
+                    Real pffN = lab(ix,  iy+1,iz  ).pff * mN;
+                    Real pffW = lab(ix-1,iy  ,iz  ).pff * mW;
+                    Real pffE = lab(ix+1,iy  ,iz  ).pff * mE;
+                    
+                    // approximate intermidiet points
+                    _mean(pff, pffW, pffE, pffS, pffN, pffB, pffF);
+                    
+                    Real kappa = kappaWM * lab(ix,iy,iz).p_w + kappaGM * lab(ix,iy,iz).p_g  + kappaCSF * lab(ix,iy,iz).p_csf;
+                    
+                    // fill in vector of matrix values
+                    values[idx  ] =   pffW + pffE + pffS + pffN + pffB + pffF + kappa*pff*h2;
+                    values[idx+1] = - pffW;
+                    values[idx+2] = - pffE;
+                    values[idx+3] = - pffS;
+                    values[idx+4] = - pffN;
+                    values[idx+5] = - pffB;
+                    values[idx+6] = - pffF;
+                    
+                    idx = idx + 7;
+                    
+                }
         
     }
     
-    
-//    /* Set up a Struct Matrix */
-//    inline void _setupMatrix()
-//    {
-//        /* Create an empty matrix object + indicate it is ready to be set*/
-//        HYPRE_StructMatrixCreate(MPI_COMM_WORLD, hypre_grid, stencil, &matrix);
-//        HYPRE_StructMatrixInitialize(matrix);
-//        
-//        /* For each processor set the matrix part based on the MRAG blocks it owns*/
-//        
-//        int stencil_indices[7]  = {0,1,2,3,4,5,6}; // labels for the stencil entries, compatible with offsets defined in _hypre_setup()
-//        
-//        const int nentries      = 7;
-//        const int blockSize     = B::sizeX * B::sizeY * B::sizeZ;
-//        const int nvalues       = nentries * blockSize;
-//
-//        vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
-//        const BlockCollection<B>& coll = mrag_grid->getBlockCollection();
-//        const BoundaryInfo& binfo=mrag_grid->getBoundaryInfo();
-//        
-//        const int stencilStart[3] = { -1, -1, -1};
-//        const int stencilEnd[3]   = { +2, +2, +2};
-//        
-//
-//        for(int i = 0; i < blocksPerProcesor; i++)
-//        {
-//            int bID     = rank + (blocksPerProcesor - 1) * rank + i;
-//            BlockInfo& info = vInfo[bID];
-//            B& block        = mrag_grid->getBlockCollection()[info.blockID];
-//            
-//            int ilower[3]   = {info.index[0] * B::sizeX,
-//                info.index[1] * B::sizeY,
-//                info.index[2] * B::sizeZ };
-//            
-//            int iupper[3]   = { ilower[0] + B::sizeX - 1,
-//                ilower[1] + B::sizeY - 1,
-//                ilower[2] + B::sizeZ - 1};
-//            
-//            vector<double> values(nvalues);
-//
-//            
-//            BlockLab<B> lab;
-//            lab.prepare(coll, binfo, stencilStart, stencilEnd);
-//            
-//            double h       = info.h[0];
-//            double h2      = h*h;
-//            Real m, mS, mN, mW, mE, mF, mB;
-//            
-//            for(int iz=0; iz<B::sizeZ; ++iz)
-//                for(int iy=0; iy<B::sizeY; ++iy)
-//                    for(int ix=0; ix<B::sizeX; ++ix)
-//                    {
-//                        // get global index
-//                        const int gix = ix + info.index[0] * B::sizeX;
-//                        const int giy = iy + info.index[1] * B::sizeY;
-//                        const int giz = iz + info.index[2] * B::sizeZ;
-//                        
-//                        const int idx = gix*7 + giy * 7 * blocksPerDimension * B::sizeX
-//                        + giz * 7 * blocksPerDimension * B::sizeX * blocksPerDimension*B::sizeY;
-//                        
-//                        values[idx  ] =   4;
-//                        values[idx+1] = - 1;
-//                        values[idx+2] = - 1;
-//                        values[idx+3] = - 1;
-//                        values[idx+4] = - 1;
-//                        values[idx+5] = - 1;
-//                        values[idx+6] = - 1;
-//                    }
-//
-//            HYPRE_StructMatrixSetBoxValues(matrix, ilower, iupper, nentries, stencil_indices, &values[0]);
-//
-//        }
-//        
-//        /* This is a collective call finalizing the matrix assembly.
-//         The matrix is now ``ready to be used'' */
-//        HYPRE_StructMatrixAssemble(matrix);
-//    }
-//    
-////    template<typename BlockLabType>
-//    //    void _fillMatrix(double * values, int blockID)
-//    template<typename BlockLabType>
-//    void _fillMatrix(std::vector<double> & values, int bID )
-//    {
-//        vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
-//        const BlockCollection<B>& coll = mrag_grid->getBlockCollection();
-//        const BoundaryInfo& binfo=mrag_grid->getBoundaryInfo();
-//        
-//        const int stencilStart[3] = { -1, -1, -1};
-//        const int stencilEnd[3]   = { +2, +2, +2};
-//        
-//        printf("Inside fillMatrix with %d blockID \n", bID);
-//        
-//        BlockLabType lab;
-//        //            lab.prepare(coll, binfo, stencilStart, stencilEnd, false);
-//        lab.prepare(coll, binfo, stencilStart, stencilEnd);
-//        
-//        lab.load(vInfo[bID]);
-//        const BlockInfo info = vInfo[bID];
-//        B& block = mrag_grid->getBlockCollection()[info.blockID];
-//        
-//        double h       = info.h[0];
-//        double h2      = h*h;
-//        Real m, mS, mN, mW, mE, mF, mB;
-//        
-//        printf("Loop through \n");
-//        for(int iz=0; iz<B::sizeZ; ++iz)
-//            for(int iy=0; iy<B::sizeY; ++iy)
-//                for(int ix=0; ix<B::sizeX; ++ix)
-//                {
-//                    // get global index
-//                    const int gix = ix + info.index[0] * B::sizeX;
-//                    const int giy = iy + info.index[1] * B::sizeY;
-//                    const int giz = iz + info.index[2] * B::sizeZ;
-//                    
-//                    const int idx = gix*7 + giy * 7 * blocksPerDimension * B::sizeX
-//                    + giz * 7 * blocksPerDimension * B::sizeX * blocksPerDimension*B::sizeY;
-//                    
-//                    values[idx  ] =   4;
-//                    values[idx+1] = - 1;
-//                    values[idx+2] = - 1;
-//                    values[idx+3] = - 1;
-//                    values[idx+4] = - 1;
-//                    values[idx+5] = - 1;
-//                    values[idx+6] = - 1;
-//                }
-//        
-//        printf("Loop through done, exiting matrix\n");
-//        
-//    }
     
     inline void _mean(Real& psi, Real& psiW, Real& psiE, Real& psiS, Real& psiN, Real& psiB, Real& psiF)
     {
@@ -373,7 +228,7 @@ class HelmholtzSolver3D_Hypre_MPI
     /* Set up Struct Vectors for rhs and solution */
     inline void _setupVectors()
     {
-        /* Create an empty vector object */
+        /* Create an empty vector objects */
         HYPRE_StructVectorCreate(MPI_COMM_WORLD, hypre_grid, &rhs);
         HYPRE_StructVectorCreate(MPI_COMM_WORLD, hypre_grid, &solution);
         
@@ -382,123 +237,53 @@ class HelmholtzSolver3D_Hypre_MPI
         HYPRE_StructVectorInitialize(solution);
         
         /* Set the vector coefficients */
-        int ilower[3]       = { 0, 0,0 };
-        int iupper[3]       = { GridsizeX-1, GridsizeY-1, GridsizeZ-1 };
-        const int size3     = GridsizeX * GridsizeY * GridsizeZ;
-        
-        double * valuesRhs     = new double[size3];
-        double * valuesSol     = new double[size3];
         
         vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
+        int nvalues = B::sizeX * B::sizeY * B::sizeZ;
         
 #pragma omp parallel for schedule(static)
-        for(int i=0; i<vInfo.size(); i++)
+        for(int i = 0; i < blocksPerProcesor; i++)
         {
-            const BlockInfo info = vInfo[i];
-            B& block = mrag_grid->getBlockCollection()[info.blockID];
+            int bID         = rank + (blocksPerProcesor - 1) * rank + i;
+            BlockInfo& info = vInfo[bID];
+            B& block        = mrag_grid->getBlockCollection()[info.blockID];
+            
+            int ilower[3]   = {info.index[0] * B::sizeX,
+                info.index[1] * B::sizeY,
+                info.index[2] * B::sizeZ };
+            
+            int iupper[3]   = { ilower[0] + B::sizeX - 1,
+                ilower[1] + B::sizeY - 1,
+                ilower[2] + B::sizeZ - 1};
             
             double h       = info.h[0];
             double h2      = h*h;
+            
+            vector<double> valuesRhs(nvalues);
+            vector<double> valuesSol(nvalues);
+            int idx = 0;
             
             for(int iz=0; iz<B::sizeZ; iz++)
                 for(int iy=0; iy<B::sizeY; iy++)
                     for(int ix=0; ix<B::sizeX; ix++)
                     {
-                        const int gix = ix + info.index[0] * B::sizeX;
-                        const int giy = iy + info.index[1] * B::sizeY;
-                        const int giz = iz + info.index[2] * B::sizeZ;
-                        
-                        const int idx = gix + giy * blocksPerDimension*B::sizeX
-                        + giz * blocksPerDimension*B::sizeX * blocksPerDimension*B::sizeY;
-                        
                         valuesRhs[idx] = h2 * block(ix,iy,iz).f;
                         valuesSol[idx] =      block(ix,iy,iz).p;
-                        
+                        idx++;
                     }
+            
+            HYPRE_StructVectorSetBoxValues(rhs,      ilower, iupper, &valuesRhs[0]);
+            HYPRE_StructVectorSetBoxValues(solution, ilower, iupper, &valuesSol[0]);
         }
         
-        
-        HYPRE_StructVectorSetBoxValues(rhs, ilower, iupper, valuesRhs);
-        HYPRE_StructVectorSetBoxValues(solution, ilower, iupper, valuesSol);
         
         /* This is a collective call finalizing the vector assembly.
          The vectors are now ``ready to be used'' */
         HYPRE_StructVectorAssemble(rhs);
         HYPRE_StructVectorAssemble(solution);
-        
-        delete [] valuesRhs;
-        delete [] valuesSol;
-        
+
     }
-    
-    
-//    /* Set up Struct Vectors for rhs and solution */
-//    inline void _setupVectors()
-//    {
-//        /* Create an empty vector object */
-//        HYPRE_StructVectorCreate(MPI_COMM_WORLD, hypre_grid, &rhs);
-//        HYPRE_StructVectorCreate(MPI_COMM_WORLD, hypre_grid, &solution);
-//        
-//        /* Indicate that the vector coefficients are ready to be set */
-//        HYPRE_StructVectorInitialize(rhs);
-//        HYPRE_StructVectorInitialize(solution);
-//        
-//        /* Set the vector coefficients */
-//        const int nvalues      = B::sizeX * B::sizeY * B::sizeZ;
-//        double * valuesRhs     = new double[nvalues];
-//        double * valuesSol     = new double[nvalues];
-//        
-//        vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
-//        
-//        printf("Hello my rank is %d \n", rank);
-//        
-//        
-//        printf("Hello again my rank is %d \n", rank);
-//        
-//        //#pragma omp parallel for schedule(static)
-//        for(int i = 0; i < blocksPerProcesor; i++)
-//        {
-//            int bID         = rank + (blocksPerProcesor - 1) * rank + i;
-//            BlockInfo& info = vInfo[bID];
-//            B& block        = mrag_grid->getBlockCollection()[info.blockID];
-//            
-//            int ilower[3]   = {info.index[0] * B::sizeX,
-//                info.index[1] * B::sizeY,
-//                info.index[2] * B::sizeZ };
-//            
-//            int iupper[3]   = { ilower[0] + B::sizeX - 1,
-//                ilower[1] + B::sizeY - 1,
-//                ilower[2] + B::sizeZ - 1};
-//            
-//            double h       = info.h[0];
-//            double h2      = h*h;
-//            
-//            int idx = 0;
-//            
-//            for(int iz=0; iz<B::sizeZ; iz++)
-//                for(int iy=0; iy<B::sizeY; iy++)
-//                    for(int ix=0; ix<B::sizeX; ix++)
-//                    {
-//                        valuesRhs[idx] = h2 * block(ix,iy,iz).f;
-//                        valuesSol[idx] =      block(ix,iy,iz).p;
-//                        idx++;
-//                    }
-//            
-//            HYPRE_StructVectorSetBoxValues(rhs, ilower, iupper, valuesRhs);
-//            HYPRE_StructVectorSetBoxValues(solution, ilower, iupper, valuesSol);
-//        }
-//        
-//        
-//        /* This is a collective call finalizing the vector assembly.
-//         The vectors are now ``ready to be used'' */
-//        HYPRE_StructVectorAssemble(rhs);
-//        HYPRE_StructVectorAssemble(solution);
-//        
-//        delete [] valuesRhs;
-//        delete [] valuesSol;
-//
-//    }
-//
+
     /* Set up a solver (See the Reference Manual for descriptions of all of the options.) */
     void _setup_solver()
     {
@@ -580,91 +365,7 @@ class HelmholtzSolver3D_Hypre_MPI
         }
     }
     
-//    void _getResultsOMP()
-//    {
-//        // get solution
-//        int ilower[3]       = { 0, 0, 0 };
-//        int iupper[3]       = { GridsizeX-1, GridsizeY-1, GridsizeZ-1 };
-//        const int size3     = GridsizeX * GridsizeY * GridsizeZ;
-//        double * values     = new double[size3];
-//        HYPRE_StructVectorGetBoxValues(solution, ilower, iupper, values);
-//        
-//        vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
-//        
-//#pragma omp parallel for schedule(static)
-//        for(int i=0; i<vInfo.size(); i++)
-//        {
-//            const BlockInfo info = vInfo[i];
-//            B& block = mrag_grid->getBlockCollection()[info.blockID];
-//            
-//            for(int iz=0; iz<B::sizeZ; iz++)
-//                for(int iy=0; iy<B::sizeY; iy++)
-//                    for(int ix=0; ix<B::sizeX; ix++)
-//                    {
-//                        const int gix = ix + info.index[0] * B::sizeX;
-//                        const int giy = iy + info.index[1] * B::sizeY;
-//                        const int giz = iz + info.index[2] * B::sizeZ;
-//                        
-//                        const int idx = gix + giy * blocksPerDimension * B::sizeX
-//                        + giz * blocksPerDimension * B::sizeX * blocksPerDimension*B::sizeY;
-//                        
-//                        block(ix,iy,iz).p = values[idx];
-//                    }
-//        }
-//        
-//        delete [ ] values;
-//    }
-    
-    
-//    void _getResultsOMP()
-//    {
-//        vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
-//        
-//        
-//        if(rank == 0)
-//        {
-//            printf("OK\n");
-//            //        for(int i = 0; i < blocksPerProcesor; i++)
-//            for(int i = 0; i < vInfo.size(); i++)
-//            {
-//                int blockID     = i; //rank + (blocksPerProcesor - 1) * rank + i;
-//                BlockInfo& info = vInfo[blockID];
-//                B& block        = mrag_grid->getBlockCollection()[info.blockID];
-//                
-//                int ilower[3]   = {
-//                    info.index[0] * B::sizeX,
-//                    info.index[1] * B::sizeY,
-//                    info.index[2] * B::sizeZ };
-//                
-//                int iupper[3]   = {
-//                    ilower[0] + B::sizeX - 1,
-//                    ilower[1] + B::sizeY - 1,
-//                    ilower[2] + B::sizeZ - 1};
-//                
-//                int nvalues         = B::sizeX * B::sizeY * B::sizeZ;
-//                double * values     = new double  [nvalues];
-//                
-//                HYPRE_StructVectorGetBoxValues(solution, ilower, iupper, values);
-//                
-//                
-//                int idx             = 0;
-//                
-//                for(int iz=0; iz<B::sizeZ; iz++)
-//                    for(int iy=0; iy<B::sizeY; iy++)
-//                        for(int ix=0; ix<B::sizeX; ix++)
-//                        {
-//                            block(ix,iy,iz).p = values[idx];
-//                            idx++;
-//                        }
-//                delete [] values;
-//                
-//            }
-//        }
-//    }
-    
-    
-    
-    void _getResultsOMP()
+    void _getResults()
     {
         /* 1) Each processor fills results into blocks it owns, using own mrag_grid, since MPI doesn't share memory */
         vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
@@ -804,28 +505,9 @@ public:
         _setupMatrix();
         _setupVectors();
         _solveSystem();
-        _getResultsOMP();
+        _getResults();
         MPI_Barrier(MPI_COMM_WORLD);
     }
-    
-//    void inline cleanUp()
-//    {
-//        HYPRE_StructGridDestroy(hypre_grid);
-//        HYPRE_StructStencilDestroy(stencil);
-//        HYPRE_StructMatrixDestroy(matrix);
-//        HYPRE_StructVectorDestroy(rhs);
-//        HYPRE_StructVectorDestroy(solution);
-//        
-//        if(bCG==0)
-//            HYPRE_StructSMGDestroy(solver);
-//        else
-//        {
-//            HYPRE_StructPCGDestroy(solver);
-//            HYPRE_StructSMGDestroy(precond);
-//        }
-//        
-//        bAlreadyAllocated = false;
-//    }
     
     void inline clean()
     {

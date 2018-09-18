@@ -240,13 +240,15 @@ void HelmholtzTest::_computeError()
 void HelmholtzTest::run()
 {
     bool bCG=1;
-    HelmholtzSolver2D_Hypre helmholtz_solver2D;
-    HelmholtzSolver3D_Hypre helmholtz_solver3D;
-
+    
+    HelmholtzSolver2D_Hypre     helmholtz_solver2D;
+    HelmholtzSolver3D_Hypre     helmholtz_solver3D;
     HelmholtzSolver3D_Hypre_MPI helmholtz_solver3D_MPI;
+    
+    
     helmholtz_solver3D_MPI.setup_hypre(*grid, rank, nprocs, bVerbose, bCG);
     
-    printf("First call : \n");
+    if(rank==0)  printf("First call : \n");
     helmholtz_solver3D_MPI.solve();
     
     if(rank == 0){
@@ -255,7 +257,7 @@ void HelmholtzTest::run()
         _computeError();
     }
     
-    printf("Second call : \n");
+    if(rank==0)  printf("Second call : \n");
     helmholtz_solver3D_MPI.solve();
     
     if(rank == 0){
