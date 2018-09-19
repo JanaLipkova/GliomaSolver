@@ -1,0 +1,842 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F9941D2F21525079006FE110 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9941D2E21525079006FE110 /* CoreFoundation.framework */; };
+		F9941D362152507A006FE110 /* GliomaSolverXcode.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D352152507A006FE110 /* GliomaSolverXcode.h */; };
+		F9941D382152507B006FE110 /* GliomaSolverXcodePriv.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D372152507B006FE110 /* GliomaSolverXcodePriv.h */; };
+		F9941D3A2152507B006FE110 /* GliomaSolverXcode.cp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D392152507B006FE110 /* GliomaSolverXcode.cp */; };
+		F9941D5D21525093006FE110 /* Glioma.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4121525093006FE110 /* Glioma.h */; };
+		F9941D5E21525093006FE110 /* Glioma_BrainDeformation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D4221525093006FE110 /* Glioma_BrainDeformation.cpp */; };
+		F9941D5F21525093006FE110 /* Glioma_BrainDeformation.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4321525093006FE110 /* Glioma_BrainDeformation.h */; };
+		F9941D6021525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D4421525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.cpp */; };
+		F9941D6121525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4521525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.h */; };
+		F9941D6221525093006FE110 /* Glioma_ReactionDiffusion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D4621525093006FE110 /* Glioma_ReactionDiffusion.cpp */; };
+		F9941D6321525093006FE110 /* Glioma_ReactionDiffusion.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4721525093006FE110 /* Glioma_ReactionDiffusion.h */; };
+		F9941D6421525093006FE110 /* Glioma_Types.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4821525093006FE110 /* Glioma_Types.h */; };
+		F9941D6521525093006FE110 /* Glioma_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D4921525093006FE110 /* Glioma_main.cpp */; };
+		F9941D6621525093006FE110 /* Matrix.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4A21525093006FE110 /* Matrix.h */; };
+		F9941D6721525093006FE110 /* AdvectionConvectionOperator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4C21525093006FE110 /* AdvectionConvectionOperator.h */; };
+		F9941D6821525093006FE110 /* HelmholtzSolver2D_Hypre.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4D21525093006FE110 /* HelmholtzSolver2D_Hypre.h */; };
+		F9941D6921525093006FE110 /* HelmholtzSolver3D_Hypre.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4E21525093006FE110 /* HelmholtzSolver3D_Hypre.h */; };
+		F9941D6A21525093006FE110 /* PressureOperator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D4F21525093006FE110 /* PressureOperator.h */; };
+		F9941D6B21525093006FE110 /* ReactionDiffusionOperator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5021525093006FE110 /* ReactionDiffusionOperator.h */; };
+		F9941D6C21525093006FE110 /* TimeUpdateOperator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5121525093006FE110 /* TimeUpdateOperator.h */; };
+		F9941D6D21525093006FE110 /* HelmholtzSolver3D_Hypre_MPI.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5221525093006FE110 /* HelmholtzSolver3D_Hypre_MPI.h */; };
+		F9941D6E21525093006FE110 /* HelmholtzTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D5421525093006FE110 /* HelmholtzTest.cpp */; };
+		F9941D6F21525093006FE110 /* HelmholtzTest.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5521525093006FE110 /* HelmholtzTest.h */; };
+		F9941D7021525093006FE110 /* Test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D5621525093006FE110 /* Test.cpp */; };
+		F9941D7121525093006FE110 /* Test.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5721525093006FE110 /* Test.h */; };
+		F9941D7221525093006FE110 /* dat2VP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D5821525093006FE110 /* dat2VP.cpp */; };
+		F9941D7321525093006FE110 /* dat2VP.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5921525093006FE110 /* dat2VP.h */; };
+		F9941D7421525093006FE110 /* AdvectionOperator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5B21525093006FE110 /* AdvectionOperator.h */; };
+		F9941D7521525093006FE110 /* HypreSolver.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D5C21525093006FE110 /* HypreSolver.h */; };
+		F9941DDD215250B5006FE110 /* MRAGHeaders.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D77215250B4006FE110 /* MRAGHeaders.h */; };
+		F9941DDE215250B5006FE110 /* MRAGBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D79215250B4006FE110 /* MRAGBitStream.h */; };
+		F9941DDF215250B5006FE110 /* MRAGBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D7A215250B4006FE110 /* MRAGBlock.h */; };
+		F9941DE0215250B5006FE110 /* MRAGBlockCollapser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D7B215250B4006FE110 /* MRAGBlockCollapser.h */; };
+		F9941DE1215250B5006FE110 /* MRAGBlockCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D7C215250B4006FE110 /* MRAGBlockCollection.h */; };
+		F9941DE2215250B5006FE110 /* MRAGBlockFWT.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D7E215250B5006FE110 /* MRAGBlockFWT.h */; };
+		F9941DE3215250B5006FE110 /* MRAGBlockLab.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D7F215250B5006FE110 /* MRAGBlockLab.h */; };
+		F9941DE4215250B5006FE110 /* MRAGBlockSplitter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D80215250B5006FE110 /* MRAGBlockSplitter.h */; };
+		F9941DE5215250B5006FE110 /* MRAGBoundaryBlockInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D81215250B5006FE110 /* MRAGBoundaryBlockInfo.cpp */; };
+		F9941DE6215250B5006FE110 /* MRAGBoundaryBlockInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D82215250B5006FE110 /* MRAGBoundaryBlockInfo.h */; };
+		F9941DE7215250B5006FE110 /* MRAGBoundaryBlockPack.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D83215250B5006FE110 /* MRAGBoundaryBlockPack.h */; };
+		F9941DE8215250B5006FE110 /* MRAGCache.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D84215250B5006FE110 /* MRAGCache.h */; };
+		F9941DE9215250B5006FE110 /* MRAGCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D85215250B5006FE110 /* MRAGCommon.h */; };
+		F9941DEA215250B5006FE110 /* MRAGCompressionPlan.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D86215250B5006FE110 /* MRAGCompressionPlan.h */; };
+		F9941DEB215250B5006FE110 /* MRAGCompressor.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D87215250B5006FE110 /* MRAGCompressor.h */; };
+		F9941DEC215250B5006FE110 /* MRAGEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D88215250B5006FE110 /* MRAGEncoder.h */; };
+		F9941DED215250B5006FE110 /* MRAGEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D89215250B5006FE110 /* MRAGEnvironment.h */; };
+		F9941DEE215250B5006FE110 /* MRAGGridNode.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D8A215250B5006FE110 /* MRAGGridNode.h */; };
+		F9941DEF215250B5006FE110 /* MRAGHelperMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D8B215250B5006FE110 /* MRAGHelperMacros.h */; };
+		F9941DF0215250B5006FE110 /* MRAGHuffmanEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D8C215250B5006FE110 /* MRAGHuffmanEncoder.h */; };
+		F9941DF1215250B5006FE110 /* MRAGMatrix2D.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D8D215250B5006FE110 /* MRAGMatrix2D.h */; };
+		F9941DF2215250B5006FE110 /* MRAGMatrix3D.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D8E215250B5006FE110 /* MRAGMatrix3D.h */; };
+		F9941DF3215250B5006FE110 /* MRAGMatrix4D.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D8F215250B5006FE110 /* MRAGMatrix4D.h */; };
+		F9941DF4215250B5006FE110 /* MRAGProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D90215250B5006FE110 /* MRAGProfiler.cpp */; };
+		F9941DF5215250B5006FE110 /* MRAGProfiler.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D91215250B5006FE110 /* MRAGProfiler.h */; };
+		F9941DF6215250B5006FE110 /* MRAGRefinementPlan.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D92215250B5006FE110 /* MRAGRefinementPlan.h */; };
+		F9941DF7215250B5006FE110 /* MRAGRefiner.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D93215250B5006FE110 /* MRAGRefiner.h */; };
+		F9941DF8215250B5006FE110 /* MRAGRefiner_Greedy.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D94215250B5006FE110 /* MRAGRefiner_Greedy.h */; };
+		F9941DF9215250B5006FE110 /* MRAGWavelets_AverageInterp3rdOrder.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D95215250B5006FE110 /* MRAGWavelets_AverageInterp3rdOrder.h */; };
+		F9941DFA215250B5006FE110 /* MRAGWavelets_AverageInterp5thOrder.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D96215250B5006FE110 /* MRAGWavelets_AverageInterp5thOrder.h */; };
+		F9941DFB215250B5006FE110 /* MRAGWavelets_Bior22.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D97215250B5006FE110 /* MRAGWavelets_Bior22.h */; };
+		F9941DFC215250B5006FE110 /* MRAGWavelets_Haar.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D98215250B5006FE110 /* MRAGWavelets_Haar.h */; };
+		F9941DFD215250B5006FE110 /* MRAGWavelets_Interp2ndOrder.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D99215250B5006FE110 /* MRAGWavelets_Interp2ndOrder.h */; };
+		F9941DFE215250B5006FE110 /* MRAGWavelets_Interp4thOrder.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D9A215250B5006FE110 /* MRAGWavelets_Interp4thOrder.h */; };
+		F9941DFF215250B5006FE110 /* MRAGWavelets_StaticData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941D9B215250B5006FE110 /* MRAGWavelets_StaticData.cpp */; };
+		F9941E00215250B5006FE110 /* MRAG_BBInfoCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D9C215250B5006FE110 /* MRAG_BBInfoCreator.h */; };
+		F9941E01215250B5006FE110 /* MRAG_STDTestL1.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D9E215250B5006FE110 /* MRAG_STDTestL1.h */; };
+		F9941E02215250B5006FE110 /* MRAG_STDTestL1_BlockCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D9F215250B5006FE110 /* MRAG_STDTestL1_BlockCollection.h */; };
+		F9941E03215250B5006FE110 /* MRAG_STDTestL1_BoundaryInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA0215250B5006FE110 /* MRAG_STDTestL1_BoundaryInfo.h */; };
+		F9941E04215250B5006FE110 /* MRAG_STDTestL1_Compression.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA1215250B5006FE110 /* MRAG_STDTestL1_Compression.h */; };
+		F9941E05215250B5006FE110 /* MRAG_STDTestL1_Generator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA2215250B5006FE110 /* MRAG_STDTestL1_Generator.h */; };
+		F9941E06215250B5006FE110 /* MRAG_STDTestL1_Grid.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA3215250B5006FE110 /* MRAG_STDTestL1_Grid.h */; };
+		F9941E07215250B5006FE110 /* MRAG_STDTestL1_Refinement.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA4215250B5006FE110 /* MRAG_STDTestL1_Refinement.h */; };
+		F9941E08215250B5006FE110 /* MRAG_STDTestL1_memtest.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA5215250B5006FE110 /* MRAG_STDTestL1_memtest.h */; };
+		F9941E09215250B5006FE110 /* MRAG_STDTestL2.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA6215250B5006FE110 /* MRAG_STDTestL2.h */; };
+		F9941E0A215250B5006FE110 /* MRAG_STDTestL2_Boundary.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA7215250B5006FE110 /* MRAG_STDTestL2_Boundary.h */; };
+		F9941E0B215250B5006FE110 /* MRAG_STDTestL2_Compression.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA8215250B5006FE110 /* MRAG_STDTestL2_Compression.h */; };
+		F9941E0C215250B5006FE110 /* MRAG_STDTestL2_Generator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DA9215250B5006FE110 /* MRAG_STDTestL2_Generator.h */; };
+		F9941E0D215250B5006FE110 /* MRAG_STDTestL2_IC.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DAA215250B5006FE110 /* MRAG_STDTestL2_IC.h */; };
+		F9941E0E215250B5006FE110 /* MRAG_STDTestL2_Refinement.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DAB215250B5006FE110 /* MRAG_STDTestL2_Refinement.h */; };
+		F9941E0F215250B5006FE110 /* MRAG_STDTestL3_Diffusion.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DAC215250B5006FE110 /* MRAG_STDTestL3_Diffusion.h */; };
+		F9941E10215250B5006FE110 /* MRAG_STDTestL3_IO.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DAD215250B5006FE110 /* MRAG_STDTestL3_IO.h */; };
+		F9941E11215250B5006FE110 /* MRAG_STDTestL3_LevelsetReinitialization.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DAE215250B5006FE110 /* MRAG_STDTestL3_LevelsetReinitialization.h */; };
+		F9941E12215250B5006FE110 /* MRAG_STDTestL3_VectorAdvection.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DAF215250B5006FE110 /* MRAG_STDTestL3_VectorAdvection.h */; };
+		F9941E13215250B5006FE110 /* MRAG_SmartBlockFinder.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB0215250B5006FE110 /* MRAG_SmartBlockFinder.h */; };
+		F9941E14215250B5006FE110 /* MRAG_SmartBoundaryInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB1215250B5006FE110 /* MRAG_SmartBoundaryInfo.h */; };
+		F9941E15215250B5006FE110 /* MRAGrid.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB2215250B5006FE110 /* MRAGrid.h */; };
+		F9941E16215250B5006FE110 /* MRAGridHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB4215250B5006FE110 /* MRAGridHelpers.h */; };
+		F9941E17215250B5006FE110 /* DumpScalarToVP.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB6215250B5006FE110 /* DumpScalarToVP.h */; };
+		F9941E18215250B5006FE110 /* IF3D_DumpToVP.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB7215250B5006FE110 /* IF3D_DumpToVP.h */; };
+		F9941E19215250B5006FE110 /* MRAG_IO_ArgumentParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB8215250B5006FE110 /* MRAG_IO_ArgumentParser.h */; };
+		F9941E1A215250B5006FE110 /* MRAG_IO_BaseClass.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DB9215250B5006FE110 /* MRAG_IO_BaseClass.h */; };
+		F9941E1B215250B5006FE110 /* MRAG_IO_Binary.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DBA215250B5006FE110 /* MRAG_IO_Binary.h */; };
+		F9941E1C215250B5006FE110 /* MRAG_IO_Native.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DBB215250B5006FE110 /* MRAG_IO_Native.h */; };
+		F9941E1D215250B5006FE110 /* MRAG_IO_VTK.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DBC215250B5006FE110 /* MRAG_IO_VTK.h */; };
+		F9941E1E215250B5006FE110 /* MRAG_IO_VTKMB.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DBD215250B5006FE110 /* MRAG_IO_VTKMB.h */; };
+		F9941E1F215250B5006FE110 /* MRAG_IO_VTKNative.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DBE215250B5006FE110 /* MRAG_IO_VTKNative.h */; };
+		F9941E20215250B5006FE110 /* MRAG_IO_VTU3D.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DBF215250B5006FE110 /* MRAG_IO_VTU3D.h */; };
+		F9941E21215250B5006FE110 /* MRAGAddressable_CUDA.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DC1215250B5006FE110 /* MRAGAddressable_CUDA.h */; };
+		F9941E22215250B5006FE110 /* MRAGBBPackHandler_CUDA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941DC2215250B5006FE110 /* MRAGBBPackHandler_CUDA.cpp */; };
+		F9941E23215250B5006FE110 /* MRAGBBPackHandler_CUDA.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DC3215250B5006FE110 /* MRAGBBPackHandler_CUDA.h */; };
+		F9941E24215250B5006FE110 /* MRAGBlockCollection_CUDA.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DC4215250B5006FE110 /* MRAGBlockCollection_CUDA.h */; };
+		F9941E25215250B5006FE110 /* MRAGBlockProcessing_CUDA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9941DC5215250B5006FE110 /* MRAGBlockProcessing_CUDA.cpp */; };
+		F9941E26215250B5006FE110 /* MRAGBlockProcessing_CUDA.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DC6215250B5006FE110 /* MRAGBlockProcessing_CUDA.h */; };
+		F9941E27215250B5006FE110 /* MRAGBlockProcessing_CUDACore.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DC8215250B5006FE110 /* MRAGBlockProcessing_CUDACore.h */; };
+		F9941E28215250B5006FE110 /* MRAGBlockProcessing_SingleCPU.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DC9215250B5006FE110 /* MRAGBlockProcessing_SingleCPU.h */; };
+		F9941E29215250B5006FE110 /* MRAGBlockProcessing_TBB.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DCA215250B5006FE110 /* MRAGBlockProcessing_TBB.h */; };
+		F9941E2A215250B5006FE110 /* MRAGWrapperCUDA.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DCB215250B5006FE110 /* MRAGWrapperCUDA.h */; };
+		F9941E2B215250B5006FE110 /* MRAGAutomaticRefiner.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DCD215250B5006FE110 /* MRAGAutomaticRefiner.h */; };
+		F9941E2C215250B5006FE110 /* MRAGRefiner_SpaceExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DCE215250B5006FE110 /* MRAGRefiner_SpaceExtension.h */; };
+		F9941E2D215250B5006FE110 /* MRAGScienceCore.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DCF215250B5006FE110 /* MRAGScienceCore.h */; };
+		F9941E2E215250B5006FE110 /* MRAGSimpleLevelsetBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD0215250B5006FE110 /* MRAGSimpleLevelsetBlock.h */; };
+		F9941E2F215250B5006FE110 /* MRAGSpaceTimeSorter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD1215250B5006FE110 /* MRAGSpaceTimeSorter.h */; };
+		F9941E30215250B5006FE110 /* MRAGWeno.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD2215250B5006FE110 /* MRAGWeno.h */; };
+		F9941E31215250B5006FE110 /* candidate_SpaceTimeSorterEuler.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD3215250B5006FE110 /* candidate_SpaceTimeSorterEuler.h */; };
+		F9941E32215250B5006FE110 /* candidate_SpaceTimeSorterRK2.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD4215250B5006FE110 /* candidate_SpaceTimeSorterRK2.h */; };
+		F9941E33215250B5006FE110 /* candidate_SpaceTimeSorterRK3.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD5215250B5006FE110 /* candidate_SpaceTimeSorterRK3.h */; };
+		F9941E34215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD7215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection.h */; };
+		F9941E35215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection_Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DD8215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection_Beta.h */; };
+		F9941E36215250B5006FE110 /* GridViewer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DDA215250B5006FE110 /* GridViewer.h */; };
+		F9941E37215250B5006FE110 /* MRAGVisualTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DDB215250B5006FE110 /* MRAGVisualTypes.h */; };
+		F9941E38215250B5006FE110 /* Texture2D.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DDC215250B5006FE110 /* Texture2D.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F9941D2B21525079006FE110 /* GliomaSolverXcode.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GliomaSolverXcode.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9941D2E21525079006FE110 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		F9941D322152507A006FE110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F9941D332152507A006FE110 /* GliomaSolverXcodeProj.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = GliomaSolverXcodeProj.xcconfig; sourceTree = "<group>"; };
+		F9941D342152507A006FE110 /* GliomaSolverXcodeTarget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = GliomaSolverXcodeTarget.xcconfig; sourceTree = "<group>"; };
+		F9941D352152507A006FE110 /* GliomaSolverXcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GliomaSolverXcode.h; sourceTree = "<group>"; };
+		F9941D372152507B006FE110 /* GliomaSolverXcodePriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GliomaSolverXcodePriv.h; sourceTree = "<group>"; };
+		F9941D392152507B006FE110 /* GliomaSolverXcode.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GliomaSolverXcode.cp; sourceTree = "<group>"; };
+		F9941D4121525093006FE110 /* Glioma.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glioma.h; sourceTree = "<group>"; };
+		F9941D4221525093006FE110 /* Glioma_BrainDeformation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Glioma_BrainDeformation.cpp; sourceTree = "<group>"; };
+		F9941D4321525093006FE110 /* Glioma_BrainDeformation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glioma_BrainDeformation.h; sourceTree = "<group>"; };
+		F9941D4421525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Glioma_BrainDeformationTimeRelaxation.cpp; path = ../Glioma_BrainDeformationTimeRelaxation.cpp; sourceTree = "<group>"; };
+		F9941D4521525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Glioma_BrainDeformationTimeRelaxation.h; path = ../Glioma_BrainDeformationTimeRelaxation.h; sourceTree = "<group>"; };
+		F9941D4621525093006FE110 /* Glioma_ReactionDiffusion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Glioma_ReactionDiffusion.cpp; sourceTree = "<group>"; };
+		F9941D4721525093006FE110 /* Glioma_ReactionDiffusion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glioma_ReactionDiffusion.h; sourceTree = "<group>"; };
+		F9941D4821525093006FE110 /* Glioma_Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glioma_Types.h; sourceTree = "<group>"; };
+		F9941D4921525093006FE110 /* Glioma_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Glioma_main.cpp; sourceTree = "<group>"; };
+		F9941D4A21525093006FE110 /* Matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix.h; sourceTree = "<group>"; };
+		F9941D4C21525093006FE110 /* AdvectionConvectionOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AdvectionConvectionOperator.h; sourceTree = "<group>"; };
+		F9941D4D21525093006FE110 /* HelmholtzSolver2D_Hypre.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelmholtzSolver2D_Hypre.h; sourceTree = "<group>"; };
+		F9941D4E21525093006FE110 /* HelmholtzSolver3D_Hypre.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelmholtzSolver3D_Hypre.h; sourceTree = "<group>"; };
+		F9941D4F21525093006FE110 /* PressureOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PressureOperator.h; sourceTree = "<group>"; };
+		F9941D5021525093006FE110 /* ReactionDiffusionOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReactionDiffusionOperator.h; sourceTree = "<group>"; };
+		F9941D5121525093006FE110 /* TimeUpdateOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimeUpdateOperator.h; sourceTree = "<group>"; };
+		F9941D5221525093006FE110 /* HelmholtzSolver3D_Hypre_MPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelmholtzSolver3D_Hypre_MPI.h; sourceTree = "<group>"; };
+		F9941D5421525093006FE110 /* HelmholtzTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelmholtzTest.cpp; sourceTree = "<group>"; };
+		F9941D5521525093006FE110 /* HelmholtzTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelmholtzTest.h; sourceTree = "<group>"; };
+		F9941D5621525093006FE110 /* Test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Test.cpp; sourceTree = "<group>"; };
+		F9941D5721525093006FE110 /* Test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Test.h; sourceTree = "<group>"; };
+		F9941D5821525093006FE110 /* dat2VP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dat2VP.cpp; sourceTree = "<group>"; };
+		F9941D5921525093006FE110 /* dat2VP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dat2VP.h; sourceTree = "<group>"; };
+		F9941D5B21525093006FE110 /* AdvectionOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AdvectionOperator.h; sourceTree = "<group>"; };
+		F9941D5C21525093006FE110 /* HypreSolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HypreSolver.h; sourceTree = "<group>"; };
+		F9941D77215250B4006FE110 /* MRAGHeaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGHeaders.h; sourceTree = "<group>"; };
+		F9941D79215250B4006FE110 /* MRAGBitStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBitStream.h; sourceTree = "<group>"; };
+		F9941D7A215250B4006FE110 /* MRAGBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlock.h; sourceTree = "<group>"; };
+		F9941D7B215250B4006FE110 /* MRAGBlockCollapser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockCollapser.h; sourceTree = "<group>"; };
+		F9941D7C215250B4006FE110 /* MRAGBlockCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockCollection.h; sourceTree = "<group>"; };
+		F9941D7D215250B5006FE110 /* MRAGBlockCollection.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MRAGBlockCollection.inl; sourceTree = "<group>"; };
+		F9941D7E215250B5006FE110 /* MRAGBlockFWT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockFWT.h; sourceTree = "<group>"; };
+		F9941D7F215250B5006FE110 /* MRAGBlockLab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockLab.h; sourceTree = "<group>"; };
+		F9941D80215250B5006FE110 /* MRAGBlockSplitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockSplitter.h; sourceTree = "<group>"; };
+		F9941D81215250B5006FE110 /* MRAGBoundaryBlockInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MRAGBoundaryBlockInfo.cpp; sourceTree = "<group>"; };
+		F9941D82215250B5006FE110 /* MRAGBoundaryBlockInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBoundaryBlockInfo.h; sourceTree = "<group>"; };
+		F9941D83215250B5006FE110 /* MRAGBoundaryBlockPack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBoundaryBlockPack.h; sourceTree = "<group>"; };
+		F9941D84215250B5006FE110 /* MRAGCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGCache.h; sourceTree = "<group>"; };
+		F9941D85215250B5006FE110 /* MRAGCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGCommon.h; sourceTree = "<group>"; };
+		F9941D86215250B5006FE110 /* MRAGCompressionPlan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGCompressionPlan.h; sourceTree = "<group>"; };
+		F9941D87215250B5006FE110 /* MRAGCompressor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGCompressor.h; sourceTree = "<group>"; };
+		F9941D88215250B5006FE110 /* MRAGEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGEncoder.h; sourceTree = "<group>"; };
+		F9941D89215250B5006FE110 /* MRAGEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGEnvironment.h; sourceTree = "<group>"; };
+		F9941D8A215250B5006FE110 /* MRAGGridNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGGridNode.h; sourceTree = "<group>"; };
+		F9941D8B215250B5006FE110 /* MRAGHelperMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGHelperMacros.h; sourceTree = "<group>"; };
+		F9941D8C215250B5006FE110 /* MRAGHuffmanEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGHuffmanEncoder.h; sourceTree = "<group>"; };
+		F9941D8D215250B5006FE110 /* MRAGMatrix2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGMatrix2D.h; sourceTree = "<group>"; };
+		F9941D8E215250B5006FE110 /* MRAGMatrix3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGMatrix3D.h; sourceTree = "<group>"; };
+		F9941D8F215250B5006FE110 /* MRAGMatrix4D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGMatrix4D.h; sourceTree = "<group>"; };
+		F9941D90215250B5006FE110 /* MRAGProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MRAGProfiler.cpp; sourceTree = "<group>"; };
+		F9941D91215250B5006FE110 /* MRAGProfiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGProfiler.h; sourceTree = "<group>"; };
+		F9941D92215250B5006FE110 /* MRAGRefinementPlan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGRefinementPlan.h; sourceTree = "<group>"; };
+		F9941D93215250B5006FE110 /* MRAGRefiner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGRefiner.h; sourceTree = "<group>"; };
+		F9941D94215250B5006FE110 /* MRAGRefiner_Greedy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGRefiner_Greedy.h; sourceTree = "<group>"; };
+		F9941D95215250B5006FE110 /* MRAGWavelets_AverageInterp3rdOrder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWavelets_AverageInterp3rdOrder.h; sourceTree = "<group>"; };
+		F9941D96215250B5006FE110 /* MRAGWavelets_AverageInterp5thOrder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWavelets_AverageInterp5thOrder.h; sourceTree = "<group>"; };
+		F9941D97215250B5006FE110 /* MRAGWavelets_Bior22.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWavelets_Bior22.h; sourceTree = "<group>"; };
+		F9941D98215250B5006FE110 /* MRAGWavelets_Haar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWavelets_Haar.h; sourceTree = "<group>"; };
+		F9941D99215250B5006FE110 /* MRAGWavelets_Interp2ndOrder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWavelets_Interp2ndOrder.h; sourceTree = "<group>"; };
+		F9941D9A215250B5006FE110 /* MRAGWavelets_Interp4thOrder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWavelets_Interp4thOrder.h; sourceTree = "<group>"; };
+		F9941D9B215250B5006FE110 /* MRAGWavelets_StaticData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MRAGWavelets_StaticData.cpp; sourceTree = "<group>"; };
+		F9941D9C215250B5006FE110 /* MRAG_BBInfoCreator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_BBInfoCreator.h; sourceTree = "<group>"; };
+		F9941D9D215250B5006FE110 /* MRAG_BBInfoCreator.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MRAG_BBInfoCreator.inl; sourceTree = "<group>"; };
+		F9941D9E215250B5006FE110 /* MRAG_STDTestL1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1.h; sourceTree = "<group>"; };
+		F9941D9F215250B5006FE110 /* MRAG_STDTestL1_BlockCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1_BlockCollection.h; sourceTree = "<group>"; };
+		F9941DA0215250B5006FE110 /* MRAG_STDTestL1_BoundaryInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1_BoundaryInfo.h; sourceTree = "<group>"; };
+		F9941DA1215250B5006FE110 /* MRAG_STDTestL1_Compression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1_Compression.h; sourceTree = "<group>"; };
+		F9941DA2215250B5006FE110 /* MRAG_STDTestL1_Generator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1_Generator.h; sourceTree = "<group>"; };
+		F9941DA3215250B5006FE110 /* MRAG_STDTestL1_Grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1_Grid.h; sourceTree = "<group>"; };
+		F9941DA4215250B5006FE110 /* MRAG_STDTestL1_Refinement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1_Refinement.h; sourceTree = "<group>"; };
+		F9941DA5215250B5006FE110 /* MRAG_STDTestL1_memtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL1_memtest.h; sourceTree = "<group>"; };
+		F9941DA6215250B5006FE110 /* MRAG_STDTestL2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL2.h; sourceTree = "<group>"; };
+		F9941DA7215250B5006FE110 /* MRAG_STDTestL2_Boundary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL2_Boundary.h; sourceTree = "<group>"; };
+		F9941DA8215250B5006FE110 /* MRAG_STDTestL2_Compression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL2_Compression.h; sourceTree = "<group>"; };
+		F9941DA9215250B5006FE110 /* MRAG_STDTestL2_Generator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL2_Generator.h; sourceTree = "<group>"; };
+		F9941DAA215250B5006FE110 /* MRAG_STDTestL2_IC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL2_IC.h; sourceTree = "<group>"; };
+		F9941DAB215250B5006FE110 /* MRAG_STDTestL2_Refinement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL2_Refinement.h; sourceTree = "<group>"; };
+		F9941DAC215250B5006FE110 /* MRAG_STDTestL3_Diffusion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL3_Diffusion.h; sourceTree = "<group>"; };
+		F9941DAD215250B5006FE110 /* MRAG_STDTestL3_IO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL3_IO.h; sourceTree = "<group>"; };
+		F9941DAE215250B5006FE110 /* MRAG_STDTestL3_LevelsetReinitialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL3_LevelsetReinitialization.h; sourceTree = "<group>"; };
+		F9941DAF215250B5006FE110 /* MRAG_STDTestL3_VectorAdvection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL3_VectorAdvection.h; sourceTree = "<group>"; };
+		F9941DB0215250B5006FE110 /* MRAG_SmartBlockFinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_SmartBlockFinder.h; sourceTree = "<group>"; };
+		F9941DB1215250B5006FE110 /* MRAG_SmartBoundaryInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_SmartBoundaryInfo.h; sourceTree = "<group>"; };
+		F9941DB2215250B5006FE110 /* MRAGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGrid.h; sourceTree = "<group>"; };
+		F9941DB3215250B5006FE110 /* MRAGrid.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MRAGrid.inl; sourceTree = "<group>"; };
+		F9941DB4215250B5006FE110 /* MRAGridHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGridHelpers.h; sourceTree = "<group>"; };
+		F9941DB6215250B5006FE110 /* DumpScalarToVP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DumpScalarToVP.h; sourceTree = "<group>"; };
+		F9941DB7215250B5006FE110 /* IF3D_DumpToVP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IF3D_DumpToVP.h; sourceTree = "<group>"; };
+		F9941DB8215250B5006FE110 /* MRAG_IO_ArgumentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_ArgumentParser.h; sourceTree = "<group>"; };
+		F9941DB9215250B5006FE110 /* MRAG_IO_BaseClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_BaseClass.h; sourceTree = "<group>"; };
+		F9941DBA215250B5006FE110 /* MRAG_IO_Binary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_Binary.h; sourceTree = "<group>"; };
+		F9941DBB215250B5006FE110 /* MRAG_IO_Native.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_Native.h; sourceTree = "<group>"; };
+		F9941DBC215250B5006FE110 /* MRAG_IO_VTK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_VTK.h; sourceTree = "<group>"; };
+		F9941DBD215250B5006FE110 /* MRAG_IO_VTKMB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_VTKMB.h; sourceTree = "<group>"; };
+		F9941DBE215250B5006FE110 /* MRAG_IO_VTKNative.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_VTKNative.h; sourceTree = "<group>"; };
+		F9941DBF215250B5006FE110 /* MRAG_IO_VTU3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_IO_VTU3D.h; sourceTree = "<group>"; };
+		F9941DC1215250B5006FE110 /* MRAGAddressable_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGAddressable_CUDA.h; sourceTree = "<group>"; };
+		F9941DC2215250B5006FE110 /* MRAGBBPackHandler_CUDA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MRAGBBPackHandler_CUDA.cpp; sourceTree = "<group>"; };
+		F9941DC3215250B5006FE110 /* MRAGBBPackHandler_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBBPackHandler_CUDA.h; sourceTree = "<group>"; };
+		F9941DC4215250B5006FE110 /* MRAGBlockCollection_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockCollection_CUDA.h; sourceTree = "<group>"; };
+		F9941DC5215250B5006FE110 /* MRAGBlockProcessing_CUDA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MRAGBlockProcessing_CUDA.cpp; sourceTree = "<group>"; };
+		F9941DC6215250B5006FE110 /* MRAGBlockProcessing_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockProcessing_CUDA.h; sourceTree = "<group>"; };
+		F9941DC7215250B5006FE110 /* MRAGBlockProcessing_CUDACore.cu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MRAGBlockProcessing_CUDACore.cu; sourceTree = "<group>"; };
+		F9941DC8215250B5006FE110 /* MRAGBlockProcessing_CUDACore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockProcessing_CUDACore.h; sourceTree = "<group>"; };
+		F9941DC9215250B5006FE110 /* MRAGBlockProcessing_SingleCPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockProcessing_SingleCPU.h; sourceTree = "<group>"; };
+		F9941DCA215250B5006FE110 /* MRAGBlockProcessing_TBB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGBlockProcessing_TBB.h; sourceTree = "<group>"; };
+		F9941DCB215250B5006FE110 /* MRAGWrapperCUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWrapperCUDA.h; sourceTree = "<group>"; };
+		F9941DCD215250B5006FE110 /* MRAGAutomaticRefiner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGAutomaticRefiner.h; sourceTree = "<group>"; };
+		F9941DCE215250B5006FE110 /* MRAGRefiner_SpaceExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGRefiner_SpaceExtension.h; sourceTree = "<group>"; };
+		F9941DCF215250B5006FE110 /* MRAGScienceCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGScienceCore.h; sourceTree = "<group>"; };
+		F9941DD0215250B5006FE110 /* MRAGSimpleLevelsetBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGSimpleLevelsetBlock.h; sourceTree = "<group>"; };
+		F9941DD1215250B5006FE110 /* MRAGSpaceTimeSorter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGSpaceTimeSorter.h; sourceTree = "<group>"; };
+		F9941DD2215250B5006FE110 /* MRAGWeno.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGWeno.h; sourceTree = "<group>"; };
+		F9941DD3215250B5006FE110 /* candidate_SpaceTimeSorterEuler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = candidate_SpaceTimeSorterEuler.h; sourceTree = "<group>"; };
+		F9941DD4215250B5006FE110 /* candidate_SpaceTimeSorterRK2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = candidate_SpaceTimeSorterRK2.h; sourceTree = "<group>"; };
+		F9941DD5215250B5006FE110 /* candidate_SpaceTimeSorterRK3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = candidate_SpaceTimeSorterRK3.h; sourceTree = "<group>"; };
+		F9941DD7215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL4_LevelsetAdvection.h; sourceTree = "<group>"; };
+		F9941DD8215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection_Beta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAG_STDTestL4_LevelsetAdvection_Beta.h; sourceTree = "<group>"; };
+		F9941DDA215250B5006FE110 /* GridViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridViewer.h; sourceTree = "<group>"; };
+		F9941DDB215250B5006FE110 /* MRAGVisualTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGVisualTypes.h; sourceTree = "<group>"; };
+		F9941DDC215250B5006FE110 /* Texture2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture2D.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F9941D2821525079006FE110 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9941D2F21525079006FE110 /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F9941D2221525079006FE110 = {
+			isa = PBXGroup;
+			children = (
+				F9941D76215250B4006FE110 /* MRAG */,
+				F9941D4021525093006FE110 /* Glioma */,
+				F9941D3021525079006FE110 /* GliomaSolverXcode */,
+				F9941D2D21525079006FE110 /* Frameworks */,
+				F9941D2C21525079006FE110 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F9941D2C21525079006FE110 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D2B21525079006FE110 /* GliomaSolverXcode.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F9941D2D21525079006FE110 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D2E21525079006FE110 /* CoreFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F9941D3021525079006FE110 /* GliomaSolverXcode */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D332152507A006FE110 /* GliomaSolverXcodeProj.xcconfig */,
+				F9941D342152507A006FE110 /* GliomaSolverXcodeTarget.xcconfig */,
+				F9941D352152507A006FE110 /* GliomaSolverXcode.h */,
+				F9941D372152507B006FE110 /* GliomaSolverXcodePriv.h */,
+				F9941D392152507B006FE110 /* GliomaSolverXcode.cp */,
+				F9941D3121525079006FE110 /* Supporting Files */,
+			);
+			path = GliomaSolverXcode;
+			sourceTree = "<group>";
+		};
+		F9941D3121525079006FE110 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D322152507A006FE110 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F9941D4021525093006FE110 /* Glioma */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D4121525093006FE110 /* Glioma.h */,
+				F9941D4221525093006FE110 /* Glioma_BrainDeformation.cpp */,
+				F9941D4321525093006FE110 /* Glioma_BrainDeformation.h */,
+				F9941D4621525093006FE110 /* Glioma_ReactionDiffusion.cpp */,
+				F9941D4721525093006FE110 /* Glioma_ReactionDiffusion.h */,
+				F9941D4821525093006FE110 /* Glioma_Types.h */,
+				F9941D4921525093006FE110 /* Glioma_main.cpp */,
+				F9941D4A21525093006FE110 /* Matrix.h */,
+				F9941D5821525093006FE110 /* dat2VP.cpp */,
+				F9941D5921525093006FE110 /* dat2VP.h */,
+				F9941D4B21525093006FE110 /* Operators */,
+				F9941D5321525093006FE110 /* Tests */,
+				F9941D5A21525093006FE110 /* others */,
+			);
+			path = Glioma;
+			sourceTree = "<group>";
+		};
+		F9941D4B21525093006FE110 /* Operators */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D4C21525093006FE110 /* AdvectionConvectionOperator.h */,
+				F9941D4D21525093006FE110 /* HelmholtzSolver2D_Hypre.h */,
+				F9941D4E21525093006FE110 /* HelmholtzSolver3D_Hypre.h */,
+				F9941D4F21525093006FE110 /* PressureOperator.h */,
+				F9941D5021525093006FE110 /* ReactionDiffusionOperator.h */,
+				F9941D5121525093006FE110 /* TimeUpdateOperator.h */,
+				F9941D5221525093006FE110 /* HelmholtzSolver3D_Hypre_MPI.h */,
+			);
+			path = Operators;
+			sourceTree = "<group>";
+		};
+		F9941D5321525093006FE110 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D5421525093006FE110 /* HelmholtzTest.cpp */,
+				F9941D5521525093006FE110 /* HelmholtzTest.h */,
+				F9941D5621525093006FE110 /* Test.cpp */,
+				F9941D5721525093006FE110 /* Test.h */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		F9941D5A21525093006FE110 /* others */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D4421525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.cpp */,
+				F9941D4521525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.h */,
+				F9941D5B21525093006FE110 /* AdvectionOperator.h */,
+				F9941D5C21525093006FE110 /* HypreSolver.h */,
+			);
+			path = others;
+			sourceTree = "<group>";
+		};
+		F9941D76215250B4006FE110 /* MRAG */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D77215250B4006FE110 /* MRAGHeaders.h */,
+				F9941D78215250B4006FE110 /* MRAGcore */,
+				F9941DB5215250B5006FE110 /* MRAGio */,
+				F9941DC0215250B5006FE110 /* MRAGmultithreading */,
+				F9941DCC215250B5006FE110 /* MRAGscience */,
+				F9941DD6215250B5006FE110 /* MRAGtests */,
+				F9941DD9215250B5006FE110 /* MRAGvisual */,
+			);
+			path = MRAG;
+			sourceTree = "<group>";
+		};
+		F9941D78215250B4006FE110 /* MRAGcore */ = {
+			isa = PBXGroup;
+			children = (
+				F9941D79215250B4006FE110 /* MRAGBitStream.h */,
+				F9941D7A215250B4006FE110 /* MRAGBlock.h */,
+				F9941D7B215250B4006FE110 /* MRAGBlockCollapser.h */,
+				F9941D7C215250B4006FE110 /* MRAGBlockCollection.h */,
+				F9941D7D215250B5006FE110 /* MRAGBlockCollection.inl */,
+				F9941D7E215250B5006FE110 /* MRAGBlockFWT.h */,
+				F9941D7F215250B5006FE110 /* MRAGBlockLab.h */,
+				F9941D80215250B5006FE110 /* MRAGBlockSplitter.h */,
+				F9941D81215250B5006FE110 /* MRAGBoundaryBlockInfo.cpp */,
+				F9941D82215250B5006FE110 /* MRAGBoundaryBlockInfo.h */,
+				F9941D83215250B5006FE110 /* MRAGBoundaryBlockPack.h */,
+				F9941D84215250B5006FE110 /* MRAGCache.h */,
+				F9941D85215250B5006FE110 /* MRAGCommon.h */,
+				F9941D86215250B5006FE110 /* MRAGCompressionPlan.h */,
+				F9941D87215250B5006FE110 /* MRAGCompressor.h */,
+				F9941D88215250B5006FE110 /* MRAGEncoder.h */,
+				F9941D89215250B5006FE110 /* MRAGEnvironment.h */,
+				F9941D8A215250B5006FE110 /* MRAGGridNode.h */,
+				F9941D8B215250B5006FE110 /* MRAGHelperMacros.h */,
+				F9941D8C215250B5006FE110 /* MRAGHuffmanEncoder.h */,
+				F9941D8D215250B5006FE110 /* MRAGMatrix2D.h */,
+				F9941D8E215250B5006FE110 /* MRAGMatrix3D.h */,
+				F9941D8F215250B5006FE110 /* MRAGMatrix4D.h */,
+				F9941D90215250B5006FE110 /* MRAGProfiler.cpp */,
+				F9941D91215250B5006FE110 /* MRAGProfiler.h */,
+				F9941D92215250B5006FE110 /* MRAGRefinementPlan.h */,
+				F9941D93215250B5006FE110 /* MRAGRefiner.h */,
+				F9941D94215250B5006FE110 /* MRAGRefiner_Greedy.h */,
+				F9941D95215250B5006FE110 /* MRAGWavelets_AverageInterp3rdOrder.h */,
+				F9941D96215250B5006FE110 /* MRAGWavelets_AverageInterp5thOrder.h */,
+				F9941D97215250B5006FE110 /* MRAGWavelets_Bior22.h */,
+				F9941D98215250B5006FE110 /* MRAGWavelets_Haar.h */,
+				F9941D99215250B5006FE110 /* MRAGWavelets_Interp2ndOrder.h */,
+				F9941D9A215250B5006FE110 /* MRAGWavelets_Interp4thOrder.h */,
+				F9941D9B215250B5006FE110 /* MRAGWavelets_StaticData.cpp */,
+				F9941D9C215250B5006FE110 /* MRAG_BBInfoCreator.h */,
+				F9941D9D215250B5006FE110 /* MRAG_BBInfoCreator.inl */,
+				F9941D9E215250B5006FE110 /* MRAG_STDTestL1.h */,
+				F9941D9F215250B5006FE110 /* MRAG_STDTestL1_BlockCollection.h */,
+				F9941DA0215250B5006FE110 /* MRAG_STDTestL1_BoundaryInfo.h */,
+				F9941DA1215250B5006FE110 /* MRAG_STDTestL1_Compression.h */,
+				F9941DA2215250B5006FE110 /* MRAG_STDTestL1_Generator.h */,
+				F9941DA3215250B5006FE110 /* MRAG_STDTestL1_Grid.h */,
+				F9941DA4215250B5006FE110 /* MRAG_STDTestL1_Refinement.h */,
+				F9941DA5215250B5006FE110 /* MRAG_STDTestL1_memtest.h */,
+				F9941DA6215250B5006FE110 /* MRAG_STDTestL2.h */,
+				F9941DA7215250B5006FE110 /* MRAG_STDTestL2_Boundary.h */,
+				F9941DA8215250B5006FE110 /* MRAG_STDTestL2_Compression.h */,
+				F9941DA9215250B5006FE110 /* MRAG_STDTestL2_Generator.h */,
+				F9941DAA215250B5006FE110 /* MRAG_STDTestL2_IC.h */,
+				F9941DAB215250B5006FE110 /* MRAG_STDTestL2_Refinement.h */,
+				F9941DAC215250B5006FE110 /* MRAG_STDTestL3_Diffusion.h */,
+				F9941DAD215250B5006FE110 /* MRAG_STDTestL3_IO.h */,
+				F9941DAE215250B5006FE110 /* MRAG_STDTestL3_LevelsetReinitialization.h */,
+				F9941DAF215250B5006FE110 /* MRAG_STDTestL3_VectorAdvection.h */,
+				F9941DB0215250B5006FE110 /* MRAG_SmartBlockFinder.h */,
+				F9941DB1215250B5006FE110 /* MRAG_SmartBoundaryInfo.h */,
+				F9941DB2215250B5006FE110 /* MRAGrid.h */,
+				F9941DB3215250B5006FE110 /* MRAGrid.inl */,
+				F9941DB4215250B5006FE110 /* MRAGridHelpers.h */,
+			);
+			path = MRAGcore;
+			sourceTree = "<group>";
+		};
+		F9941DB5215250B5006FE110 /* MRAGio */ = {
+			isa = PBXGroup;
+			children = (
+				F9941DB6215250B5006FE110 /* DumpScalarToVP.h */,
+				F9941DB7215250B5006FE110 /* IF3D_DumpToVP.h */,
+				F9941DB8215250B5006FE110 /* MRAG_IO_ArgumentParser.h */,
+				F9941DB9215250B5006FE110 /* MRAG_IO_BaseClass.h */,
+				F9941DBA215250B5006FE110 /* MRAG_IO_Binary.h */,
+				F9941DBB215250B5006FE110 /* MRAG_IO_Native.h */,
+				F9941DBC215250B5006FE110 /* MRAG_IO_VTK.h */,
+				F9941DBD215250B5006FE110 /* MRAG_IO_VTKMB.h */,
+				F9941DBE215250B5006FE110 /* MRAG_IO_VTKNative.h */,
+				F9941DBF215250B5006FE110 /* MRAG_IO_VTU3D.h */,
+			);
+			path = MRAGio;
+			sourceTree = "<group>";
+		};
+		F9941DC0215250B5006FE110 /* MRAGmultithreading */ = {
+			isa = PBXGroup;
+			children = (
+				F9941DC1215250B5006FE110 /* MRAGAddressable_CUDA.h */,
+				F9941DC2215250B5006FE110 /* MRAGBBPackHandler_CUDA.cpp */,
+				F9941DC3215250B5006FE110 /* MRAGBBPackHandler_CUDA.h */,
+				F9941DC4215250B5006FE110 /* MRAGBlockCollection_CUDA.h */,
+				F9941DC5215250B5006FE110 /* MRAGBlockProcessing_CUDA.cpp */,
+				F9941DC6215250B5006FE110 /* MRAGBlockProcessing_CUDA.h */,
+				F9941DC7215250B5006FE110 /* MRAGBlockProcessing_CUDACore.cu */,
+				F9941DC8215250B5006FE110 /* MRAGBlockProcessing_CUDACore.h */,
+				F9941DC9215250B5006FE110 /* MRAGBlockProcessing_SingleCPU.h */,
+				F9941DCA215250B5006FE110 /* MRAGBlockProcessing_TBB.h */,
+				F9941DCB215250B5006FE110 /* MRAGWrapperCUDA.h */,
+			);
+			path = MRAGmultithreading;
+			sourceTree = "<group>";
+		};
+		F9941DCC215250B5006FE110 /* MRAGscience */ = {
+			isa = PBXGroup;
+			children = (
+				F9941DCD215250B5006FE110 /* MRAGAutomaticRefiner.h */,
+				F9941DCE215250B5006FE110 /* MRAGRefiner_SpaceExtension.h */,
+				F9941DCF215250B5006FE110 /* MRAGScienceCore.h */,
+				F9941DD0215250B5006FE110 /* MRAGSimpleLevelsetBlock.h */,
+				F9941DD1215250B5006FE110 /* MRAGSpaceTimeSorter.h */,
+				F9941DD2215250B5006FE110 /* MRAGWeno.h */,
+				F9941DD3215250B5006FE110 /* candidate_SpaceTimeSorterEuler.h */,
+				F9941DD4215250B5006FE110 /* candidate_SpaceTimeSorterRK2.h */,
+				F9941DD5215250B5006FE110 /* candidate_SpaceTimeSorterRK3.h */,
+			);
+			path = MRAGscience;
+			sourceTree = "<group>";
+		};
+		F9941DD6215250B5006FE110 /* MRAGtests */ = {
+			isa = PBXGroup;
+			children = (
+				F9941DD7215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection.h */,
+				F9941DD8215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection_Beta.h */,
+			);
+			path = MRAGtests;
+			sourceTree = "<group>";
+		};
+		F9941DD9215250B5006FE110 /* MRAGvisual */ = {
+			isa = PBXGroup;
+			children = (
+				F9941DDA215250B5006FE110 /* GridViewer.h */,
+				F9941DDB215250B5006FE110 /* MRAGVisualTypes.h */,
+				F9941DDC215250B5006FE110 /* Texture2D.h */,
+			);
+			path = MRAGvisual;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		F9941D2921525079006FE110 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9941DF0215250B5006FE110 /* MRAGHuffmanEncoder.h in Headers */,
+				F9941DEB215250B5006FE110 /* MRAGCompressor.h in Headers */,
+				F9941DEE215250B5006FE110 /* MRAGGridNode.h in Headers */,
+				F9941D6121525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.h in Headers */,
+				F9941E36215250B5006FE110 /* GridViewer.h in Headers */,
+				F9941E1E215250B5006FE110 /* MRAG_IO_VTKMB.h in Headers */,
+				F9941E02215250B5006FE110 /* MRAG_STDTestL1_BlockCollection.h in Headers */,
+				F9941E04215250B5006FE110 /* MRAG_STDTestL1_Compression.h in Headers */,
+				F9941E30215250B5006FE110 /* MRAGWeno.h in Headers */,
+				F9941DDD215250B5006FE110 /* MRAGHeaders.h in Headers */,
+				F9941E11215250B5006FE110 /* MRAG_STDTestL3_LevelsetReinitialization.h in Headers */,
+				F9941E31215250B5006FE110 /* candidate_SpaceTimeSorterEuler.h in Headers */,
+				F9941DFA215250B5006FE110 /* MRAGWavelets_AverageInterp5thOrder.h in Headers */,
+				F9941DF6215250B5006FE110 /* MRAGRefinementPlan.h in Headers */,
+				F9941D362152507A006FE110 /* GliomaSolverXcode.h in Headers */,
+				F9941DF1215250B5006FE110 /* MRAGMatrix2D.h in Headers */,
+				F9941E0C215250B5006FE110 /* MRAG_STDTestL2_Generator.h in Headers */,
+				F9941E19215250B5006FE110 /* MRAG_IO_ArgumentParser.h in Headers */,
+				F9941E08215250B5006FE110 /* MRAG_STDTestL1_memtest.h in Headers */,
+				F9941E28215250B5006FE110 /* MRAGBlockProcessing_SingleCPU.h in Headers */,
+				F9941E2D215250B5006FE110 /* MRAGScienceCore.h in Headers */,
+				F9941DE8215250B5006FE110 /* MRAGCache.h in Headers */,
+				F9941E23215250B5006FE110 /* MRAGBBPackHandler_CUDA.h in Headers */,
+				F9941DFD215250B5006FE110 /* MRAGWavelets_Interp2ndOrder.h in Headers */,
+				F9941E0D215250B5006FE110 /* MRAG_STDTestL2_IC.h in Headers */,
+				F9941DE2215250B5006FE110 /* MRAGBlockFWT.h in Headers */,
+				F9941DDE215250B5006FE110 /* MRAGBitStream.h in Headers */,
+				F9941E26215250B5006FE110 /* MRAGBlockProcessing_CUDA.h in Headers */,
+				F9941D7121525093006FE110 /* Test.h in Headers */,
+				F9941D7321525093006FE110 /* dat2VP.h in Headers */,
+				F9941E03215250B5006FE110 /* MRAG_STDTestL1_BoundaryInfo.h in Headers */,
+				F9941E37215250B5006FE110 /* MRAGVisualTypes.h in Headers */,
+				F9941E38215250B5006FE110 /* Texture2D.h in Headers */,
+				F9941E20215250B5006FE110 /* MRAG_IO_VTU3D.h in Headers */,
+				F9941D6721525093006FE110 /* AdvectionConvectionOperator.h in Headers */,
+				F9941DE3215250B5006FE110 /* MRAGBlockLab.h in Headers */,
+				F9941E35215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection_Beta.h in Headers */,
+				F9941D6B21525093006FE110 /* ReactionDiffusionOperator.h in Headers */,
+				F9941DF9215250B5006FE110 /* MRAGWavelets_AverageInterp3rdOrder.h in Headers */,
+				F9941D7421525093006FE110 /* AdvectionOperator.h in Headers */,
+				F9941E27215250B5006FE110 /* MRAGBlockProcessing_CUDACore.h in Headers */,
+				F9941D6321525093006FE110 /* Glioma_ReactionDiffusion.h in Headers */,
+				F9941D6621525093006FE110 /* Matrix.h in Headers */,
+				F9941E01215250B5006FE110 /* MRAG_STDTestL1.h in Headers */,
+				F9941DFE215250B5006FE110 /* MRAGWavelets_Interp4thOrder.h in Headers */,
+				F9941DED215250B5006FE110 /* MRAGEnvironment.h in Headers */,
+				F9941DFB215250B5006FE110 /* MRAGWavelets_Bior22.h in Headers */,
+				F9941DF2215250B5006FE110 /* MRAGMatrix3D.h in Headers */,
+				F9941D5D21525093006FE110 /* Glioma.h in Headers */,
+				F9941E17215250B5006FE110 /* DumpScalarToVP.h in Headers */,
+				F9941E1D215250B5006FE110 /* MRAG_IO_VTK.h in Headers */,
+				F9941DE6215250B5006FE110 /* MRAGBoundaryBlockInfo.h in Headers */,
+				F9941DF3215250B5006FE110 /* MRAGMatrix4D.h in Headers */,
+				F9941E1C215250B5006FE110 /* MRAG_IO_Native.h in Headers */,
+				F9941E15215250B5006FE110 /* MRAGrid.h in Headers */,
+				F9941D6D21525093006FE110 /* HelmholtzSolver3D_Hypre_MPI.h in Headers */,
+				F9941E29215250B5006FE110 /* MRAGBlockProcessing_TBB.h in Headers */,
+				F9941DF8215250B5006FE110 /* MRAGRefiner_Greedy.h in Headers */,
+				F9941DF5215250B5006FE110 /* MRAGProfiler.h in Headers */,
+				F9941E21215250B5006FE110 /* MRAGAddressable_CUDA.h in Headers */,
+				F9941E2F215250B5006FE110 /* MRAGSpaceTimeSorter.h in Headers */,
+				F9941DEF215250B5006FE110 /* MRAGHelperMacros.h in Headers */,
+				F9941D6921525093006FE110 /* HelmholtzSolver3D_Hypre.h in Headers */,
+				F9941DE9215250B5006FE110 /* MRAGCommon.h in Headers */,
+				F9941E0F215250B5006FE110 /* MRAG_STDTestL3_Diffusion.h in Headers */,
+				F9941D6821525093006FE110 /* HelmholtzSolver2D_Hypre.h in Headers */,
+				F9941DDF215250B5006FE110 /* MRAGBlock.h in Headers */,
+				F9941DF7215250B5006FE110 /* MRAGRefiner.h in Headers */,
+				F9941D6421525093006FE110 /* Glioma_Types.h in Headers */,
+				F9941E16215250B5006FE110 /* MRAGridHelpers.h in Headers */,
+				F9941DE7215250B5006FE110 /* MRAGBoundaryBlockPack.h in Headers */,
+				F9941DE0215250B5006FE110 /* MRAGBlockCollapser.h in Headers */,
+				F9941D6C21525093006FE110 /* TimeUpdateOperator.h in Headers */,
+				F9941E05215250B5006FE110 /* MRAG_STDTestL1_Generator.h in Headers */,
+				F9941E1B215250B5006FE110 /* MRAG_IO_Binary.h in Headers */,
+				F9941DEA215250B5006FE110 /* MRAGCompressionPlan.h in Headers */,
+				F9941E32215250B5006FE110 /* candidate_SpaceTimeSorterRK2.h in Headers */,
+				F9941DEC215250B5006FE110 /* MRAGEncoder.h in Headers */,
+				F9941E0B215250B5006FE110 /* MRAG_STDTestL2_Compression.h in Headers */,
+				F9941E14215250B5006FE110 /* MRAG_SmartBoundaryInfo.h in Headers */,
+				F9941E10215250B5006FE110 /* MRAG_STDTestL3_IO.h in Headers */,
+				F9941DE1215250B5006FE110 /* MRAGBlockCollection.h in Headers */,
+				F9941E12215250B5006FE110 /* MRAG_STDTestL3_VectorAdvection.h in Headers */,
+				F9941DE4215250B5006FE110 /* MRAGBlockSplitter.h in Headers */,
+				F9941D6F21525093006FE110 /* HelmholtzTest.h in Headers */,
+				F9941E00215250B5006FE110 /* MRAG_BBInfoCreator.h in Headers */,
+				F9941E2B215250B5006FE110 /* MRAGAutomaticRefiner.h in Headers */,
+				F9941D6A21525093006FE110 /* PressureOperator.h in Headers */,
+				F9941E2C215250B5006FE110 /* MRAGRefiner_SpaceExtension.h in Headers */,
+				F9941E09215250B5006FE110 /* MRAG_STDTestL2.h in Headers */,
+				F9941E33215250B5006FE110 /* candidate_SpaceTimeSorterRK3.h in Headers */,
+				F9941D382152507B006FE110 /* GliomaSolverXcodePriv.h in Headers */,
+				F9941D7521525093006FE110 /* HypreSolver.h in Headers */,
+				F9941E1F215250B5006FE110 /* MRAG_IO_VTKNative.h in Headers */,
+				F9941E06215250B5006FE110 /* MRAG_STDTestL1_Grid.h in Headers */,
+				F9941E0E215250B5006FE110 /* MRAG_STDTestL2_Refinement.h in Headers */,
+				F9941E34215250B5006FE110 /* MRAG_STDTestL4_LevelsetAdvection.h in Headers */,
+				F9941E18215250B5006FE110 /* IF3D_DumpToVP.h in Headers */,
+				F9941DFC215250B5006FE110 /* MRAGWavelets_Haar.h in Headers */,
+				F9941E24215250B5006FE110 /* MRAGBlockCollection_CUDA.h in Headers */,
+				F9941D5F21525093006FE110 /* Glioma_BrainDeformation.h in Headers */,
+				F9941E13215250B5006FE110 /* MRAG_SmartBlockFinder.h in Headers */,
+				F9941E2E215250B5006FE110 /* MRAGSimpleLevelsetBlock.h in Headers */,
+				F9941E1A215250B5006FE110 /* MRAG_IO_BaseClass.h in Headers */,
+				F9941E2A215250B5006FE110 /* MRAGWrapperCUDA.h in Headers */,
+				F9941E07215250B5006FE110 /* MRAG_STDTestL1_Refinement.h in Headers */,
+				F9941E0A215250B5006FE110 /* MRAG_STDTestL2_Boundary.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		F9941D2A21525079006FE110 /* GliomaSolverXcode */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F9941D3D2152507B006FE110 /* Build configuration list for PBXNativeTarget "GliomaSolverXcode" */;
+			buildPhases = (
+				F9941D2721525079006FE110 /* Sources */,
+				F9941D2821525079006FE110 /* Frameworks */,
+				F9941D2921525079006FE110 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GliomaSolverXcode;
+			productName = GliomaSolverXcode;
+			productReference = F9941D2B21525079006FE110 /* GliomaSolverXcode.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F9941D2321525079006FE110 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0640;
+				ORGANIZATIONNAME = Lipkova;
+				TargetAttributes = {
+					F9941D2A21525079006FE110 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+				};
+			};
+			buildConfigurationList = F9941D2621525079006FE110 /* Build configuration list for PBXProject "GliomaSolverXcode" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F9941D2221525079006FE110;
+			productRefGroup = F9941D2C21525079006FE110 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F9941D2A21525079006FE110 /* GliomaSolverXcode */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F9941D2721525079006FE110 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9941DE5215250B5006FE110 /* MRAGBoundaryBlockInfo.cpp in Sources */,
+				F9941D5E21525093006FE110 /* Glioma_BrainDeformation.cpp in Sources */,
+				F9941D6221525093006FE110 /* Glioma_ReactionDiffusion.cpp in Sources */,
+				F9941D7021525093006FE110 /* Test.cpp in Sources */,
+				F9941D6521525093006FE110 /* Glioma_main.cpp in Sources */,
+				F9941D7221525093006FE110 /* dat2VP.cpp in Sources */,
+				F9941D6E21525093006FE110 /* HelmholtzTest.cpp in Sources */,
+				F9941E22215250B5006FE110 /* MRAGBBPackHandler_CUDA.cpp in Sources */,
+				F9941DF4215250B5006FE110 /* MRAGProfiler.cpp in Sources */,
+				F9941D3A2152507B006FE110 /* GliomaSolverXcode.cp in Sources */,
+				F9941E25215250B5006FE110 /* MRAGBlockProcessing_CUDA.cpp in Sources */,
+				F9941D6021525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.cpp in Sources */,
+				F9941DFF215250B5006FE110 /* MRAGWavelets_StaticData.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F9941D3B2152507B006FE110 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F9941D3C2152507B006FE110 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F9941D3E2152507B006FE110 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = GliomaSolverXcode/Info.plist;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F9941D3F2152507B006FE110 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = GliomaSolverXcode/Info.plist;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F9941D2621525079006FE110 /* Build configuration list for PBXProject "GliomaSolverXcode" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9941D3B2152507B006FE110 /* Debug */,
+				F9941D3C2152507B006FE110 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F9941D3D2152507B006FE110 /* Build configuration list for PBXNativeTarget "GliomaSolverXcode" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9941D3E2152507B006FE110 /* Debug */,
+				F9941D3F2152507B006FE110 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F9941D2321525079006FE110 /* Project object */;
+}

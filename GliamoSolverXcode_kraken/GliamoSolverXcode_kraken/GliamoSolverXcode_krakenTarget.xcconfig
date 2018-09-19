@@ -1,7 +1,0 @@
-	PRODUCT_NAME = 	GliamoSolverXcode_kraken;
-	WRAPPER_EXTENSION = bundle;
-	INSTALL_PATH = "$(HOME)/Library/Bundles"
-	INFOPLIST_FILE = GliamoSolverXcode_kraken/Info.plist
-	GCC_ENABLE_CPP_EXCEPTIONS = YES;
-	GCC_ENABLE_CPP_RTTI = YES;
-	GCC_SYMBOLS_PRIVATE_EXTERN = YES;

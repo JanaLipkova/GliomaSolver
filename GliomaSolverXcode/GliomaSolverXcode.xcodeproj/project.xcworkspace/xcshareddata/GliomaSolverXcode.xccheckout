@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>9477439F-AE6F-4135-9BA8-3879AEDAF601</string>
+	<key>IDESourceControlProjectName</key>
+	<string>project</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>72A0E94DDB01C96C94E34A071B13B0B7ED005AE1</key>
+		<string>https://github.com/JanaLipkova/GliomaSolver.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>GliomaSolverXcode/GliomaSolverXcode.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>72A0E94DDB01C96C94E34A071B13B0B7ED005AE1</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/JanaLipkova/GliomaSolver.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>72A0E94DDB01C96C94E34A071B13B0B7ED005AE1</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>72A0E94DDB01C96C94E34A071B13B0B7ED005AE1</string>
+			<key>IDESourceControlWCCName</key>
+			<string>GliomaSolver</string>
+		</dict>
+	</array>
+</dict>
+</plist>
