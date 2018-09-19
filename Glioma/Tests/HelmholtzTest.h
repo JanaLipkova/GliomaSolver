@@ -36,7 +36,7 @@ private:
     int                                     nprocs;
     
     
-    static void _ic_Square(Grid<W,B>& grid);
+    static void _ic_Square(Grid<W,B>& grid, int rank);
     void		_computeError();
     void        _dump(int counter);
         

@@ -65,7 +65,7 @@ namespace MRAG
 			{
 				const int nthreads = threads==-1? _MRAG_TBB_NTHREADS_HINT : threads;
 				init = new tbb::task_scheduler_init(nthreads);
-				printf("INITIALIZED THREADS=%d (_MRAG_TBB_NTHREADS_HINT is %d)\n", nthreads, _MRAG_TBB_NTHREADS_HINT);
+				//printf("INITIALIZED THREADS=%d (_MRAG_TBB_NTHREADS_HINT is %d)\n", nthreads, _MRAG_TBB_NTHREADS_HINT);
 			}
 #endif
 

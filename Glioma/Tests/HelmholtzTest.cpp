@@ -38,7 +38,7 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv)
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
-    _ic_Square(*grid);
+    _ic_Square(*grid, rank);
     _dump(0);
     
     isDone              = false;
@@ -47,7 +47,7 @@ HelmholtzTest::HelmholtzTest(int argc, const char ** argv): parser(argc,argv)
 
 HelmholtzTest::~HelmholtzTest()
 {
-    std::cout << "------Adios muchachos------" << std::endl;
+    if(rank==0) std::cout << "------Adios muchachos------" << std::endl;
 }
 
 #pragma mark InitialConditions
@@ -59,9 +59,9 @@ HelmholtzTest::~HelmholtzTest()
  -----------------------
  p = cos(c*PI*x) * cos(c*PI*y)
  f =  (dim. * c*c * PI*PI + 1.) * cos(c*PI*x) * cos(c*PI*y); */
-void HelmholtzTest::_ic_Square(Grid<W,B>& grid)
+void HelmholtzTest::_ic_Square(Grid<W,B>& grid, int rank)
 {
-    std::cout <<" Test case on a SQUARE"<< std::endl;
+    if(rank==0) std::cout <<" Test case on a SQUARE"<< std::endl;
     
     const float radius      = 0.25;
     const double tau        = 1.e-10;    // cut of phase field function on LHS

@@ -38,18 +38,15 @@ int main(int argc,const char ** argv)
     
     if(rank==0){
         printf("\n\n       MRAG Launched         \n\n");
-        printf("Running with %d MPI processes \n", size);
+        printf("Running with %d MPI processes: \n", size);
     }
 #else
     printf("\n\n       MRAG Launched         \n\n");
-
 #endif
     
     ArgumentParser parser(argc, argv);
     Environment::setup(max(1, parser("-nthreads").asInt()));
-    
     Glioma * s = NULL;
-    printf("INPUT IS %s\n", parser("-model").asString().data());
     
     if(parser("-model").asString() == "RD")
         s = new Glioma_ReactionDiffusion(argc, (const char **)argv);

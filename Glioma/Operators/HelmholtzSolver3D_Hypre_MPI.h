@@ -356,7 +356,7 @@ class HelmholtzSolver3D_Hypre_MPI
             HYPRE_StructPCGGetFinalRelativeResidualNorm( solver, &final_res_norm );
         }
         
-        if(bVerbose)
+        if((bVerbose)&&(rank==0))
         {
             printf("=========== HYPRE ===========\n");
             printf("Iterations = %d\n", num_iterations);
