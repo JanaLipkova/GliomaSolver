@@ -154,7 +154,7 @@ struct Cell
 #ifdef _TESTS
         switch(i)
         {
-            case 0: return p;
+            case 0: return p; //vp
             case 1: return exact;
             case 2: return pff;
             case 3: return chi;
@@ -163,7 +163,7 @@ struct Cell
 #else
 		switch(i)
 		{
-            case 0:  return vp;//phi;
+            case 0:  return phi;
             case 1:  return phi + 0.1 * p_g + 0.2 * p_w;
             case 2:  return p_w;
             case 3:  return p_g;
@@ -174,7 +174,7 @@ struct Cell
             case 8:  return ux * chi;
             case 9:  return uy * chi;
             case 10: return uz * chi;
-            case 11: return p  * chi;
+            case 11: return p ;
             case 12: return chi;
             case 13: return f;
             case 14: return pff;

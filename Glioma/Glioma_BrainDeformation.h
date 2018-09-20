@@ -1,6 +1,6 @@
 //
 //  Glioma_BrainDeformation.h
-//  DeformationsXcode
+//  GliomaSolver
 //
 //  Created by Lipkova on 17/07/18.
 //  Copyright (c) 2018 Lipkova. All rights reserved.
@@ -9,9 +9,11 @@
 #ifndef __Glioma_BrainDeformation__
 #define __Glioma_BrainDeformation__
 
+
 #pragma once
 #include "Glioma_Types.h"
-#include "Operators/HelmholtzSolver3D_Hypre.h"
+#include "../Operators/HelmholtzSolver3D_Hypre.h"
+#include "Operators/HelmholtzSolver3D_Hypre_MPI.h"
 
 class Glioma_BrainDeformation: public Glioma
 {
@@ -34,11 +36,13 @@ private:
     bool                                    bVerbose;
     bool                                    bProfiler;
     bool                                    bVTK;
-    int                                     pID;
     Real                                    L;
+    string                                  PatientFileName;
+    int                                     rank;
+    int                                     nprocs;
     
-    static void _ic(Grid<W,B>& grid, int pID, Real& L);
-    static void _icSphere3Parts(Grid<W,B>& grid, Real& L);
+    static void _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L );
+    static void _icSphere3Parts(Grid<W,B>& grid, int rank, Real& L);
     double      _estimate_dt(double Diff_dt, double CFL);
     Real        _compute_maxvel();
     void        _computePressureSource(const int nParallelGranularity, const Real rho);
@@ -46,8 +50,6 @@ private:
     void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const Real Dw, const Real Dg, const Real rho);
     void        _advectionConvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt);
     void		_dump(int counter);
-    
-    HelmholtzSolver3D_Hypre helmholtz_solver3D;
     
 public:
     Glioma_BrainDeformation(int argc, const char ** argv);

@@ -1,6 +1,6 @@
 //
 //  Glioma_ReactionDiffusion.cpp
-//  GliomaXcode
+//  GliomaSolver
 //
 //  Created by Lipkova on 10/06/15.
 //  Copyright (c) 2015 Lipkova. All rights reserved.
@@ -17,27 +17,25 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
 {
     bVerbose  = parser("-verbose").asBool(1);
     bProfiler = parser("-dumpfreq").asBool(1);
+    bVTK        = parser("-vtk").asBool();
+    bAdaptivity = parser("-adaptive").asBool();
     
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("//////////////////          Glioma Reaction Diffusion           ////////////////\n");
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
-    if(bVerbose) printf("RD INIT! nThreads=%d, blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", nThreads, blockSize, "w", blocksPerDimension, maxLevel);
+    if(bVerbose) printf("Set up: blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", blockSize, "w", blocksPerDimension, maxLevel);
     
     refiner		= new Refiner_SpaceExtension(resJump,maxLevel);
     compressor	= new Compressor(resJump);
-    Environment::setup();
-    
-    grid = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
+    grid        = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
     grid->setCompressor(compressor);
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
-    bVTK        = parser("-vtk").asBool();
-    bAdaptivity = parser("-adaptive").asBool();
-    pID         = parser("-pID").asInt();
+    PatientFileName = parser("-PatFileName").asString();
     L = 1;
     
-    _ic(*grid, pID, L);
+    _ic(*grid, PatientFileName, L);
     _dump(0);
     
     isDone              = false;
@@ -57,30 +55,16 @@ Glioma_ReactionDiffusion::~Glioma_ReactionDiffusion()
 // 1) read in anatomies - rescaled to [0,1]^3
 // 2) read in tumor center of mass + initialize tumor around
 // 3) set the characteristic length L as the length of the data
-void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, int pID, Real& L)
+void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real& L)
 {
-    char dataFolder   [200];
-    char patientFolder[200];
+    printf("Reading data from file: %s \n", PatientFileName.c_str());
+   
     char anatomy      [200];
-    
-#ifdef KRAKEN
-    sprintf(dataFolder,"/home/jana/Work/GliomaAdvance/source/Anatomy/");
-#elif defined(LRZ_CLUSTER)
-    sprintf(dataFolder,"/home/hpc/txh01/di49zin/GliomaAdvance/GliomaSolver/Anatomy/");
-#elif defined(JANA)
-    sprintf(dataFolder,"/Users/lipkova 1/WORK/GliomaSolver/Anatomy/");
-#else
-    sprintf(dataFolder,"../../Anatmoy/");
-#endif
-    
-    sprintf(patientFolder, "%sPatient%02d/P%02d",dataFolder,pID,pID);
-    printf("Reading anatomy from: %s \n", patientFolder);
-    
-    sprintf(anatomy, "%s_GM.dat", patientFolder);
+    sprintf(anatomy, "%s_GM.dat", PatientFileName.c_str());
     MatrixD3D GM(anatomy);
-    sprintf(anatomy, "%s_WM.dat", patientFolder);
+    sprintf(anatomy, "%s_WM.dat", PatientFileName.c_str());
     MatrixD3D WM(anatomy);
-    sprintf(anatomy, "%s_CSF.dat", patientFolder);
+    sprintf(anatomy, "%s_CSF.dat", PatientFileName.c_str());
     MatrixD3D CSF(anatomy);
     
     int brainSizeX = (int) GM.getSizeX();
@@ -153,10 +137,10 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, int pID, Real& L)
                             pWM    = pWM  / all;
                             pCSF   = pCSF / all;
                             
-                            pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;  // enhance csf for hemisphere separation
-                            block(ix,iy,iz).p_csf = pCSF;
-                            
-                            if(pCSF  < 1.)
+//                            pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;  // enhance csf for hemisphere separation
+//                            block(ix,iy,iz).p_csf = pCSF;
+//                            
+//                            if(pCSF  < 1.)
                             {
                                 block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM); // low level mixing for nicer visualisation
                                 block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
@@ -208,7 +192,7 @@ void Glioma_ReactionDiffusion:: _dump(int counter)
     if(bVTK)
     {
         char filename[256];
-        sprintf(filename,"P%02d_data_%04d",pID, counter);
+        sprintf(filename,"Data_%04d", counter);
         
         IO_VTKNative3D<W,B, 5,0 > vtkdumper2;
         vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);

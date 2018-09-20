@@ -33,40 +33,41 @@ static int maxStencil[2][3] = {
 };
 
 
-Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): parser(argc, argv), helmholtz_solver3D(argc,argv)
+Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): parser(argc, argv)
 {
     bVerbose  = parser("-verbose").asBool(1);
     bProfiler = parser("-profiler").asBool(1);
+    bVTK      = parser("-vtk").asBool();
     
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    
+    if(rank==0){
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("//////////////////       Glioma Brain Deformations Model        ////////////////\n");
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
-    if(bVerbose) printf("INIT! nThreads=%d, blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", nThreads, blockSize, "w", blocksPerDimension, maxLevel);
+    if(bVerbose) printf("Set up: blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", blockSize, "w", blocksPerDimension, maxLevel);
+    }
     
     refiner		= new Refiner_SpaceExtension();
     compressor	= new Compressor();
-    Environment::setup();
-    
-    grid = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
+    grid        = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
     grid->setCompressor(compressor);
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
     
-    bVTK = parser("-vtk").asBool();
-    pID  = parser("-pID").asInt();
-    L = 1;
-    
-    if(pID == 100)
-        _icSphere3Parts(*grid, L);
+    PatientFileName = parser("-PatFileName").asString();
+    L               = 1;
+        
+    if(parser("-ICtype").asInt(1)==0)
+    _icSphere3Parts(*grid,rank,L);
     else
-        _ic(*grid, pID, L);
+    _ic(*grid, rank, PatientFileName, L);
     
     
-    if(parser("-bDumpIC").asBool(0))
+    if((parser("-bDumpIC").asBool(0))&&(rank==0))
         _dump(0);
-    
-    //MPI_Init(&argc, (char ***)&argv);
     
     isDone              = false;
     whenToWriteOffset	= parser("-dumpfreq").asDouble();
@@ -77,17 +78,15 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
 
 Glioma_BrainDeformation::~Glioma_BrainDeformation()
 {
-    //MPI_Finalize();
-    std::cout << "------Adios muchachos------" << std::endl;
+    if(rank==0) std::cout << "------Adios muchachos------" << std::endl;
 }
-
 
 
 #pragma mark InitialConditions
 /* 3 componten structure: WM, GM, CSF + Tumor*/
-void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
+void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, int rank, Real& L)
 {
-    std::cout <<" Test case: Sphere with 3 components \n"<< std::endl;
+    if(rank==0) std::cout <<" Test case: Sphere with 3 components \n"<< std::endl;
     
     const double AnatmoyRadius	= 0.4;
     const double tumorRad		= 0.1;    // tumor radius
@@ -106,7 +105,7 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
         B& block = grid.getBlockCollection()[info.blockID];
         
         double h    = vInfo[0].h[0];
-        double eps  = 1.1 * h;             // phase field fun. smoothening
+        double eps  = 0.2*h;//1.1 * h;             // phase field fun. smoothening
         double iw = 1./(smooth_sup * h);   // width of tumor smoothening
         
         for(int iz=0; iz<B::sizeZ; iz++)
@@ -131,27 +130,27 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
                     const double pff = 0.5 * (1. - tanh(3.*r / eps)) ;
                     block(ix,iy,iz).pff = max(pff,tau);
                     block(ix,iy,iz).chi = (r<= 0) ? 1. : 0.;
-                    block(ix,iy,iz).p   = 0.;
                     
                     // anatomy
                     const Real theta = atan2((x[1]-0.5), (x[0]-0.5) ) * 180. / (M_PI);
                     
-                    if (block(ix,iy,iz).chi > tau)
+                    if (block(ix,iy,iz).pff > tau)
                     {
-//                        if ((0<=theta)&&(theta < 120))
-//                            block(ix,iy,iz).p_w = 1.;
-//                        else if ((-120 <= theta)&&(theta < 0))
-//                            block(ix,iy,iz).p_g = 1.;
-//                        else
-//                            block(ix,iy,iz).p_csf = 1.;
-                        
-                        block(ix,iy,iz).p_w = 1.;
-                        
-                        block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
-                        block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
-                        block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
-                        
+                        if ((0<=theta)&&(theta < 120))
+                            block(ix,iy,iz).p_w = 1.;
+                        else if ((-120 <= theta)&&(theta < 0))
+                            block(ix,iy,iz).p_g = 1.;
+                        else
+                            block(ix,iy,iz).p_csf = 1.;
                     }
+                    
+                    block(ix,iy,iz).p_w = (block(ix,iy,iz).p_csf==1)? 1. : block(ix,iy,iz).p_w;
+                    block(ix,iy,iz).p_csf = 0;
+                    
+                    //tissue concetration
+                    block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
+                    block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
+                    block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
                 }
         
         grid.getBlockCollection().release(info.blockID);
@@ -160,40 +159,131 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, Real& L)
 }
 
 
+//void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L )
+//{
+//    if(rank==0) printf("Reading data from file: %s \n", PatientFileName.c_str());
+//    
+//    char anatomy      [200];
+//    sprintf(anatomy, "%s_GM.dat", PatientFileName.c_str() );
+//    MatrixD3D GM(anatomy);
+//    sprintf(anatomy, "%s_WM.dat", PatientFileName.c_str());
+//    MatrixD3D WM(anatomy);
+//    sprintf(anatomy, "%s_CSF.dat", PatientFileName.c_str());
+//    MatrixD3D CSF(anatomy);
+//    sprintf(anatomy, "%s_PFF.dat", PatientFileName.c_str());
+//    MatrixD3D PFF(anatomy);
+//    
+//    
+//    int brainSizeX = (int) GM.getSizeX();
+//    int brainSizeY = (int) GM.getSizeY();
+//    int brainSizeZ = (int) GM.getSizeZ();
+//    if(rank==0) printf("brainSizeX=%d, brainSizeY=%d, brainSizeZ= %d \n", brainSizeX, brainSizeY, brainSizeZ);
+//    
+//    int brainSizeMax = max(brainSizeX, max(brainSizeY,brainSizeZ));
+//    L                = brainSizeMax * 0.1;   // voxel spacing 1mm, convert from mm to cm  // L = 22.9 cm
+//    
+//    double brainHx = 1.0 / ((double)(brainSizeMax-1)); // should be w.r.t. longest dimension for correct aspect ratio
+//    double brainHy = 1.0 / ((double)(brainSizeMax-1)); // should be w.r.t. longest dimension for correct aspect ratio
+//    double brainHz = 1.0 / ((double)(brainSizeMax-1)); // should be w.r.t. longest dimension for correct aspect ratio
+//    
+//    // tumour parameters
+//    const Real tumorRadius = 3./(blockSize * blocksPerDimension);//0.01;//0.005;//0.01;
+//    const Real smooth_sup  = 3.;		// suppor of smoothening, over how many gp to smooth
+//    const Real c[3] = { 0.6, 0.7, 0.5};
+//    
+//    double pGM, pWM, pCSF, pPFF;
+//    const double tau = 1.e-10;
+//    
+//    
+//    
+//    const Real center[3]   = {0.5, 0.5, 0.5};
+//    const double AnatmoyRadius	= 0.4;
+//
+//    vector<BlockInfo> vInfo = grid.getBlocksInfo();
+//    
+//    for(int i=0; i<vInfo.size(); i++)
+//    {
+//        BlockInfo& info = vInfo[i];
+//        B& block = grid.getBlockCollection()[info.blockID];
+//        
+//        const float h = vInfo[0].h[0]; //i.e.ersusres same initialisaition for grids of different resolution
+//        double eps  = 0.2*h;//1.1 * h;             // phase field fun. smoothening
+//        const float iw = 1./(smooth_sup * h);   // width of smoothening => now it is over two grid points
+//        
+//        for(int iz=0; iz<B::sizeZ; iz++)
+//            for(int iy=0; iy<B::sizeY; iy++)
+//                for(int ix=0; ix<B::sizeX; ix++)
+//                {
+//                    Real x[3];
+//                    info.pos(x, ix, iy, iz);
+//
+//                    
+//                        
+//                        //tissue concetration
+//                        block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
+//                        block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
+//                        block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
+//                        
+//                        
+//                        // tumor
+//                        const Real p[3] = {x[0] - c[0], x[1] - c[1], x[2] - c[2]};
+//                        const Real dist = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);    // distance of curent voxel from tumor center
+//                        const Real psi  = (dist - tumorRadius)*iw;
+//                        
+//                        if ((psi < -1)  )		// we are in tumor
+//                            block(ix,iy,iz).phi = 1.0;
+//                        else if(( (-1 <= psi) && (psi <= 1) ))
+//                            block(ix,iy,iz).phi = 1.0 * 0.5 * (1 - psi - sin(M_PI*psi)/(M_PI));
+//                        else
+//                            block(ix,iy,iz).phi = 0.0;
+//                        
+//                        // anatomy
+//                        const Real pa[3]  = { x[0] - center[0], x[1] - center[1], x[2] - center[2]};
+//                        const Real dista  = sqrt( pa[0]*pa[0] + pa[1]*pa[1] +pa[2]*pa[2] );
+//                        const Real r     = dista - AnatmoyRadius;    // sign distance function
+//                        
+//                        const double pff = 0.5 * (1. - tanh(3.*r / eps)) ;
+//                        block(ix,iy,iz).pff = max(pff,tau);
+//                        block(ix,iy,iz).chi = (r<= 0) ? 1. : 0.;
+//                        block(ix,iy,iz).p   = 0.;
+//                        
+//                        block(ix,iy,iz).p_w = block(ix,iy,iz).chi;
+//                        block(ix,iy,iz).p_g = block(ix,iy,iz).chi;
+//                        block(ix,iy,iz).p_csf = block(ix,iy,iz).chi;
+//                        
+//                        //tissue concetration
+//                        block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
+//                        block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
+//                        block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
+//
+//                    
+//                }
+//        
+//        grid.getBlockCollection().release(info.blockID);
+//        
+//    }
+//}
 
-void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
+
+void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L )
 {
-    char dataFolder   [200];
-    char patientFolder[200];
+    if(rank==0) printf("Reading data from file: %s \n", PatientFileName.c_str());
+    
     char anatomy      [200];
-    
-#ifdef KRAKEN
-    sprintf(dataFolder,"/home/jana/Work/GliomaAdvance/source/Anatomy/");
-#elif defined(LRZ_CLUSTER)
-    sprintf(dataFolder,"/home/hpc/txh01/di49zin/GliomaAdvance/GliomaSolver/Anatomy/");
-#elif defined(JANA)
-    sprintf(dataFolder,"/Users/lipkova 1/WORK/GliomaSolver/Anatomy/");
-#else
-    sprintf(dataFolder,"../../Anatmoy/");
-#endif
-    
-    sprintf(patientFolder, "%sPatient%02d/P%02d",dataFolder,pID,pID);
-    printf("Reading anatomy from: %s \n", patientFolder);
-    
-    sprintf(anatomy, "%s_GM.dat", patientFolder);
+    sprintf(anatomy, "%s_GM.dat", PatientFileName.c_str() );
     MatrixD3D GM(anatomy);
-    sprintf(anatomy, "%s_WM.dat", patientFolder);
+    sprintf(anatomy, "%s_WM.dat", PatientFileName.c_str());
     MatrixD3D WM(anatomy);
-    sprintf(anatomy, "%s_CSF.dat", patientFolder);
+    sprintf(anatomy, "%s_CSF.dat", PatientFileName.c_str());
     MatrixD3D CSF(anatomy);
-    sprintf(anatomy, "%s_PFF.dat", patientFolder);
+    sprintf(anatomy, "%s_PFF.dat", PatientFileName.c_str());
     MatrixD3D PFF(anatomy);
     
     
     int brainSizeX = (int) GM.getSizeX();
     int brainSizeY = (int) GM.getSizeY();
     int brainSizeZ = (int) GM.getSizeZ();
-    printf("brainSizeX=%d, brainSizeY=%d, brainSizeZ= %d \n", brainSizeX, brainSizeY, brainSizeZ);
+    if(rank==0) printf("brainSizeX=%d, brainSizeY=%d, brainSizeZ= %d \n", brainSizeX, brainSizeY, brainSizeZ);
     
     int brainSizeMax = max(brainSizeX, max(brainSizeY,brainSizeZ));
     L                = brainSizeMax * 0.1;   // voxel spacing 1mm, convert from mm to cm  // L = 22.9 cm
@@ -203,7 +293,7 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
     double brainHz = 1.0 / ((double)(brainSizeMax-1)); // should be w.r.t. longest dimension for correct aspect ratio
     
     // tumour parameters
-    const Real tumorRadius = 0.005;//0.01;
+    const Real tumorRadius = 3./(blockSize * blocksPerDimension);//0.01;//0.005;//0.01;
     const Real smooth_sup  = 3.;		// suppor of smoothening, over how many gp to smooth
     const Real c[3] = { 0.6, 0.7, 0.5};
     
@@ -217,9 +307,9 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
         BlockInfo& info = vInfo[i];
         B& block = grid.getBlockCollection()[info.blockID];
         
-        const float h = 1./128; //vInfo[0].h[0]; i.e.ersusres same initialisaition for grids of different resolution
+        const float h = vInfo[0].h[0]; //i.e.ersusres same initialisaition for grids of different resolution
         const float iw = 1./(smooth_sup * h);   // width of smoothening => now it is over two grid points
-        
+      
         for(int iz=0; iz<B::sizeZ; iz++)
             for(int iy=0; iy<B::sizeY; iy++)
                 for(int ix=0; ix<B::sizeX; ix++)
@@ -250,7 +340,7 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
                         pCSF = (pCSF < 1e-05) ? 0. : pCSF;
                         pPFF = (pPFF < 1e-05) ? 0. : pPFF;
                         
-                        double all = pGM + pWM + pCSF;
+                                                double all = pGM + pWM + pCSF;
                         if(all > 0)
                         {
                             // normalize
@@ -267,12 +357,20 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int pID, Real& L)
                                 block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
                                 block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM);
                             }
+                            
+                            //---------
+                            block(ix,iy,iz).p_g = 0;
+                            block(ix,iy,iz).p_w = 1;
+                            block(ix,iy,iz).p_csf = 0;
+                            
+                            //---------
                         }
                         
                         //tissue concetration
                         block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
                         block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
                         block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
+                        
                         
                         // tumor
                         const Real p[3] = {x[0] - c[0], x[1] - c[1], x[2] - c[2]};
@@ -313,7 +411,7 @@ double Glioma_BrainDeformation::_estimate_dt(double Diff_dt, double CFL)
     
     assert(largest_dt >= smallest_dt);
     
-    if (largest_dt <= Diff_dt)
+    if ((largest_dt <= Diff_dt)&&(rank==0))
         printf("Advection dominated time step Adts = %f, ADLdt=%f, Ddt=%f, returning=%f \n", smallest_dt, largest_dt, Diff_dt, (largest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt) );
     
     return (smallest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt);
@@ -327,7 +425,6 @@ Real Glioma_BrainDeformation::_compute_maxvel()
     map<int, Real> velocities;
     for(vector<BlockInfo>::iterator it=vInfo.begin(); it!=vInfo.end(); it++)
         velocities[it->blockID] = 0;
-    
     
     GetUMax<_DIM> get_velocities(velocities);
     BlockProcessing::process(vInfo, collecton, get_velocities);
@@ -394,8 +491,9 @@ void Glioma_BrainDeformation:: _dump(int counter)
 {
     if (bVTK)
     {
+        if(bVerbose) printf("dumping data %04d \n", counter);
         char filename[256];
-        sprintf(filename,"P%02d_data_%04d",pID,counter);
+        sprintf(filename,"Data_%04d",counter);
         
         IO_VTKNative3D<W,B, 15,0 > vtkdumper2;
         vtkdumper2.Write(*grid, grid->getBoundaryInfo(), filename);
@@ -422,35 +520,35 @@ void Glioma_BrainDeformation::run()
     int     iCounter    = 1;
     double  t           = 0.;
     
-    printf("Dg=%e, Dw=%e, dt= %e, rho=%e \n", Dg, Dw, dt, rho);
+    if(rank==0) printf("Dg=%e, Dw=%e, dt= %e, rho=%e \n", Dg, Dw, dt, rho);
     
-    // relaxation parameters
-    const bool bCG          = 1;
+    // relaxation and mobility parameters
     const bool bRelaxation  = 1;
+    const bool bMobility    = parser("-bMobility").asBool(0);
+
+    vector<Real> kappa(3,1);
+    vector<Real> mobility(3,1);   // CSF, WM, GM
+
+    if(bRelaxation){
+        kappa.push_back(parser("-kCSF").asDouble()); //  [m.s / kg] * Kstar = [L* T* / M* ]
+        kappa.push_back(parser("-kWM").asDouble()); //  [m.s / kg] * Kstar = [L* T* / M* ]
+        kappa.push_back(parser("-kGM").asDouble()); //  [m.s / kg] * Kstar = [L* T* / M* ]
+        if(rank==0) printf("kCSF=%f, kWM=%f, kGM=%f \n", kappa[0], kappa[1], kappa[2]);
+    }
     
-    const Real kCSF = parser("-kCSF").asDouble(); //  [m.s / kg] * Kstar = [L* T* / M* ]
-    const Real kWM  = parser("-kWM").asDouble();  //  [m.s / kg] * Kstar = [L* T* / M* ]
-    const Real kGM  = parser("-kGM").asDouble();  //  [m.s / kg] * Kstar = [L* T* / M* ]
-    
-    vector<Real> kappa;
-    kappa.push_back(kCSF);
-    kappa.push_back(kWM);
-    kappa.push_back(kGM);
-    
-    printf("kCSF=%f, kWM=%f, kGM=%f, bVerbose=%i \n", kCSF, kWM, kGM, bVerbose);
-    
-    // mobility parameters
-    const bool bMobility = parser("-bMobility").asBool(0);
-    vector<Real> mobility;   // CSF, WM, GM
-    
-    if(bMobility)
-    {
+    if(bMobility){
         mobility.push_back(parser("-mCSF").asDouble(1)); //[m^3 s/ kg] * Mstar = [L*^3 T* / M*]
         mobility.push_back(parser("-mWM").asDouble(1));
         mobility.push_back(parser("-mGM").asDouble(1));
-        
-        printf("mCSF=%f, mWM=%f, mGM=%f\n", mobility[0], mobility[1], mobility[2]);
+        if(rank==0) printf("mCSF=%f, mWM=%f, mGM=%f\n", mobility[0], mobility[1], mobility[2]);
     }
+    
+    
+    /* Set up Hypre solver */
+    bool bCG = 1;
+//    HelmholtzSolver3D_Hypre_MPI helmholtz_solver;
+    HelmholtzSolver3D_Hypre_MPI helmholtz_solver;
+    helmholtz_solver.setup_hypre(*grid, rank, nprocs, bVerbose);//, bCG, bRelaxation, &kappa, bMobility, &mobility);
     
     while (t <= tend)
     {
@@ -461,11 +559,13 @@ void Glioma_BrainDeformation::run()
         if(bProfiler) profiler.getAgent("PressureSource").start();
         _computePressureSource(nParallelGranularity,rho);
         if(bProfiler) profiler.getAgent("PressureSource").stop();
-        
+        if(rank==0) _dump(iCounter++);
+
         if(bProfiler) profiler.getAgent("Helmholtz").start();
-        helmholtz_solver3D(*grid, bVerbose, bCG, bRelaxation, &kappa, bMobility, &mobility);
+        helmholtz_solver.solve();
         if(bProfiler) profiler.getAgent("Helmholtz").stop();
-        
+        if(rank==0) _dump(iCounter++);
+
         if(bProfiler) profiler.getAgent("Velocity").start();
         _computeVelocities(boundaryInfo, bMobility, &mobility);
         if(bProfiler) profiler.getAgent("Velocity").stop();
@@ -482,21 +582,29 @@ void Glioma_BrainDeformation::run()
         t                   += dt   ;
         numberOfIterations  ++      ;
         
-        if ( t >= ((double)(whenToWrite)) )
+        //if ( t >= ((double)(whenToWrite)) )
         {
             if(bProfiler) profiler.getAgent("I/O").start();
-            _dump(iCounter);
+            if(rank==0) _dump(iCounter++);
             if(bProfiler) profiler.getAgent("I/O").stop();
             
             whenToWrite = whenToWrite + whenToWriteOffset;
-            iCounter++;
         }
     }
     
+    if(rank == 0)
     _dump(iCounter);
     
+    isDone = 1;
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+    helmholtz_solver.clean();
+    printf("calling done by rank = %d \n",rank);
+    
+    if(rank==0){
     if(bVerbose) profiler.printSummary();
     if(bVerbose) printf("**** Dumping done\n");
     if(bVerbose) printf("\n\n Run Finished \n\n");
+    }
 }
 

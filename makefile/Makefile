@@ -115,7 +115,7 @@ MRAGWavelets_StaticData.o \
 Test.o\
 
 ifeq "$(helmholtz)" "hypre"
-#OBJECTS += Glioma_BrainDeformation.o 
+OBJECTS += Glioma_BrainDeformation.o 
 OBJECTS += HelmholtzTest.o 
 endif
 

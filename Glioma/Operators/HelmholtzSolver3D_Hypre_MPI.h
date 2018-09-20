@@ -16,6 +16,10 @@
 #ifndef GliomaSolverXcode_HelmholtzSolver3D_Hypre_MPI_h
 #define GliomaSolverXcode_HelmholtzSolver3D_Hypre_MPI_h
 
+#include <_hypre_utilities.h>
+#include <HYPRE_krylov.h>
+#include <HYPRE_sstruct_ls.h>
+
 class HelmholtzSolver3D_Hypre_MPI
 {
     HYPRE_StructGrid     hypre_grid;
@@ -478,11 +482,11 @@ public:
         this->blocksPerProcesor = nMRAGblocks / nprocs;
         
         if((rank==0)&&(bVerbose)){
-            printf("----------------------------------------------------------------------\n");
+            printf("------------------------------------------------------------------------\n");
             printf("Hello from Helmholtz-Hypre solver \n");
-            printf("Assume: uniform grid, which fits in the memory of single processor    \n");
-            printf("Number of MRAG blocks is multiple of number of MPI processes.         \n");
-            printf("Using %d MRAG blocks, %d MPI processes, %d blocksPerProcesor          \n", nMRAGblocks, nprocs, blocksPerProcesor);
+            printf("1)Supports only uniform grid that fits in the memory of a single processor \n");
+            printf("2)Assume Number of MRAG blocks is multiple of number of MPI processes.           \n");
+            printf("You are using %d MRAG blocks, %d MPI processes, %d blocksPerProcesor     \n", nMRAGblocks, nprocs, blocksPerProcesor);
             printf("----------------------------------------------------------------------\n");
         }
         
@@ -510,7 +514,7 @@ public:
     }
     
     void inline clean()
-    {
+    {        
         HYPRE_StructGridDestroy(hypre_grid);
         HYPRE_StructStencilDestroy(stencil);
         HYPRE_StructMatrixDestroy(matrix);
