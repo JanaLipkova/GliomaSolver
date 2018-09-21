@@ -15,8 +15,8 @@ static int maxStencil[2][3] = {
 
 Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv): parser(argc, argv)
 {
-    bVerbose  = parser("-verbose").asBool(1);
-    bProfiler = parser("-dumpfreq").asBool(1);
+    bVerbose    = parser("-verbose").asBool(1);
+    bProfiler   = parser("-profiler").asBool(1);
     bVTK        = parser("-vtk").asBool();
     bAdaptivity = parser("-adaptive").asBool();
     

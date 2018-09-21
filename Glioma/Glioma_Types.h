@@ -17,6 +17,7 @@
 #include "Operators/PressureOperator.h"
 #include "Operators/AdvectionConvectionOperator.h"
 #include "Operators/TimeUpdateOperator.h"
+#include "Operators/CahnHilliardOperator.h"
 
 struct Cell
 {
@@ -47,8 +48,10 @@ struct Cell
     
     // Volume Perception
     Real vp;
-
     
+    // Cahn-Hilliard
+    Real mob, mu;  // mobility and chemical potetnial mu
+
 	Cell()
 	{
 		phi		 = 0.0;
@@ -69,10 +72,11 @@ struct Cell
 		pff		 = 0.0;
         chi      = 0.0;
         vp       = 0.0;
-
+        mob      = 0.0;
+        mu       = 0.0;
     }
 	
-    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real exact_, Real tmp_ , Real f_, Real pff_, Real chi_, Real vp_)
+    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real exact_, Real tmp_ , Real f_, Real pff_, Real chi_, Real vp_, Real mob_, Real mu_)
 	{
 		phi		 = phi_	    ;
 		dphidt	 = dphidt_  ;
@@ -98,6 +102,8 @@ struct Cell
 		pff		 = pff_	    ;
         chi      = chi_     ;
         vp       = vp_      ;
+        mob      = mob_     ;
+        mu       = mu_      ;
     }
 	
 	void operator += (Cell t)
@@ -126,6 +132,8 @@ struct Cell
 		pff		 += t.pff     ;
         chi      += t.chi     ;
         vp       += t.vp      ;
+        mob      += t.mob     ;
+        mu       += t.mu      ;
 	}
 	
 	
@@ -217,6 +225,8 @@ inline Cell operator*(const Cell& p, Real v)
 	c.pff		= p.pff		 *v;
     c.chi       = p.chi      *v;
     c.vp        = p.vp       *v;
+    c.mob       = p.mob      *v;
+    c.mu        = p.mu       *v;
    
 	return c;
 }

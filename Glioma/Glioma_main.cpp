@@ -13,6 +13,7 @@
 
 #include "../Tests/Test.h"
 #include "Glioma_ReactionDiffusion.h"
+#include "Glioma_ComputePFF_CahnHilliard.h"
 #include "dat2VP.h"
 
 #ifdef HYPRE
@@ -48,6 +49,8 @@ int main(int argc,const char ** argv)
     
     if(parser("-model").asString() == "RD")
         s = new Glioma_ReactionDiffusion(argc, (const char **)argv);
+    else if(parser("-model").asString() == "PFFCH")
+        s = new Glioma_ComputePFF_CahnHilliard(argc, (const char **)argv);
 #ifdef HYPRE
     else if(parser("-model").asString() == "deform")
         s = new Glioma_BrainDeformation(argc, (const char **)argv);

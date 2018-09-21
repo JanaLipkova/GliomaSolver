@@ -107,8 +107,8 @@ VPATH := ../Glioma/ ../MRAG/ ../MRAG/MRAGcore ../Glioma/Tests/
 OBJECTS = \
 Glioma_main.o \
 Glioma_ReactionDiffusion.o\
+Glioma_ComputePFF_CahnHilliard.o\
 MRAGBoundaryBlockInfo.o \
-Glioma_BrainDeformationTimeRelaxation.o \
 dat2VP.o \
 MRAGProfiler.o \
 MRAGWavelets_StaticData.o \

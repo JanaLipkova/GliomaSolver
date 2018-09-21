@@ -66,8 +66,7 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
     _ic(*grid, rank, PatientFileName, L);
     
     
-    if((parser("-bDumpIC").asBool(0))&&(rank==0))
-        _dump(0);
+    if((parser("-bDumpIC").asBool(0))&&(rank==0)) _dump(0);
     
     isDone              = false;
     whenToWriteOffset	= parser("-dumpfreq").asDouble();
@@ -99,6 +98,7 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, int rank, Real& L
     
     vector<BlockInfo> vInfo = grid.getBlocksInfo();
     
+#pragma omp parallel for
     for(int i=0; i<vInfo.size(); i++)
     {
         BlockInfo& info = vInfo[i];
