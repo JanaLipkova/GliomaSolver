@@ -1,15 +1,15 @@
 # Glioma solver
 Softer for simulating tumor growth in brain anatomy, including models:
 * tumor growth (Reaction-Diffusion model)
-* mechanical interaction of the growing tumor with the enviroment
+* tumor mass effect and ICP (Brain deformation model)
 * others
 
 ### Instalations
-* you need to install vtk and tbb library
-* downloaded the UNIX compatible libraries here: http://tdo.sk/~janka/lib/ 
-* unpack libraries and store to a folder, i.e. /lib/ 
-* install tbb libraries by calling ```make clean && make```
-* vtk library is already precompiled, you just need to uncompressed it, no need to install
+* Downloaded the UNIX compatible libraries here: http://tdo.sk/~janka/lib/ 
+* Unpack libraries and store to a folder, i.e. /lib/ 
+* Install `tbb` libraries by calling ```make clean && make```
+* `vtk` library is already precompiled, you just need to uncompressed it, no need to install
+* For the deformation solver install also `hypre` (follow instructions in the hypre-2.10.0b)
 
 ### Set-up enviroment
 In following notes, files with a word *kraken* in the name refer to files for unix local computer, while files with a word *lrz* in the name refer to SLURM cluster files. Pick one, depending on your enviroment.
@@ -24,20 +24,19 @@ Set up enviroment, e.g. on the local computer called kraken. The compile:
 ```sh
 source setup_kraken.sh
 make clean && make -j 4
+% For deformation model:
+make clean && make helmholtz-hypre -j 4
 ```
 Creates executable ```brain```. 
 
-### Example
-Folder ```makefile/TumorGrowth``` contains script to run tumor growth in patient anatomy in the folder ```Anatomy```. To run it, copy your executable  ```brain``` inside the ```TumorGrowth```. To run the simulation on local unix computer:
-```sh
-./run.sh
-```
-To run on SLURM system:
-```sh
-sbatch run.sh
-```
+### Examples
+Folder `makefile` contains example of solver:
+* `TumorGrowth`: tumor growth model in patinet antomy using *reacion-diffusion model*
+* `BrainDeform`: tumor growth with in patient anatomy with mass effect ucing *brain-deformaiton model*
+
 ### References
 Please cite:
 * Lipkova et al.: *Personalized Radiotherapy Planning for Glioma Using Multimodal Bayesian Model Calibration*, preprint arXiv:1807.00499, (2018)
 * Rossinelli D, et al.: *Mrag-i2d: Multi-resolution adapted grids for remeshed vortex methods on multicore architectures.* Journal of Computational Physics 288:1–18, (2015).
     
+
