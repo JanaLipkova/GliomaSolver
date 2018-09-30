@@ -1,5 +1,5 @@
 # Glioma solver
-Softer for simulating tumor growth in brain anatomy, including models:
+Softvare for simulating tumor growth in brain anatomy, including models for:
 * tumor growth (Reaction-Diffusion model)
 * tumor mass effect and ICP (Brain deformation model)
 * others
