@@ -236,9 +236,7 @@ void Glioma_ReactionDiffusion::run()
                 Science::AutomaticRefinement	<0,0>(*grid, blockfwt, refinement_tolerance, maxLevel, 1, &profiler);
                 Science::AutomaticCompression	<0,0>(*grid, blockfwt, compression_tolerance, -1, &profiler);
             }
-            
-            _dump(iCounter);
-            iCounter++;
+            _dump(iCounter++);
             whenToWrite = whenToWrite + whenToWriteOffset;
             if( (bVerbose) && (bVTK)) printf("Dumping data at time t=%f\n", t);
         }

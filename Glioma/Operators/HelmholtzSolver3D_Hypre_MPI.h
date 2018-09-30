@@ -108,7 +108,7 @@ class HelmholtzSolver3D_Hypre_MPI
         
         /*Each processor fill the grid boxes it owns */
          vector<BlockInfo> vInfo = mrag_grid->getBlocksInfo();
-        
+                
 #pragma omp parallel for schedule(static)
         for(int i = 0; i < blocksPerProcesor; i++)
         {
@@ -158,6 +158,7 @@ class HelmholtzSolver3D_Hypre_MPI
         double h       = info.h[0];
         double h2      = h*h;
         Real m, mS, mN, mW, mE, mF, mB;
+        Real kappa;
         int idx = 0;
         
         for(int iz=0; iz<B::sizeZ; ++iz)
@@ -165,8 +166,8 @@ class HelmholtzSolver3D_Hypre_MPI
                 for(int ix=0; ix<B::sizeX; ++ix)
                 {
                     // compute mobility components
-                    if ((mWM == mGM) && (mWM == mCSF))
-                        m = mS = mN = mW = mE = mF = mB = mCSF;
+                    if(!bMobility)
+                        m = mS = mN = mW = mE = mF = mB = 1.;
                     else
                     {
                         mB  = mWM * lab(ix,  iy,  iz-1).p_w + mGM * lab(ix,  iy,  iz-1).p_g + mCSF * lab(ix,  iy,  iz-1).p_csf;
@@ -190,7 +191,10 @@ class HelmholtzSolver3D_Hypre_MPI
                     // approximate intermidiet points
                     _mean(pff, pffW, pffE, pffS, pffN, pffB, pffF);
                     
-                    Real kappa = kappaWM * lab(ix,iy,iz).p_w + kappaGM * lab(ix,iy,iz).p_g  + kappaCSF * lab(ix,iy,iz).p_csf;
+                    if(!bRelaxation)
+                        kappa = 1;
+                    else
+                        kappa = kappaWM * lab(ix,iy,iz).p_w + kappaGM * lab(ix,iy,iz).p_g  + kappaCSF * lab(ix,iy,iz).p_csf;
                     
                     // fill in vector of matrix values
                     values[idx  ] =   pffW + pffE + pffS + pffN + pffB + pffF + kappa*pff*h2;
@@ -202,7 +206,6 @@ class HelmholtzSolver3D_Hypre_MPI
                     values[idx+6] = - pffF;
                     
                     idx = idx + 7;
-                    
                 }
         
     }
@@ -217,16 +220,6 @@ class HelmholtzSolver3D_Hypre_MPI
         psiB = 0.5 * (psi + psiB);
         psiF = 0.5 * (psi + psiF);
         
-    }
-    
-    inline void _harmonicAvg(Real& psi, Real& psiW, Real& psiE, Real& psiS, Real& psiN, Real& psiB, Real& psiF)
-    {
-        psiW = 2. * psi * psiW / (psi + psiW);
-        psiE = 2. * psi * psiE / (psi + psiE);
-        psiS = 2. * psi * psiS / (psi + psiS);
-        psiN = 2. * psi * psiN / (psi + psiN);
-        psiB = 2. * psi * psiB / (psi + psiB);
-        psiF = 2. * psi * psiF / (psi + psiF);
     }
     
     /* Set up Struct Vectors for rhs and solution */
@@ -271,7 +264,7 @@ class HelmholtzSolver3D_Hypre_MPI
                 for(int iy=0; iy<B::sizeY; iy++)
                     for(int ix=0; ix<B::sizeX; ix++)
                     {
-                        valuesRhs[idx] = h2 * block(ix,iy,iz).f;
+                        valuesRhs[idx] = h2 * block(ix,iy,iz).f * block(ix,iy,iz).pff;
                         valuesSol[idx] =      block(ix,iy,iz).p;
                         idx++;
                     }
@@ -280,12 +273,11 @@ class HelmholtzSolver3D_Hypre_MPI
             HYPRE_StructVectorSetBoxValues(solution, ilower, iupper, &valuesSol[0]);
         }
         
-        
         /* This is a collective call finalizing the vector assembly.
          The vectors are now ``ready to be used'' */
         HYPRE_StructVectorAssemble(rhs);
         HYPRE_StructVectorAssemble(solution);
-
+        
     }
 
     /* Set up a solver (See the Reference Manual for descriptions of all of the options.) */
@@ -418,7 +410,7 @@ class HelmholtzSolver3D_Hypre_MPI
         {
             if(rank>0)
             {
-                // - send
+                // send
                 for(int i = 0; i < blocksPerProcesor; i++){
                     int blockID     = rank + (blocksPerProcesor - 1) * rank + i;
                     BlockInfo& info = vInfo[blockID];
@@ -460,6 +452,7 @@ public:
         this->bVerbose      = bVerbose;
         this->bCG           = bCG;
         this->bRelaxation   = bRelaxation;
+        this->bMobility     = bMobility;
         
         if (bRelaxation)
             assert (kappa!=NULL);
@@ -484,8 +477,8 @@ public:
         if((rank==0)&&(bVerbose)){
             printf("------------------------------------------------------------------------\n");
             printf("Hello from Helmholtz-Hypre solver \n");
-            printf("1)Supports only uniform grid that fits in the memory of a single processor \n");
-            printf("2)Assume Number of MRAG blocks is multiple of number of MPI processes.           \n");
+            printf("1) Supports only uniform grid that fits in the memory of a single processor \n");
+            printf("2) Assume Number of MRAG blocks is multiple of number of MPI processes.           \n");
             printf("You are using %d MRAG blocks, %d MPI processes, %d blocksPerProcesor     \n", nMRAGblocks, nprocs, blocksPerProcesor);
             printf("----------------------------------------------------------------------\n");
         }

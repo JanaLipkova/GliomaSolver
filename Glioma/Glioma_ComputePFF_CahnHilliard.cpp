@@ -26,6 +26,11 @@ Glioma_ComputePFF_CahnHilliard::Glioma_ComputePFF_CahnHilliard(int argc, const c
     printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("Set up: blockSize=%d Wavelets=w%s (blocksPerDimension=%d, maxLevel=%d)\n", blockSize, "w", blocksPerDimension, maxLevel);
     
+    if(bVerbose) printf("\n ------------------------------------------------------ \n");
+    if(bVerbose) printf("   Set refinement w.r.t pff chanel or use unifomr grid !   n");
+    if(bVerbose) printf("\n ------------------------------------------------------ \n");
+
+    
     refiner		= new Refiner_SpaceExtension();
     compressor	= new Compressor();
     grid        = new Grid<W,B>(blocksPerDimension,blocksPerDimension, blocksPerDimension, maxStencil);
@@ -105,7 +110,7 @@ void Glioma_ComputePFF_CahnHilliard::_ic(Grid<W,B>& grid, string PatientFileName
                     mappedBrainZ -= (int) ( (brainSizeMax - brainSizeZ) * 0.5);
                     
                     if ( (mappedBrainX >= 0 && mappedBrainX < brainSizeX) & (mappedBrainY >= 0 && mappedBrainY < brainSizeY) && (mappedBrainZ >= 0 && mappedBrainZ < brainSizeZ) )
-                        block(ix,iy,iz).phi  =  MASK( mappedBrainX,mappedBrainY,mappedBrainZ);
+                        block(ix,iy,iz).pff  =  MASK( mappedBrainX,mappedBrainY,mappedBrainZ);
                     
                 }
         
@@ -175,27 +180,27 @@ void Glioma_ComputePFF_CahnHilliard::_dumpBinary(int counter)
                     int mz = (int)round( (x[2]) / hf  );
                     
                     if( h < hf + eps)
-                        PFF(mx,my,mz) = block(ix,iy,iz).phi;
+                        PFF(mx,my,mz) = block(ix,iy,iz).pff;
                     else if(h < 2.*hf + eps)
                     {
                         for(int cz=0; cz<2; cz++)
                             for(int cy=0; cy<2; cy++)
                                 for(int cx=0; cx<2; cx++)
-                                    PFF(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).phi;
+                                    PFF(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).pff;
                     }
                     else if (h < 3.*hf + eps)
                     {
                         for(int cz=0; cz<3; cz++)
                             for(int cy=0; cy<3; cy++)
                                 for(int cx=0; cx<3; cx++)
-                                    PFF(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).phi;
+                                    PFF(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).pff;
                     }
                     else
                     {
                         for(int cz=0; cz<4; cz++)
                             for(int cy=0; cy<4; cy++)
                                 for(int cx=0; cx<4; cx++)
-                                    PFF(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).phi;
+                                    PFF(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).pff;
                     }
                 }
         
@@ -212,12 +217,14 @@ void Glioma_ComputePFF_CahnHilliard::run()
     const int nParallelGranularity	= (grid->getBlocksInfo().size()<=8 ? 1 : 4);
     BoundaryInfo* boundaryInfo		= &grid->getBoundaryInfo();
     
-    double h            = 1./(blockSize*blocksPerDimension);
-    double dt           = h*h*h / (2*_DIM);        // 4th order method should be h^4
     int Niter           = parser("-Niter").asInt(100);
-    int iCounter        = 0;
     int w               = parser("-width").asInt(9); // smoothen over w grid points
-    
+    double h            = 1./(blockSize*blocksPerDimension);   
+    double dt           = h*h / (8.*_DIM * w * w);   // dt < h^4/(8*DIM*eps^2), for eps = w*h 
+    int iCounter        = 0;
+
+    printf("Setup summary: Niter=%d, w=%d, h=%f, dt=%e \n", Niter, w, h, dt);
+ 
     while (iCounter <= Niter )
     {
         _CahnHilliardStep(boundaryInfo, nParallelGranularity, dt, w);
@@ -231,6 +238,7 @@ void Glioma_ComputePFF_CahnHilliard::run()
                 Science::AutomaticCompression	<0,0>(*grid, blockfwt, compression_tolerance, -1, &profiler);
             }
             
+            printf("dumping data at iter=%d \n", iCounter);
             _dump(iCounter);
             _dumpBinary(iCounter);
             whenToWrite = whenToWrite + whenToWriteOffset;

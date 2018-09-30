@@ -1,4 +1,3 @@
-
 /*
  *  GliomaTypes.h
  *  GliomaXcode
@@ -39,8 +38,8 @@ struct Cell
     // pressure + auxiliary functions for pressure source, phase filed funtion, charact. function
     Real p, dpdt;
     Real f;
-    Real pff;   // pahse field function of whole anatomy, of tissue
-    Real chi;
+    Real chi;           // domain char. funciton
+    Real pff, dpffdt;   // pahse field function of whole anatomy, of tissue
     
     // other helper fields
 	Real exact;
@@ -66,17 +65,18 @@ struct Cell
         dpdt     = 0.0;
 		omega	 = 0.0;
 		domegadt = 0.0;
-		exact      = 0.0;
+		exact    = 0.0;
 		tmp      = 0.0;
 		f        = 0.0;
-		pff		 = 0.0;
         chi      = 0.0;
+		pff		 = 0.0;
+        dpffdt   = 0.0;
         vp       = 0.0;
         mob      = 0.0;
         mu       = 0.0;
     }
 	
-    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real exact_, Real tmp_ , Real f_, Real pff_, Real chi_, Real vp_, Real mob_, Real mu_)
+    Cell(Real phi_, Real dphidt_, Real p_g_, Real p_w_, Real p_csf_, Real wm_, Real gm_, Real csf_, Real dwmdt_, Real dgmdt_, Real dcsfdt_, Real ux_, Real uy_, Real uz_, Real p_, Real dpdt_, Real omega_, Real domegadt_, Real exact_, Real tmp_ , Real f_, Real chi_, Real pff_, Real dpffdt_, Real vp_, Real mob_, Real mu_)
 	{
 		phi		 = phi_	    ;
 		dphidt	 = dphidt_  ;
@@ -99,8 +99,9 @@ struct Cell
 		exact    = exact_   ;
 		tmp      = tmp_     ;
 		f        = f_       ;
-		pff		 = pff_	    ;
         chi      = chi_     ;
+		pff		 = pff_	    ;
+        dpffdt   = dpffdt_  ;
         vp       = vp_      ;
         mob      = mob_     ;
         mu       = mu_      ;
@@ -129,8 +130,9 @@ struct Cell
 		exact    += t.exact   ;
 		tmp      += t.tmp	  ;
 		f        += t.f		  ;
-		pff		 += t.pff     ;
         chi      += t.chi     ;
+		pff		 += t.pff     ;
+        dpffdt   += t.dpffdt     ;
         vp       += t.vp      ;
         mob      += t.mob     ;
         mu       += t.mu      ;
@@ -179,9 +181,9 @@ struct Cell
             case 5:  return wm;
             case 6:  return gm;
             case 7:  return csf;
-            case 8:  return ux * chi;
-            case 9:  return uy * chi;
-            case 10: return uz * chi;
+            case 8:  return ux;
+            case 9:  return uy;
+            case 10: return uz;
             case 11: return p ;
             case 12: return chi;
             case 13: return f;
@@ -222,8 +224,9 @@ inline Cell operator*(const Cell& p, Real v)
 	c.exact     = p.exact    *v;
 	c.tmp       = p.tmp      *v;
 	c.f         = p.f        *v;
-	c.pff		= p.pff		 *v;
     c.chi       = p.chi      *v;
+	c.pff		= p.pff		 *v;
+    c.dpffdt    = p.dpffdt   *v;
     c.vp        = p.vp       *v;
     c.mob       = p.mob      *v;
     c.mu        = p.mu       *v;
@@ -246,6 +249,8 @@ inline Real RD_projector_impl_wav(const T&t)
 {
 	//return i==0 ? (Real)(t.phi) : (Real)(t.p_w);  // for refinment w.r.t 2 channels
     return (Real)(t.phi) ;
+//    return (Real)(t.pff) ;
+
 
 }
 

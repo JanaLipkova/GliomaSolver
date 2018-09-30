@@ -33,7 +33,7 @@ class HelmholtzSolver3D_Hypre
     bool bRelaxation;
     bool bMobility;
 
-    Real kappaCSF, kappaWM, kappaGM;  // relaxation factors for diff. anatomies
+    Real kappaWM, kappaGM, kappaCSF;  // relaxation factors for diff. anatomies
     Real mWM, mGM, mCSF;      // hydralucit conductivuty (mobility)
     
     int GridsizeX, GridsizeY,GridsizeZ ;
@@ -95,6 +95,7 @@ class HelmholtzSolver3D_Hypre
                 double h       = info.h[0];
                 double h2      = h*h;
                 Real m, mS, mN, mW, mE, mF, mB;
+                Real kappa;
                 
                 for(int iz=0; iz<B::sizeZ; ++iz)
                     for(int iy=0; iy<B::sizeY; ++iy)
@@ -110,8 +111,8 @@ class HelmholtzSolver3D_Hypre
                             
                             
                             // compute mobility components
-                            if ((mWM == mGM) && (mWM == mCSF))
-                                m = mS = mN = mW = mE = mF = mB = mCSF;
+                            if(!bMobility)
+                                m = mS = mN = mW = mE = mF = mB = 1.;
                             else
                             {
                                 mB  = mWM * lab(ix,  iy,  iz-1).p_w + mGM * lab(ix,  iy,  iz-1).p_g + mCSF * lab(ix,  iy,  iz-1).p_csf;
@@ -135,7 +136,10 @@ class HelmholtzSolver3D_Hypre
                             // approximate intermidiet points
                             _mean(pff, pffW, pffE, pffS, pffN, pffB, pffF);
                             
-                            Real kappa = kappaWM * lab(ix,iy,iz).p_w + kappaGM * lab(ix,iy,iz).p_g  + kappaCSF * lab(ix,iy,iz).p_csf;
+                            if(!bRelaxation)
+                                kappa = 1;
+                            else
+                                kappa = kappaWM * lab(ix,iy,iz).p_w + kappaGM * lab(ix,iy,iz).p_g  + kappaCSF * lab(ix,iy,iz).p_csf;
                             
                             // fill in vector of matrix values
                             values[idx  ] =   pffW + pffE + pffS + pffN + pffB + pffF + kappa*pff*h2;
@@ -214,7 +218,7 @@ class HelmholtzSolver3D_Hypre
                         const int idx = gix + giy * blocksPerDimension*B::sizeX
                         + giz * blocksPerDimension*B::sizeX * blocksPerDimension*B::sizeY;
                         
-                        valuesRhs[idx] = h2 * block(ix,iy,iz).f;
+                        valuesRhs[idx] = h2 * block(ix,iy,iz).f * block(ix,iy,iz).phi;
                         valuesSol[idx] =      block(ix,iy,iz).p;
                         
                     }
@@ -366,6 +370,7 @@ public:
         this->bVerbose      = bVerbose;
         this->bCG           = bCG;
         this->bRelaxation   = bRelaxation;
+        this->bMobility     = bMobility;
         
         if (bRelaxation)
             assert (kappa!=NULL);

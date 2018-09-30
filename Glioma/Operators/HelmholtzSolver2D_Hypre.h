@@ -101,6 +101,7 @@ class HelmholtzSolver2D_Hypre
                 double h2      = h*h;
                 
                 Real m, mS, mN, mE, mW;
+                Real kappa;
                 
                 for(int iy=0; iy<B::sizeY; ++iy)
                     for(int ix=0; ix<B::sizeX; ++ix)
@@ -112,8 +113,8 @@ class HelmholtzSolver2D_Hypre
                         
                         
                         // compute mobility components
-                        if( (mWM == mGM) && (mWM == mCSF) )
-                            m = mS = mN = mW = mE = mCSF;
+                        if( !bMobility )
+                            m = mS = mN = mW = mE = 1.;
                         else
                         {
                             mS  = mWM * lab(ix,  iy-1).p_w  + mGM * lab(ix,  iy-1).p_g  + mCSF * lab(ix,  iy-1).p_csf ;
@@ -134,7 +135,11 @@ class HelmholtzSolver2D_Hypre
                         // approximate intermidiet points
                         _mean(pff, pffW, pffE, pffS, pffN);
                         
-                        Real kappa = kappaWM * lab(ix,iy).p_w  + kappaGM * lab(ix,iy).p_g  + kappaCSF * lab(ix,iy).p_csf;
+                        
+                        if(!bRelaxation)
+                            kappa = 1;
+                        else
+                         kappa = kappaWM * lab(ix,iy).p_w  + kappaGM * lab(ix,iy).p_g  + kappaCSF * lab(ix,iy).p_csf;
                         
                         // fill in vector of matrix values
                         values[idx  ] =   pffW + pffE + pffS + pffN + kappa *pff*h2;
@@ -204,7 +209,7 @@ class HelmholtzSolver2D_Hypre
                     const int giy = iy + info.index[1] * B::sizeY;
                     const int idx = gix + giy * blocksPerDimension*B::sizeX;
                     
-                    valuesRhs[idx] = h2 * block(ix,iy).f;
+                    valuesRhs[idx] = h2 * block(ix,iy).f * block(ix,iy).pff;
                     valuesSol[idx] =      block(ix,iy).p;
 
                 }
@@ -347,6 +352,7 @@ public:
         this->bVerbose      = bVerbose;
         this->bCG           = bCG;
         this->bRelaxation   = bRelaxation;
+        this->bMobility     = bMobility;
         
         if (bRelaxation)
             assert (kappa!=NULL);

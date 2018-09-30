@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F9446630215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F944662E215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.cpp */; };
+		F9446631215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.h in Headers */ = {isa = PBXBuildFile; fileRef = F944662F215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.h */; };
+		F9446633215BCE5C000E1187 /* CahnHilliardOperator.h in Headers */ = {isa = PBXBuildFile; fileRef = F9446632215BCE5C000E1187 /* CahnHilliardOperator.h */; };
 		F9941D2F21525079006FE110 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9941D2E21525079006FE110 /* CoreFoundation.framework */; };
 		F9941D362152507A006FE110 /* GliomaSolverXcode.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D352152507A006FE110 /* GliomaSolverXcode.h */; };
 		F9941D382152507B006FE110 /* GliomaSolverXcodePriv.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941D372152507B006FE110 /* GliomaSolverXcodePriv.h */; };
@@ -131,6 +134,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F944662E215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Glioma_ComputePFF_CahnHilliard.cpp; sourceTree = "<group>"; };
+		F944662F215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glioma_ComputePFF_CahnHilliard.h; sourceTree = "<group>"; };
+		F9446632215BCE5C000E1187 /* CahnHilliardOperator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CahnHilliardOperator.h; sourceTree = "<group>"; };
 		F9941D2B21525079006FE110 /* GliomaSolverXcode.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GliomaSolverXcode.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9941D2E21525079006FE110 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		F9941D322152507A006FE110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -330,6 +336,8 @@
 				F9941D4321525093006FE110 /* Glioma_BrainDeformation.h */,
 				F9941D4621525093006FE110 /* Glioma_ReactionDiffusion.cpp */,
 				F9941D4721525093006FE110 /* Glioma_ReactionDiffusion.h */,
+				F944662E215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.cpp */,
+				F944662F215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.h */,
 				F9941D4821525093006FE110 /* Glioma_Types.h */,
 				F9941D4921525093006FE110 /* Glioma_main.cpp */,
 				F9941D4A21525093006FE110 /* Matrix.h */,
@@ -349,6 +357,7 @@
 				F9941D4D21525093006FE110 /* HelmholtzSolver2D_Hypre.h */,
 				F9941D4E21525093006FE110 /* HelmholtzSolver3D_Hypre.h */,
 				F9941D4F21525093006FE110 /* PressureOperator.h */,
+				F9446632215BCE5C000E1187 /* CahnHilliardOperator.h */,
 				F9941D5021525093006FE110 /* ReactionDiffusionOperator.h */,
 				F9941D5121525093006FE110 /* TimeUpdateOperator.h */,
 				F9941D5221525093006FE110 /* HelmholtzSolver3D_Hypre_MPI.h */,
@@ -606,6 +615,7 @@
 				F9941DF7215250B5006FE110 /* MRAGRefiner.h in Headers */,
 				F9941D6421525093006FE110 /* Glioma_Types.h in Headers */,
 				F9941E16215250B5006FE110 /* MRAGridHelpers.h in Headers */,
+				F9446631215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.h in Headers */,
 				F9941DE7215250B5006FE110 /* MRAGBoundaryBlockPack.h in Headers */,
 				F9941DE0215250B5006FE110 /* MRAGBlockCollapser.h in Headers */,
 				F9941D6C21525093006FE110 /* TimeUpdateOperator.h in Headers */,
@@ -618,6 +628,7 @@
 				F9941E14215250B5006FE110 /* MRAG_SmartBoundaryInfo.h in Headers */,
 				F9941E10215250B5006FE110 /* MRAG_STDTestL3_IO.h in Headers */,
 				F9941DE1215250B5006FE110 /* MRAGBlockCollection.h in Headers */,
+				F9446633215BCE5C000E1187 /* CahnHilliardOperator.h in Headers */,
 				F9941E12215250B5006FE110 /* MRAG_STDTestL3_VectorAdvection.h in Headers */,
 				F9941DE4215250B5006FE110 /* MRAGBlockSplitter.h in Headers */,
 				F9941D6F21525093006FE110 /* HelmholtzTest.h in Headers */,
@@ -712,6 +723,7 @@
 				F9941E22215250B5006FE110 /* MRAGBBPackHandler_CUDA.cpp in Sources */,
 				F9941DF4215250B5006FE110 /* MRAGProfiler.cpp in Sources */,
 				F9941D3A2152507B006FE110 /* GliomaSolverXcode.cp in Sources */,
+				F9446630215BC94E000E1187 /* Glioma_ComputePFF_CahnHilliard.cpp in Sources */,
 				F9941E25215250B5006FE110 /* MRAGBlockProcessing_CUDA.cpp in Sources */,
 				F9941D6021525093006FE110 /* Glioma_BrainDeformationTimeRelaxation.cpp in Sources */,
 				F9941DFF215250B5006FE110 /* MRAGWavelets_StaticData.cpp in Sources */,
@@ -835,6 +847,7 @@
 				F9941D3F2152507B006FE110 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

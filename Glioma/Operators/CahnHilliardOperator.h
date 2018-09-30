@@ -61,14 +61,14 @@ struct CahnHilliardPotential
             for(int iy=0; iy<BlockType::sizeY; iy++)
                 for(int ix=0; ix<BlockType::sizeX; ix++)
                 {
-                    const Real FluxInX = lab(ix-1,iy  ).phi + lab(ix+1,iy ).phi;
-                    const Real FluxInY = lab(ix  ,iy-1).phi + lab(ix  ,iy+1).phi;
-                    const Real FluxOut = 4.*lab(ix,iy).phi;
+                    const Real FluxInX = lab(ix-1,iy  ).pff + lab(ix+1,iy ).pff;
+                    const Real FluxInY = lab(ix  ,iy-1).pff + lab(ix  ,iy+1).pff;
+                    const Real FluxOut = 4.*lab(ix,iy).pff;
                     
                     const Real laplace = ih2 * (FluxInX + FluxInY - FluxOut);
                     
-                    const Real tmp      = lab(ix,iy).phi * ( 1. - lab(ix,iy).phi) * (0.5 - lab(ix,iy).phi);  // derivative of potential g'(c)
-                    const Real mobility = lab(ix,iy).phi * ( 1. - lab(ix,iy).phi);   // mobility term M(c) = abs(c(1-c))
+                    const Real tmp      = lab(ix,iy).pff * ( 1. - lab(ix,iy).pff) * (0.5 - lab(ix,iy).pff);  // derivative of potential g'(c)
+                    const Real mobility = lab(ix,iy).pff * ( 1. - lab(ix,iy).pff);                   // mobility term M(c) = abs(c(1-c))
                     
                     o(ix,iy).mu  = tmp - eps*eps * laplace;
                     o(ix,iy).mob = (mobility < 0.) ? -mobility : mobility ;
@@ -81,15 +81,15 @@ struct CahnHilliardPotential
                 for(int iy=0; iy<BlockType::sizeY; iy++)
                     for(int ix=0; ix<BlockType::sizeX; ix++)
                     {
-                        const Real FluxInX = lab(ix-1,iy  ,iz  ).phi + lab(ix+1,iy  ,iz  ).phi;
-                        const Real FluxInY = lab(ix  ,iy-1,iz  ).phi + lab(ix  ,iy+1,iz  ).phi;
-                        const Real FluxInZ = lab(ix  ,iy  ,iz-1).phi + lab(ix  ,iy  ,iz+1).phi;
-                        const Real FluxOut = 6.*lab(ix,iy,iz).phi;
+                        const Real FluxInX = lab(ix-1,iy  ,iz  ).pff + lab(ix+1,iy  ,iz  ).pff;
+                        const Real FluxInY = lab(ix  ,iy-1,iz  ).pff + lab(ix  ,iy+1,iz  ).pff;
+                        const Real FluxInZ = lab(ix  ,iy  ,iz-1).pff + lab(ix  ,iy  ,iz+1).pff;
+                        const Real FluxOut = 6.*lab(ix,iy,iz).pff;
                         
                         const Real laplace = ih2 * (FluxInX + FluxInY + FluxInZ - FluxOut);
                         
-                        const Real tmp       = lab(ix,iy,iz).phi * ( 1. - lab(ix,iy,iz).phi) * (0.5 - lab(ix,iy,iz).phi);
-                        const Real mobility  = lab(ix,iy,iz).phi * ( 1. - lab(ix,iy,iz).phi);
+                        const Real tmp       = lab(ix,iy,iz).pff * ( 1. - lab(ix,iy,iz).pff) * (0.5 - lab(ix,iy,iz).pff);
+                        const Real mobility  = lab(ix,iy,iz).pff * ( 1. - lab(ix,iy,iz).pff);
                         
                         o(ix,iy,iz).mu  = tmp - eps*eps * laplace;
                         o(ix,iy,iz).mob = (mobility < 0.) ? -mobility : mobility;
@@ -153,7 +153,7 @@ struct CahnHilliardEquation
                     Real fluxOutX = mW * lab(ix-1,iy  ).mu + mE * lab(ix+1,iy  ).mu;
                     Real fluxIn   = (mS + mN + mW + mE) * lab(ix,iy).mu;
                     
-                    o(ix,iy).dphidt = ih2 * (fluxOutX + fluxOutY - fluxIn );
+                    o(ix,iy).dpffdt = ih2 * (fluxOutX + fluxOutY - fluxIn );
                 }
         }
         else
@@ -179,7 +179,7 @@ struct CahnHilliardEquation
                         Real fluxOutX = mW * lab(ix-1,iy  ,iz  ).mu + mE * lab(ix+1,iy  ,iz  ).mu;
                         Real fluxIn   = (mF + mB + mS + mN + mW + mE) * lab(ix,iy,iz).mu;
                         
-                        o(ix,iy,iz).dphidt = ih2 * (fluxOutZ + fluxOutY + fluxOutX - fluxIn );
+                        o(ix,iy,iz).dpffdt = ih2 * (fluxOutZ + fluxOutY + fluxOutX - fluxIn );
                     }
         }
     }
@@ -227,9 +227,9 @@ struct CahnHilliardUpdate
             for(int iy=0; iy<BlockType::sizeY; iy++)
                 for(int ix=0; ix<BlockType::sizeX; ix++)
                 {
-                    o(ix, iy).phi += dt * o(ix, iy).dphidt;
-                    o(ix, iy).phi  = (o(ix,iy).phi > 1.) ? 1. : o(ix,iy).phi;
-                    o(ix, iy).phi  = (o(ix,iy).phi < 0.) ? 0. : o(ix,iy).phi;
+                    o(ix, iy).pff += dt * o(ix, iy).dpffdt;
+                    o(ix, iy).pff  = (o(ix,iy).pff > 1.) ? 1. : o(ix,iy).pff;
+                    o(ix, iy).pff  = (o(ix,iy).pff < 0.) ? 0. : o(ix,iy).pff;
                 }
         }
         else
@@ -238,9 +238,9 @@ struct CahnHilliardUpdate
                 for(int iy=0; iy<BlockType::sizeY; iy++)
                     for(int ix=0; ix<BlockType::sizeX; ix++)
                     {
-                        o(ix, iy, iz).phi += dt * o(ix, iy, iz).dphidt;
-                        o(ix, iy, iz).phi  = (o(ix,iy,iz).phi > 1.) ? 1. : o(ix,iy,iz).phi;
-                        o(ix, iy, iz).phi  = (o(ix,iy,iz).phi < 0.) ? 0. : o(ix,iy,iz).phi;
+                        o(ix, iy, iz).pff += dt * o(ix, iy, iz).dpffdt;
+                        o(ix, iy, iz).pff  = (o(ix,iy,iz).pff > 1.) ? 1. : o(ix,iy,iz).pff;
+                        o(ix, iy, iz).pff  = (o(ix,iy,iz).pff < 0.) ? 0. : o(ix,iy,iz).pff;
                     }
         }
         

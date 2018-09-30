@@ -8,7 +8,7 @@ program=brain
 model=helmholtzTest
 verbose=1
 profiler=1
-vtk=0
+vtk=1
 
 echo "In the directory: $PWD"
 echo "Running program on $SLURM_NODES nodes with total $SLURM_NTASKS MPI tasks, each with $SLURM_CPUS_PER_TASK resp $N threads."

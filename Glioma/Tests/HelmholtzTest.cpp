@@ -102,7 +102,7 @@ void HelmholtzTest::_ic_Square(Grid<W,B>& grid, int rank)
                     block(ix,iy).chi    = (r<= 0) ? 1. : 0.;                                                //domain characteristic function
                     block(ix,iy).exact  = cos(c * M_PI * x[0]) * cos(c * M_PI * x[1]) * block(ix,iy).chi ;  // exact. sol
                     block(ix,iy).p      = 0;                                                                // init. guess for pressure
-                    block(ix,iy).f      = rhs * pff;
+                    block(ix,iy).f      = rhs;
                     
                 }
             
@@ -146,7 +146,7 @@ void HelmholtzTest::_ic_Square(Grid<W,B>& grid, int rank)
                         block(ix,iy,iz).chi     = (r<= 0) ? 1. : 0.;            //domain characteristic function
                         block(ix,iy,iz).exact   = cos(c * M_PI * x[0]) * cos(c * M_PI * x[1]) * cos(c * M_PI * x[2]) * block(ix,iy,iz).chi ;  // exact sol.
                         block(ix,iy,iz).p       = 0;                            // init. guess for pressure
-                        block(ix,iy,iz).f       = rhs * pff;
+                        block(ix,iy,iz).f       = rhs;
                         
                     }
             

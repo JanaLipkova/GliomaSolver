@@ -9,12 +9,12 @@ model=deform
 verbose=1
 profiler=1
 bDumpIC=0
-dumpfreq=10
-vtk=0
+dumpfreq=2
+vtk=1
 CFL=0.8
 
 # model parameters
-tend=4
+tend=10
 rho=0.012
 Dw=1.3e-03
 kCSF=100
