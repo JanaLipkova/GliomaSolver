@@ -39,7 +39,7 @@ In the example anatomy of the patient is stored in `/Anatomy/Patient00/`. The in
 ### Output
 If `vtk` is set to `1`, the solver will save output in the form `Data_000*.vtu`, where `*` is numbering of output data in chronological order, i.e. `Data_0000.vtu` is the inital conditon and `Data_0001.vtu` is the solution at time specified in 'dumpfreq'. The output files can be open in Paraview:
 
-![alt text](../figures/registration.png)
+![alt text](../figures/TumorGrowth.jpg)
 Figure: Tumor growth in patient anatomy.
 
 
