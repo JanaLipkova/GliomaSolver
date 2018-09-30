@@ -24,13 +24,15 @@ export OMP_NUM_THREADS=$SLURM_CPUS_ON_NODE
 program=brain
 model=RD
 verbose=1
+profiler=1
 adaptive=1
-vtk=0
+vtk=1
 dumpfreq=50
-DATA_BASE=/home/hpc/txh01/di49zin/GliomaAdvance/GliomaSolver/Anatomy
+#DATA_BASE=/home/hpc/txh01/di49zin/GliomaAdvance/GliomaSolver/Anatomy
+DATA_BASE=../../Anatomy
 PatFileName=$DATA_BASE/Patient00/P00
 
 echo "In the directory: $PWD"
 echo "Running program on $SLURM_NODES nodes, with $SLURM_CPUS_ON_NODE cores on node, each with $SLURM_CPUS_PER_TASK cores."
 
-./$program -nthreads $SLURM_CPUS_ON_NODE -model $model -verbose $verbose -adaptive $adaptive -PatFileName $PatFileName -vtk $vtk -dumpfreq $dumpfreq 
+./$program -nthreads $SLURM_CPUS_ON_NODE -model $model -verbose -profiler $profiler $verbose -adaptive $adaptive -PatFileName $PatFileName -vtk $vtk -dumpfreq $dumpfreq 

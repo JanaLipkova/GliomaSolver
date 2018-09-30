@@ -33,7 +33,7 @@ dim ?= 3
 bpd ?= 8
 #bpd ?= 16
 #bs ?= 16
-bs=8
+bs=16
 
 CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd)  
 
