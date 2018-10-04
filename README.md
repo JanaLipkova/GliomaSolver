@@ -26,7 +26,7 @@ Set up enviroment and compile:
 source setup_kraken.sh
 make clean && make -j 4
 % For deformation model:
-make clean && make helmholtz-hypre -j 4
+make clean && make helmholtz=hypre -j 4
 ```
 Creates executable ```brain```. 
 
