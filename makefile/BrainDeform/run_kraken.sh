@@ -24,7 +24,7 @@ bMobility=0
 ICtype=1
 
 # Path to patient data
-DATA_BASE=/home/jana/Work/GliomaAdvance/GliomaSolver/Anatomy
+DATA_BASE=../../Anatomy 
 PatFileName=$DATA_BASE/Patient00/P00
 
 echo "In the directory: $PWD"
