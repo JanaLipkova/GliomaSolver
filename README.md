@@ -31,7 +31,7 @@ make clean && make helmholtz=hypre -j 4
 Creates executable ```brain```. 
 
 ### Examples
-Folder `makefile` contains example of solver:
+Folder `Examples` contains example of solver:
 * `TumorGrowth`: tumor growth model in patinet antomy using *reacion-diffusion model*
 * `BrainDeform`: tumor growth with in patient anatomy with mass effect ucing *brain-deformaiton model*
 
