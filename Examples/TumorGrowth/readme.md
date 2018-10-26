@@ -7,8 +7,8 @@ Set up enviroment, e.g. on the local computer called kraken and compile to get e
 cd makefile
 source setup_kraken.sh
 make clean && make -j 4
-cp brain Examples/TumorGrowth 
-cd Examples/TumorGrowth
+cp brain ../Examples/TumorGrowth 
+cd ../Examples/TumorGrowth
 ./run_kraken.sh
 ```
 For running on SLURM cluster, use the scripts with keyword lrz and submit as  ```sbatch run_lrz.sh ```. The  ```run_*.sh ``` contains execution command and simulaiton input parameters.
