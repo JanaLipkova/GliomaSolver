@@ -165,13 +165,13 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFile
     if(rank==0) printf("Reading data from file: %s \n", PatientFileName.c_str());
     
     char anatomy      [200];
-    sprintf(anatomy, "%s_GM.dat", PatientFileName.c_str() );
+    sprintf(anatomy, "%sGM.dat", PatientFileName.c_str() );
     MatrixD3D GM(anatomy);
-    sprintf(anatomy, "%s_WM.dat", PatientFileName.c_str());
+    sprintf(anatomy, "%sWM.dat", PatientFileName.c_str());
     MatrixD3D WM(anatomy);
-    sprintf(anatomy, "%s_CSF.dat", PatientFileName.c_str());
+    sprintf(anatomy, "%sCSF.dat", PatientFileName.c_str());
     MatrixD3D CSF(anatomy);
-    sprintf(anatomy, "%s_PFF.dat", PatientFileName.c_str());
+    sprintf(anatomy, "%sPFF.dat", PatientFileName.c_str());
     MatrixD3D PFF(anatomy);
     
     int brainSizeX = (int) GM.getSizeX();

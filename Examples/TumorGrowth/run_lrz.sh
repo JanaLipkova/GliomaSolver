@@ -30,7 +30,7 @@ vtk=1
 dumpfreq=50
 #DATA_BASE=/home/hpc/txh01/di49zin/GliomaAdvance/GliomaSolver/Anatomy
 DATA_BASE=../../Anatomy
-PatFileName=$DATA_BASE/Patient00/P00
+PatFileName=$DATA_BASE/Patient00/P00_
 
 echo "In the directory: $PWD"
 echo "Running program on $SLURM_NODES nodes, with $SLURM_CPUS_ON_NODE cores on node, each with $SLURM_CPUS_PER_TASK cores."

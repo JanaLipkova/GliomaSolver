@@ -7,22 +7,15 @@
 %
 %===================================
 
-function convert_folder_content_nii2dat(inputPath)
-
 addpath('../lib/toolbox_matlab_nifti')
 addpath('../lib/NIfTI_20140122/')
 addpath('../lib/vi');
 addpath('../lib/Matlab2C/matrixMatlab2Cpp/matlab/')
 addpath('../lib/')
 
-'running matlab function'
-
-% inputPath=[inputPath,'/']
-% inputPath = num2str(inputPath)
-
-
-% inputPath =  '../../Examples/PatientSpecificInference/InputData/';
-outputPath = [inputPath(1:end-1),'_dat/']
+% FILL IN HERE: Provide full path to data or paht relative to this fodler
+inputPath =  '../../Examples/PatientSpecificInference/InputData/';
+outputPath = [inputPath(1:end-1),'_dat/'];
 
 bRotate = 1;
 

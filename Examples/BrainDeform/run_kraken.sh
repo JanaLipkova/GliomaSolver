@@ -25,7 +25,7 @@ ICtype=1
 
 # Path to patient data
 DATA_BASE=../../Anatomy 
-PatFileName=$DATA_BASE/Patient00/P00
+PatFileName=$DATA_BASE/Patient00/P00_
 
 echo "In the directory: $PWD"
 echo "Running program with total $M MPI tasks,each with $N OMP threads."
