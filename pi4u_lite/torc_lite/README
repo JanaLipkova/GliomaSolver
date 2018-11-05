@@ -1,0 +1,9 @@
+Basic instructions:
+ 
+1. Make sure you have an MPI installation available on your system, preferably a thread-safe one
+
+2. ./configure CC=mpicc F77=mpif77 
+
+3. make
+
+4. cd demo; make

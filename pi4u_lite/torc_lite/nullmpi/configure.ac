@@ -1,0 +1,16 @@
+AC_INIT(nullmpi, 1.0.0,,nullmpi)
+
+AC_CONFIG_AUX_DIR(../auxdir)
+AM_INIT_AUTOMAKE
+
+AC_PROG_CC
+AC_LANG_C
+
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
+AC_OUTPUT(Makefile lib/Makefile)
+
+
+
+

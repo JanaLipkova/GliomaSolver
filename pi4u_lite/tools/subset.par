@@ -1,0 +1,40 @@
+# Problem dimension
+Nth		2
+
+# Number of initial random samples
+N_init		11000
+
+# Number of seeds 
+N_seeds		1000
+
+# Metropolis-Hastings steps
+N_steps		10
+
+# Boundaries
+Bdef		-6	6
+#B0		-6	6
+#B1		-6	6
+
+
+# Explicit thresholds for engine_ss1
+
+NTHRESHOLDS     10
+# thresholds for rosenbrock
+Thresholds	-64.0 -32.0 -16.0 -8.0 -4.0 -2.0 -1.0 -0.5 -0.25 -0.125
+# thresholds for log(rosenbrock)
+#Thresholds	-9.079833 -7.131807 -5.072115 -2.301635 -0.512342 0.645466 1.807496 2.993659 3.936539 4.520819
+
+# Sigma parameter
+sigma		0.1
+
+# Internal option, do not touch
+logval		0
+
+# RNG initial seed
+#seed		0
+seed		280675
+
+
+# The following options are parsed by the adaptive SubSim (engine_ss2)
+factor		0.50
+MAXTHRESHOLDS	10

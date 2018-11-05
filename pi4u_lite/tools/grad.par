@@ -1,0 +1,43 @@
+# Part I: common configuration options for fd_grad, fd_deriv and sa_deriv
+
+# Problem dimension
+Nth		4
+
+# Boundaries
+Bdef		-4	4
+#lb		0 0 0 0
+#ub		2 2 2 2
+
+# Evaluation point
+#theta		1 1 1 1
+theta		0.5 0.5 0.5 0.5
+
+# Part II: options for fd_grad
+
+initstep	0.1
+stepratio	1.5
+maxsteps	100
+
+
+# Part III: options for fd_deriv
+
+# Differentiation step
+Hdef		1e-4
+diffstep	1e-4 1e-4 1e-4 1e-4
+
+# Method to make a matrix positive definitive
+posdef		0
+
+
+# Part IV: options for PNDL, i.e. for both fd_grad and fd_deriv
+order		2
+
+
+# Part V: options for sa_deriv
+
+# Total samples
+reps		100000
+
+# RNG seed
+seed		280675
+#seed		0

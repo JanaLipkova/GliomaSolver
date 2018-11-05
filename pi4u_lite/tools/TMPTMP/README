@@ -1,0 +1,35 @@
+===========================================
+	   GLIOMA TMCMC
+==========================================
+
+Content of this folder is used for TMCMC solver. This folder and its content is created automatically by the script creating Inference Enviroment.
+
+The folder should contain:
+
+DATA:
+  * tumPET.dat
+  * tumT1c.dat
+  * tumFLAIR.dat
+  * HGG_data.dat (will be provided by glioma solver)
+  * ROI.dat (optional)
+
+GLIOMA AUXILIARY FILES:
+ * HGG_InputParameters.txt (will be created by TMCMC)
+ * LikelihoodInput.txt  (will be created by TMCMC) 
+
+EXECUTABLES for GLIOMA SOLVER & LIKELIHOOD:
+ * brain 
+ * likelihood  
+
+TO RUN IT ALL:
+ * runAll.sh  
+
+OPTIONAL:
+README 
+
+------------------------------------------------
+   IMPORTANT REMEBER TO EXPORT RIGHT PATHS
+------------------------------------------------
+export PATH=$HOME/usr/torc/bin:$PATH
+export LD_LIBRARY_PATH=/cluster/home/mavt/lipkovaj/LIB/tbb40_20120613oss/build/linux_intel64_gcc_cc4.6.1_libc2.5_kernel2.6.18_release/:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/cluster/work/infk/cconti/VTK5.8_gcc/lib/vtk-5.8/:$LD_LIBRARY_PATH

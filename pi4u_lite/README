@@ -1,0 +1,29 @@
+I. SOFTWARE COMPONENTS
+
+You will find the following software packages:
+
+- torc_lite: a tasking library that allows us to write platform-independent code
+- pndl: parallel numerical differentiation library, built on top of torc_lite
+- engines: the UQ framework built on top of torc_lite. 
+
+
+II. PREREQUISITES
+- An MPI implementation must be installed on your system (preferably with full thread safety)
+- GSL (http://www.gnu.org/software/gsl/) is required by some engines and must be installed on your system
+
+
+III. INSTALLATION STEPS
+
+1) First we start with torc_lite. We assume that the MPI compiler is named mpicc.
+	cd torc_lite
+	./configure CC=mpicc --prefix=$HOME/usr/torc
+	make; make install
+	export PATH=$HOME/usr/torc/bin:$PATH
+
+   If configure reports missing files, you will need to execute the autoreconf command (autoreconf) before executing ./configure 
+
+   In $HOME/usr/torc/bin there are two files (torc_cflags, torc_libs) that facilitate the development of torc-based programs.
+   That's why we have added this directory to the PATH environment variable using the export (bash) command. 
+ 
+   After finishing this step, you must be able to run successfully at least one of the demo examples, available in torc/examples
+

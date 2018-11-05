@@ -1,0 +1,29 @@
+0.1:	First official release
+
+0.2:	Minor fixes
+
+0.3:	Various fixes
+	Breaking long chains
+	Gaussian prior
+	aux.c to auxil.c
+	Improved propagation tool
+
+0.4:	TMCMC: fzerofind in tmcmc_stats.c
+	TMCMC: support for very large number of samples
+	TMCMC: reading samples from file
+	TMCMC: multithreaded RNGs
+	TMCMC: storing and dumping complete set of points
+	AMaLGaM: algorithm added
+	ABC-SubSim: algorithm added
+
+0.5:	Tutorial (pdf)
+	Updated postprocessing tools
+	Asycnhronous versions of CMAES
+	DRAM algorithm (sequential version)
+	Various compilation fixes
+	Checkpoint restart for CMAES
+	Local covariance matrix in TMCMC
+
+	
+	
+	

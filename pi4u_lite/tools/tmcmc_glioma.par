@@ -1,0 +1,55 @@
+# TMCMC and SN-TMCMC configuration file
+
+
+# problem dimension
+Nth		11
+
+# Max number of generations
+MaxStages	1000
+
+# Population size
+PopSize		6048
+
+# Chain Lengths
+MinChainLength	0
+MaxChainLength	1
+#MinChainLength 2
+#MaxChainLength 1e6
+
+# Boundaries
+Bdef             0	    4
+B0		-8.9480   -3.2702         
+B1		-5.9145   -1.6607         
+B2      	 6.5280    9.8875
+B3              -0.9808   -0.5025
+B4              -0.5621   -0.2744
+B5              -0.5709   -0.3079
+B6		-4.0174   -1.3863
+B7		-0.5108    0.0198
+B8		-0.5108   -0.2231
+B9		-2.9957   -0.5108
+B10		-2.9957   -2.3026
+
+
+TolCOV		1  # 1 !!! don't play with fire
+bbeta		0.2
+
+#auxil_size	5
+#auxil_data	0.1,0.2,0.3,0.4,5
+
+# RNG seed
+#seed		0
+seed		280675
+
+# Internal options
+opt.MaxIter	1000
+opt.Tol		1e-12
+opt.Display	1
+opt.Step        1e-4
+
+# Online plotting of data, useful for 2D data and debugging
+iplot		0
+
+# SN-TMCMC specific options
+diffstep	1e-4
+posdef		4
