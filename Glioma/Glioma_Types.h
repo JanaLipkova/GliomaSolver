@@ -290,7 +290,7 @@ static const bool	bVerbose		= true;
 // Multiresolution parameters
 static const int maxLevel = _MAXLEVEL_;    // 8bpd has maxLevel 3 since 2^3
 static const int resJump  = 1;    // modulo(maxLevel,resJum) = 0, !!! and reJump < maxLevel
-const double refinement_tolerance	= 1e-3;
+const double refinement_tolerance	= 1e-4;
 const double compression_tolerance	= 1e-5;
 
 typedef		Block< Cell, blockSize, blockSize, blockSizeZ>	B;

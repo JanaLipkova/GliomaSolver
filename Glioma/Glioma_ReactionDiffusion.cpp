@@ -16,9 +16,10 @@ static int maxStencil[2][3] = {
 Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv): parser(argc, argv)
 {
     bVerbose    = parser("-verbose").asBool(1);
-    bProfiler   = parser("-profiler").asBool(1);
-    bVTK        = parser("-vtk").asBool();
-    bAdaptivity = parser("-adaptive").asBool();
+    bVTK        = parser("-vtk").asBool(1);
+    bUQ         = parser("-UQ").asBool(0);
+    bAdaptivity = parser("-adaptive").asBool(1);
+    PatientFileName = parser("-PatFileName").asString();
     
     if(bVerbose) printf("////////////////////////////////////////////////////////////////////////////////\n");
     if(bVerbose) printf("//////////////////          Glioma Reaction Diffusion           ////////////////\n");
@@ -32,10 +33,27 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
-    PatientFileName = parser("-PatFileName").asString();
     L = 1;
     
-    _ic(*grid, PatientFileName, L);
+    if(bUQ){
+        ifstream mydata("TumorIC.txt");
+        
+        if (mydata.is_open()){
+            mydata >> tumor_ic[0];
+            mydata >> tumor_ic[1];
+            mydata >> tumor_ic[2];
+            mydata.close();
+        }
+    }
+    else{
+        tumor_ic[0] = 0.315;
+        tumor_ic[1] = 0.71;
+        tumor_ic[2] = 0.4;
+    }
+    
+    _ic(*grid, PatientFileName, L, tumor_ic);
+    
+    if(!bUQ) _dump(0);
     _dump(0);
     
     isDone              = false;
@@ -51,11 +69,10 @@ Glioma_ReactionDiffusion::~Glioma_ReactionDiffusion()
 
 
 #pragma mark InitialCondition
-// Patient 01 data
-// 1) read in anatomies - rescaled to [0,1]^3
-// 2) read in tumor center of mass + initialize tumor around
-// 3) set the characteristic length L as the length of the data
-void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real& L)
+// 1) Read in anatomies - rescaled to [0,1]^3
+// 2) Initialize tumor
+// 3) Set the characteristic length L as the length of the data
+void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real& L, Real tumor_ic[3])
 {
     printf("Reading data from file: %s \n", PatientFileName.c_str());
    
@@ -70,84 +87,66 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real
     int brainSizeX = (int) GM.getSizeX();
     int brainSizeY = (int) GM.getSizeY();
     int brainSizeZ = (int) GM.getSizeZ();
+    printf("brainSizeX=%i, brainSizeY=%i, brainSizeZ= %i \n", brainSizeX, brainSizeY, brainSizeZ);
     
     int brainSizeMax = max(brainSizeX, max(brainSizeY,brainSizeZ));
-    L    = brainSizeMax * 0.1;   // voxel spacing 1mm, convert from mm to cm  // L = 25.6 cm
+    L   = brainSizeMax * 0.1;   // voxel spacing 1mm, convert from mm to cm  // L = 25.6 cm
+    printf("Characteristic Lenght L=%f \n", L);
     
-    printf("brainSizeX=%i, brainSizeY=%i, brainSizeZ= %i \n", brainSizeX, brainSizeY, brainSizeZ);
-    std::cout<<"brainSizeX="<<brainSizeX<<" brainSizeY="<<brainSizeY<<" brainSizeZ="<<brainSizeZ<<std::endl;
+    double brainHx = 1.0 / ((double)(brainSizeMax)); //  w.r.t. longest dimension for correct aspect ratio
+    double brainHy = 1.0 / ((double)(brainSizeMax)); //  w.r.t. longest dimension for correct aspect ratio
+    double brainHz = 1.0 / ((double)(brainSizeMax)); //  w.r.t. longest dimension for correct aspect ratio
     
-    double brainHx = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
-    double brainHy = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
-    double brainHz = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
     
-    /* Tumor Set UP */
-    vector<Real> tumor_ic(_DIM);
-    tumor_ic[0] = 0.315;
-    tumor_ic[1] = 0.67;
-    tumor_ic[2] = 0.5;
-    
+    // Tumor set up
     const Real tumorRadius = 0.005;
-    const Real smooth_sup  = 2.;		// suppor of smoothening, over how many gp to smooth
+    const Real smooth_sup  = 2.;		// suppor of smoothening
+    const Real h           = 1./128;    // use fixed h, for same IC smoothening at all resolutions
+    const Real iw          = 1./(smooth_sup * h); // widht of smoothening
     
     Real pGM, pWM, pCSF;
     
     vector<BlockInfo> vInfo = grid.getBlocksInfo();
     
-#pragma omp paraller for
+#pragma omp parallel for schedule(static)
     for(int i=0; i<vInfo.size(); i++)
     {
         BlockInfo& info = vInfo[i];
         B& block = grid.getBlockCollection()[info.blockID];
         
-        //        const Real h = vInfo[0].h[0];
-        const Real h = 1./128;
-        const Real iw = 1./(smooth_sup * h);   // width of smoothening => now it is over two grid points
-        
         for(int iz=0; iz<B::sizeZ; iz++)
             for(int iy=0; iy<B::sizeY; iy++)
                 for(int ix=0; ix<B::sizeX; ix++)
                 {
-                    double x[3];
+                    Real x[3];
                     info.pos(x, ix, iy, iz);
                     
-                    /* Anatomy */
                     int mappedBrainX = (int)floor( x[0] / brainHx  );
                     int mappedBrainY = (int)floor( x[1] / brainHy  );
                     int mappedBrainZ = (int)floor( x[2] / brainHz  );
                     
                     // aspect ratio correction
-                    mappedBrainX -= (int) ( (brainSizeMax - brainSizeX) * 0.5);
-                    mappedBrainY -= (int) ( (brainSizeMax - brainSizeY) * 0.5);
-                    mappedBrainZ -= (int) ( (brainSizeMax - brainSizeZ) * 0.5);
+//                    mappedBrainX -= (int) ( (brainSizeMax - brainSizeX) * 0.5);
+//                    mappedBrainY -= (int) ( (brainSizeMax - brainSizeY) * 0.5);
+//                    mappedBrainZ -= (int) ( (brainSizeMax - brainSizeZ) * 0.5);
                     
                     if ( (mappedBrainX >= 0 && mappedBrainX < brainSizeX) & (mappedBrainY >= 0 && mappedBrainY < brainSizeY) && (mappedBrainZ >= 0 && mappedBrainZ < brainSizeZ) )
                     {
+                        // anatomy
                         pGM     =  GM( mappedBrainX,mappedBrainY,mappedBrainZ);
                         pWM     =  WM( mappedBrainX,mappedBrainY,mappedBrainZ);
                         pCSF    =  CSF(mappedBrainX,mappedBrainY,mappedBrainZ);
                         
-                        // Anatomy
-                        double all = pWM + pGM + pCSF;
+                        // separat tissue and fluid + normalise
+                        pCSF = (pCSF > 0.1)  ? 1. : pCSF;
+                        pWM  = (pCSF > 0.1)  ? 0. : pWM;
+                        pGM  = (pCSF > 0.1)  ? 0. : pGM;
                         
-                        if(all > 0)
-                        {
-                            // normalize
-                            pGM    = pGM  / all;
-                            pWM    = pWM  / all;
-                            pCSF   = pCSF / all;
-                            
-//                            pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;  // enhance csf for hemisphere separation
-//                            block(ix,iy,iz).p_csf = pCSF;
-//                            
-//                            if(pCSF  < 1.)
-                            {
-                                block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM); // low level mixing for nicer visualisation
-                                block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
-                                block(ix,iy,iz).p_g   = pGM  / (pCSF + pWM + pGM);
-                            }
-                            
-                        }
+                        block(ix,iy,iz).p_csf = pCSF;
+                        
+                        double tissue = pWM + pGM;
+                        block(ix,iy,iz).p_w = (tissue > 0.) ? (pWM / tissue) : 0.;
+                        block(ix,iy,iz).p_g = (tissue > 0.) ? (pGM / tissue) : 0.;
                         
                         // tumor
                         const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};
@@ -162,7 +161,6 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real
                             block(ix,iy,iz).phi = 0.0;
                         
                     }
-                    
                 }
         
         grid.getBlockCollection().release(info.blockID);
@@ -179,7 +177,7 @@ void Glioma_ReactionDiffusion::_reactionDiffusionStep(BoundaryInfo* boundaryInfo
     const BlockCollection<B>& collecton = grid->getBlockCollection();
     
     ReactionDiffusionOperator<_DIM>  rhs(Dw,Dg,rho);
-    UpdateTumor                     <_DIM>  updateTumor(dt);
+    UpdateTumor              <_DIM>  updateTumor(dt);
     
     blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhs);
     BlockProcessing::process(vInfo, collecton, updateTumor, nParallelGranularity);
@@ -200,42 +198,122 @@ void Glioma_ReactionDiffusion:: _dump(int counter)
 }
 
 
+/* Dump output for UQ likelihood. Requirements:
+ - dump at the uniform finest resolution
+ - use 3D Matrix structure to dump data in binary format
+ - assume 3D simulation */
+void Glioma_ReactionDiffusion::_dumpUQoutput()
+{
+    int gpd    = blocksPerDimension * blockSize;
+    double hf  = 1./gpd;
+    double eps = hf*0.5;
+    
+    MatrixD3D tumor(gpd,gpd,gpd);
+    vector<BlockInfo> vInfo = grid->getBlocksInfo();
+    
+#pragma omp parallel for schedule(static)
+    for(int i=0; i<vInfo.size(); i++)
+    {
+        BlockInfo& info = vInfo[i];
+        B& block = grid->getBlockCollection()[info.blockID];
+        double h = info.h[0];
+        
+        for(int iz=0; iz<B::sizeZ; iz++)
+            for(int iy=0; iy<B::sizeY; iy++)
+                for(int ix=0; ix<B::sizeX; ix++)
+                {
+                    double x[3];
+                    info.pos(x, ix, iy, iz);
+                    
+                    //mapped coordinates
+                    int mx = (int)floor( (x[0]) / hf  );
+                    int my = (int)floor( (x[1]) / hf  );
+                    int mz = (int)floor( (x[2]) / hf  );
+                    
+                    if(h < hf + eps)
+                        tumor(mx,my,mz) = block(ix,iy,iz).phi;
+                    else if(h < 2.*hf + eps)
+                    {
+                        for(int cz=0; cz<2; cz++)
+                            for(int cy=0; cy<2; cy++)
+                                for(int cx=0; cx<2; cx++)
+                                    tumor(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).phi;
+                    }
+                    else if (h < 3.*hf + eps)
+                    {
+                        for(int cz=0; cz<3; cz++)
+                            for(int cy=0; cy<3; cy++)
+                                for(int cx=0; cx<3; cx++)
+                                    tumor(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).phi;
+                    }
+                    else
+                    {
+                        for(int cz=0; cz<4; cz++)
+                            for(int cy=0; cy<4; cy++)
+                                for(int cx=0; cx<4; cx++)
+                                    tumor(mx+cx,my+cy,mz+cz) = block(ix,iy,iz).phi;
+                    }
+                }
+        
+    }
+    
+    char filename2[256];
+    sprintf(filename2,"HGG_data.dat");
+    tumor.dump(filename2);
+    
+}
+
+
+
+#pragma mark RUN
 void Glioma_ReactionDiffusion::run()
 {
     const int nParallelGranularity	= (grid->getBlocksInfo().size()<=8 ? 1 : 4);
     BoundaryInfo* boundaryInfo		= &grid->getBoundaryInfo();
     
     /* Tumor growth parameters*/
-    Real Dw     = (Real) parser("-Dw").asDouble(0.0013);
-    Real rho    = (Real) parser("-rho").asDouble(0.025);
-    double tend = parser("-Tend").asDouble(300);
+    Real Dw, Dg, rho, tend;
     
-    /*rescale*/
+    if(bUQ){
+        ifstream mydata("InputParameters.txt");
+        if (mydata.is_open())
+        {
+            mydata >> Dw;
+            mydata >> rho;
+            mydata >> tend;
+            mydata.close();
+        }
+    }
+    else
+    {
+        Dw   = (Real) parser("-Dw").asDouble(0.0013);
+        rho  = (Real) parser("-rho").asDouble(0.025);
+        tend = (Real) parser("-Tend").asDouble(300);
+    }
+    
+    /*rescale for correct space dimension*/
     Dw = Dw/(L*L);
-    Real Dg = 0.1*Dw;
+    Dg = 0.1*Dw;
     
-    double t			= 0.0;
-    int iCounter        = 1;
-    double h            = 1./(blockSize*blocksPerDimension);
-    double dt           = 0.99 * h*h / ( 2.* _DIM * max(Dw, Dg) );
-    if(bVerbose)  printf("Dg=%e, Dw=%e, dt= %f, rho=%f , h=%f\n", Dg, Dw, dt, rho,h);
+    Real t			= 0.0;
+    Real h          = 1./(blockSize*blocksPerDimension);
+    Real dt         = 0.99 * h*h / ( 2.* _DIM * max(Dw, Dg) );
+    int iCounter    = 1;
+    if(bVerbose) printf("Dg=%e, Dw=%e, dt= %f, rho=%f , h=%f\n", Dg, Dw, dt, rho,h);
     
     while (t <= tend)
     {
-        if(bProfiler) profiler.getAgent("RD_Step").start();
         _reactionDiffusionStep(boundaryInfo, nParallelGranularity, Dw, Dg, rho, dt);
-        if(bProfiler) profiler.getAgent("RD_Step").stop();
-        
         t                   += dt   ;
         numberOfIterations  ++      ;
         
         if ( t >= ((double)(whenToWrite)) )
         {
-            if(bAdaptivity)
-            {
+            if(bAdaptivity){
                 Science::AutomaticRefinement	<0,0>(*grid, blockfwt, refinement_tolerance, maxLevel, 1, &profiler);
                 Science::AutomaticCompression	<0,0>(*grid, blockfwt, compression_tolerance, -1, &profiler);
             }
+            
             _dump(iCounter++);
             whenToWrite = whenToWrite + whenToWriteOffset;
             if( (bVerbose) && (bVTK)) printf("Dumping data at time t=%f\n", t);
@@ -245,11 +323,11 @@ void Glioma_ReactionDiffusion::run()
     
     // Refine + save the last one
     if(bAdaptivity)
-        Science::AutomaticRefinement	<0,0>(*grid, blockfwt, refinement_tolerance, maxLevel, 1, &profiler);
+        Science::AutomaticRefinement<0,0>(*grid, blockfwt, refinement_tolerance, maxLevel, 1, &profiler);
     
     _dump(iCounter);
+    if(bUQ) _dumpUQoutput();
     
-    if(bVerbose) profiler.printSummary();
     if(bVerbose) printf("**** Dumping done\n");
     if(bVerbose) printf("\n\n Run Finished \n\n");
 }

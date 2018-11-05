@@ -30,10 +30,10 @@ endif
 
 #MRAG grid parameters
 dim ?= 3
-bpd ?= 8
-#bpd ?= 16
+bpd ?= 16
+bs=8
+#bpd ?= 8
 #bs ?= 16
-bs=16
 
 CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd)  
 
@@ -107,6 +107,7 @@ VPATH := ../Glioma/ ../MRAG/ ../MRAG/MRAGcore ../Glioma/Tests/
 OBJECTS = \
 Glioma_main.o \
 Glioma_ReactionDiffusion.o\
+Glioma_UQ_DataPreprocessing.o\
 Glioma_ComputePFF_CahnHilliard.o\
 MRAGBoundaryBlockInfo.o \
 dat2VP.o \

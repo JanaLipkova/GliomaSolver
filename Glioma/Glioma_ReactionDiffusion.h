@@ -32,14 +32,16 @@ private:
     bool                                    isDone;
     bool                                    bAdaptivity;
     bool                                    bVerbose;
-    bool                                    bProfiler;
     bool                                    bVTK;
+    bool                                    bUQ;
     string                                  PatientFileName;
     Real                                    L;
+    Real                                    tumor_ic[3];
     
-    static void _ic(Grid<W,B>& grid, string PatientFileName, Real& L);
+    static void _ic(Grid<W,B>& grid, string PatientFileName, Real& L, Real tumor_ic[3]);
     void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, const Real Dw, const Real Dg, const Real rho,double dt);
     void		_dump(int counter);
+    void        _dumpUQoutput();
 
 public:
     Glioma_ReactionDiffusion(int argc, const char ** argv);
