@@ -34,5 +34,6 @@ export OMP_NUM_THREADS=$SLURM_NTASKS_PER_NODE
 
 echo "In the directory: $PWD"
 echo "Running program on $SLURM_TASKS nodes with $SLURM_CPUS_PER_TASK tasks, each with $SLURM_CPUS_PER_TASK cores."
-mpirun ./engine_tmcmc
+
+mpirun -env TORC_WORKERS 1 ./engine_tmcmc
 #mpirun -np 64 -env TORC_WORKERS 1 ./engine_tmcmc
