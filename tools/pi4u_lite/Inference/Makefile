@@ -1,5 +1,17 @@
+hn ?= $(shell hostname)
+
+ifneq "$(findstring mpp, $(shell hostname))" ""
+export LANG=C
+export LC_ALL=C
+GSL_INC_DIR=/lrz/sys/libraries/gsl/2.3/include
+GSL_LIB_DIR=/lrz/sys/libraries/gsl/2.3/lib
+else
+GSL_INC_DIR=${HOME}/usr/gsl/include
+GSL_LIB_DIR=${HOME}/usr/gsl/lib
+endif
+
 #GSLROOT=${HOME}/usr/gsl
-GSLROOT=/opt/local
+#GSLROOT=/opt/local
 
 CC = mpicc
 CPP = mpic++ 
@@ -12,8 +24,10 @@ CFLAGS += -Wall #-Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-f
 CFLAGS += `torc_cflags`
 
 # GSL
-CFLAGS  += -I${GSLROOT}/include
-LDFLAGS += -L${GSLROOT}/lib -lgsl -lgslcblas
+CFLAGS  += -I${GSL_INC_DIR}
+LDFLAGS += -L${GSL_LIB_DIR} -lgsl -lgslcblas
+#CFLAGS  += -I${GSLROOT}/include
+#LDFLAGS += -L${GSLROOT}/lib -lgsl -lgslcblas
 
 # PRIMARY
 LDFLAGS += `torc_libs` -lpthread -lm 
