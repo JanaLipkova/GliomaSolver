@@ -2,6 +2,7 @@
 Solver for simulating tumor growth in a brain anatomy, including models for:
 * tumor growth (Reaction-Diffusion model)
 * tumor mass effect and intracranial pressure (Brain deformation model)
+* Bayesian calibration of tumor growth model for personalised radiotherapy planning
 * others
 
 ### Instalations
@@ -31,7 +32,7 @@ make clean && make helmholtz=hypre -j 4
 Creates executable ```brain```. 
 
 ### Examples
-Folder `Examples` contains example of solver:
+Folder `Simulations` contains example of solver:
 * `TumorGrowth`: tumor growth model in patinet antomy using *reacion-diffusion model* as in [1]
 * `BrainDeform`: mechanical model for tumor growth with mass effect using *brain-deformaiton model*
 * `PatientInference`: Bayesian calibration of tumor growth model w.r.t. patient multimodal scans as proposed in [1] 
