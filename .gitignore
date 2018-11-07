@@ -8,4 +8,5 @@ source/makefile/brain
 *.dat
 *.out
 *.nii
+*.nii.gz
 brain
