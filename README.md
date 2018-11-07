@@ -32,12 +32,13 @@ Creates executable ```brain```.
 
 ### Examples
 Folder `Examples` contains example of solver:
-* `TumorGrowth`: tumor growth model in patinet antomy using *reacion-diffusion model*
-* `BrainDeform`: tumor growth with in patient anatomy with mass effect ucing *brain-deformaiton model*
+* `TumorGrowth`: tumor growth model in patinet antomy using *reacion-diffusion model* as in [1]
+* `BrainDeform`: mechanical model for tumor growth with mass effect using *brain-deformaiton model*
+* `PatientInference`: Bayesian calibration of tumor growth model w.r.t. patient multimodal scans as proposed in [1] 
 
 ### References
 Please cite:
-* Lipkova et al.: *Personalized Radiotherapy Planning for Glioma Using Multimodal Bayesian Model Calibration*, preprint arXiv:1807.00499, (2018)
-* Rossinelli D, et al.: *Mrag-i2d: Multi-resolution adapted grids for remeshed vortex methods on multicore architectures.* Journal of Computational Physics 288:1–18, (2015).
+* [1] Lipkova et al.: *Personalized Radiotherapy Planning for Glioma Using Multimodal Bayesian Model Calibration*, preprint arXiv:1807.00499, (2018)
+* [2] Rossinelli D, et al.: *Mrag-i2d: Multi-resolution adapted grids for remeshed vortex methods on multicore architectures.* Journal of Computational Physics 288:1–18, (2015).
     
 
