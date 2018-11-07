@@ -30,13 +30,14 @@ private:
     bool                                    bVerbose;
     bool                                    bVTK;
     string                                  PatientFileName;
+    Real                                    L;
     Real                                    cm[3];
     Real                                    volFLAIR;
 
     
-    static void _ic(Grid<W,B>& grid, string PatientFileName);
+    static void _ic(Grid<W,B>& grid, string PatientFileName, Real& L);
     void        _normalisePET();
-    void        _computeTumorStatistic();
+    void        _computePriorRange();
     void        _dumpUQdata();
     void        _dumpInferenceROI();
     void		_dump(int counter);

@@ -32,7 +32,8 @@ Glioma_UQ_DataPreprocessing::Glioma_UQ_DataPreprocessing(int argc, const char **
     stSorter.connect(*grid);
     
     PatientFileName = parser("-PatFileName").asString();
-    _ic(*grid, PatientFileName);
+    L = 1;
+    _ic(*grid, PatientFileName, L);
     
     isDone              = false;
 }
@@ -48,7 +49,7 @@ Glioma_UQ_DataPreprocessing::~Glioma_UQ_DataPreprocessing()
 // 1) read in anatomies - rescaled to [0,1]^3
 // 2) read in tumor center of mass + initialize tumor around
 // 3) set the characteristic length L as the length of the data
-void Glioma_UQ_DataPreprocessing::_ic(Grid<W,B>& grid, string PatientFileName)
+void Glioma_UQ_DataPreprocessing::_ic(Grid<W,B>& grid, string PatientFileName, Real &L)
 {
     printf("Reading data from file: %s \n", PatientFileName.c_str());
     
@@ -80,6 +81,7 @@ void Glioma_UQ_DataPreprocessing::_ic(Grid<W,B>& grid, string PatientFileName)
     printf("dataSizeX=%i, dataSizeY=%i, dataSizeZ= %i \n", brainSizeX, brainSizeY, brainSizeZ);
     
     int brainSizeMax = max(brainSizeX, max(brainSizeY,brainSizeZ));
+    L   = brainSizeMax * 0.1;   // voxel spacing 1mm, convert from mm to cm  // L = 25.6 cm
     
     double brainHx = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
     double brainHy = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
@@ -180,9 +182,37 @@ void Glioma_UQ_DataPreprocessing::_normalisePET()
     }
 }
 
-// CM of tumor w.r.t to T1c, prior range for IC, volume of tumor in T1c and FLAIR
-void Glioma_UQ_DataPreprocessing::_computeTumorStatistic()
+/* Case specific prior:
+   1) Load generic prior range,
+   2) Compute patient specific parts
+       - IC prior = Box centered at CM of T1c tumor, side = diameter of sphere with same volume as T1c lesion
+       - T        = [Tmin, Tmax + 300], where Tmin = TumRad/v_max, Tmax = TumRad + 2cm / v_min, where
+                     v = 2*sqrt(D*rho), get v_max, v_min from generic prior 
+                     TumRad is a radius of sphere with volume same as FLAIR-enhancing lesion
+   3) Write prior and LogPrior  */
+void Glioma_UQ_DataPreprocessing::_computePriorRange()
 {
+    // 1) Load generic prior range:
+    // Input order: D, rho, Tend, icx, icy, icz, PETsigma, ucT1, ucT2, Tisigma2
+    vector<float> prior;
+    float tmp;
+    
+    ifstream myfile("GenericPrior.txt");
+    if (myfile.is_open()){
+         while( myfile.good()){
+             myfile >> tmp;
+             if(myfile.eof()) break;  // since EOF is after the last element, without this the last element would be written to prior 2x
+             prior.push_back(tmp);
+          }
+        myfile.close();
+    }
+    else{
+        printf("Aborting: missing input file GenericPrior.txt \n");
+        abort();
+    }
+    
+    
+    // 2) Compute IC and T prior
     Real massT1 = 0.;
     Real massT2 = 0.;
     Real cmx = 0.;
@@ -225,17 +255,50 @@ void Glioma_UQ_DataPreprocessing::_computeTumorStatistic()
     volFLAIR   = massT2 * h3;
     
     // Radius of sphere with volume same as T1c lesion
-    Real radius3 = 3. * volT1 / (4. * M_PI);
-    Real radius  = pow(radius3, 1./3.);
-    radius = radius * 1.1;  // add extra 10% just in case
+    Real T1radius3 = 3. * volT1 / (4. * M_PI);
+    Real T1radius  = pow(T1radius3, 1./3.);
+    T1radius = T1radius * 1.25;  // add extra 25% just in case
     
-    Real ICprior[6] = { cm[0] - radius, cm[0] + radius,
-        cm[1] - radius, cm[1] + radius,
-        cm[2] - radius, cm[2] + radius };
+    Real ICprior[6] = {
+        cm[0] - T1radius, cm[0] + T1radius,
+        cm[1] - T1radius, cm[1] + T1radius,
+        cm[2] - T1radius, cm[2] + T1radius };
+    
+    Real FLAIRradius3 = 3.* volFLAIR / (4.* M_PI);
+    Real FLAIRradius  = pow(FLAIRradius3, 1./3.);
+    FLAIRradius       = 1.25 * FLAIRradius * L; // add 25% to be sure[cm]
+   
+    Real vmin = 2*pow(prior[0]*prior[2], 1./2.);
+    Real vmax = 2*pow(prior[1]*prior[3], 1./2.);
+    
+    Real Tmin = FLAIRradius/vmax;
+    Real Tmax = (FLAIRradius + 2.) / vmin + 300.; // add 2cm infiltration + 300 days
+    
+    Real cmin = Tmin * Tmin * prior[3];
+    Real cmax = Tmax * Tmax * prior[2];
+    
+    // Time
+    prior[4]  = cmin;
+    prior[5]  = cmax;
+    prior[6]  = ICprior[0];
+    prior[7]  = ICprior[1];
+    prior[8]  = ICprior[2];
+    prior[9]  = ICprior[3];
+    prior[10] = ICprior[4];
+    prior[11] = ICprior[5];
 
+    if(bVerbose) printf("Tmin =%f, Tmax=%f \n",  Tmin, Tmax);
+    if(bVerbose) printf("FLAIRradius = %f, vmin =%f, vmax=%f \n", FLAIRradius, vmin, vmax);
+    
     FILE * pFile;
-    pFile = fopen ("logPriorIC.txt", "w");
-    for (int i = 0; i < 6; i++) fprintf(pFile, "%.4f\n", log(ICprior[i]));
+    pFile = fopen ("PriorRange.txt",    "w");
+    for(int i = 0; i < prior.size(); i=i+2)
+        fprintf(pFile, "%.4f     %.4f\n", prior[i], prior[i+1]);
+    fclose (pFile);
+
+    pFile = fopen ("LogPriorRange.txt",    "w");
+    for(int i = 0; i < prior.size(); i=i+2)
+        fprintf(pFile, "%.4f     %.4f\n", log(prior[i]), log(prior[i+1]));
     fclose (pFile);
     
 }
@@ -362,7 +425,7 @@ void Glioma_UQ_DataPreprocessing::_dumpInferenceROI()
 void Glioma_UQ_DataPreprocessing::run()
 {
     _normalisePET();
-    _computeTumorStatistic();
+    _computePriorRange();
     _dumpUQdata();
     _dumpInferenceROI();
     _dump(0);

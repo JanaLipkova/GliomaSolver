@@ -14,7 +14,7 @@ export OMP_NUM_THREADS=$N
 program=brain
 model=UQprep
 verbose=0
-vtk=0
+vtk=1
 
 # Path to patient data
 PatFileName="$1"

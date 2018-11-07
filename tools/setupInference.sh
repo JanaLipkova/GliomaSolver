@@ -32,6 +32,8 @@ cp brain $PrepFolder
 cp scripts/mapDataToMRAGrid.sh $PrepFolder
 cp scripts/writeRunAll.sh $PrepFolder/
 cp scripts/writeTMCMCpar.sh $PrepFolder/
+cp scripts/GenericPrior.txt $PrepFolder/
+
 
 cd $PrepFolder
 ./mapDataToMRAGrid.sh "$DataPath"

@@ -13,7 +13,7 @@ let i=0
 while read line; do
   myArray[i]="$line"
   ((++i))
-done < logPriorIC.txt
+done < LogPriorRange.txt
 
 
 # Write the TMCMC configuration file
@@ -38,17 +38,17 @@ MaxChainLength  1
 
 # Boundaries
 Bdef             0          4
-B0              -8.9480   -3.2702
-B1              -5.9145   -1.6607
-B2               6.5280    9.8875
-B3              ${myArray[0]}    ${myArray[1]} 
-B4              ${myArray[2]}    ${myArray[3]}
-B5              ${myArray[4]}    ${myArray[5]}
-B6              -4.0174   -1.3863
-B7              -0.5108    0.0198
-B8              -0.5108   -0.2231
-B9              -2.9957   -0.5108
-B10             -2.9957   -2.3026
+B0               ${myArray[0]}
+B1               ${myArray[1]}
+B2                ${myArray[2]}
+B3               ${myArray[3]}
+B4               ${myArray[4]}
+B5               ${myArray[5]}
+B6               ${myArray[6]}
+B7               ${myArray[7]}
+B8               ${myArray[8]}
+B9               ${myArray[9]}
+B10              ${myArray[10]}
 
 TolCOV          1  # 1 !!! don't play with fire
 bbeta           0.2
