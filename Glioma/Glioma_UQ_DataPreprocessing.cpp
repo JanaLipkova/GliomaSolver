@@ -39,7 +39,7 @@ Glioma_UQ_DataPreprocessing::Glioma_UQ_DataPreprocessing(int argc, const char **
 
 Glioma_UQ_DataPreprocessing::~Glioma_UQ_DataPreprocessing()
 {
-    std::cout << "------Adios muchachos------" << std::endl;
+    if(bVerbose) std::cout << "------Adios muchachos------" << std::endl;
 }
 
 
@@ -234,8 +234,8 @@ void Glioma_UQ_DataPreprocessing::_computeTumorStatistic()
         cm[2] - radius, cm[2] + radius };
 
     FILE * pFile;
-    pFile = fopen ("ICprior.txt", "w");
-    for (int i = 0; i < 6; i++) fprintf(pFile, "%.3f\n", ICprior[i]);
+    pFile = fopen ("logPriorIC.txt", "w");
+    for (int i = 0; i < 6; i++) fprintf(pFile, "%.4f\n", log(ICprior[i]));
     fclose (pFile);
     
 }
@@ -306,8 +306,8 @@ void Glioma_UQ_DataPreprocessing::_dumpInferenceROI()
     Real radius  = pow(radius3, 1./3.);
     radius       = radius * 2.;
     
-    printf("Center of mass =[ %f, %f, %f]\n", cm[0],cm[1],cm[2]);
-    printf("ROI radius %f\n", radius);
+    if(bVerbose) printf("Center of mass =[ %f, %f, %f]\n", cm[0],cm[1],cm[2]);
+    if(bVerbose) printf("ROI radius %f\n", radius);
     
     int points         = 0;
     vector<double>     ROI;
@@ -367,5 +367,5 @@ void Glioma_UQ_DataPreprocessing::run()
     _dumpInferenceROI();
     _dump(0);
     
-    printf("\n\n Run Finished \n\n");
+    if(bVerbose)printf("\n\n Run Finished \n\n");
 }

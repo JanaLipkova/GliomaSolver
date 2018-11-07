@@ -7,4 +7,5 @@ source/makefile/brain
 *.vtk
 *.dat
 *.out
+*.nii
 brain

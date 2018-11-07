@@ -25,18 +25,23 @@ static pthread_mutex_t fork_mutex = PTHREAD_MUTEX_INITIALIZER;
  4. read likelihood value from the file & store output in *res
  5. remove temporary direcotries
  --------------------------------------
- PARAMETERS (shown values for synthetic data):
- x[0] =  0.0013    // Dw
- x[1] =  0.025     // rho
- x[2] =  270       // tend
- x[3] =  0.05      // IC noise (sigma, not sigma2), IC ~ N(CM,sigma2)
- x[4] =  0.05    // PET sigma; infered is log(PETsigma)
- x[5] =  0.827702  // PET scale factor
+ PARAMETERS :
+ x[0] = Dw
+ x[1] = rho
+ x[2] = c ( Tend^2 = c / rho )
+ x[3] = icx
+ x[4] = icy
+ x[5] = icz
+ x[6] = PETsigma      
+ x[7] = PETscale
+ x[8] = ucT1
+ x[9] = ucT2
+ x[10] = Tisigma2
  */
 
 #define USE_SCRATCH 0
-#define REMOVE_DIRS 0
-#define RESTRICT_WAITING_TIME 0 
+#define REMOVE_DIRS 1
+#define RESTRICT_WAITING_TIME 1 
 
 void taskfun(double /*const*/ *x, int *pN, double *res, int winfo[4])
 {
@@ -109,7 +114,7 @@ retry:
         }
         
         
-        // 1.3 write input parametes to the simulation's input file (first 3)
+        // Convert from log- to real space
         double param[n];
         param[0] = exp( x[0] );         // D
         param[1] = exp( x[1] );         // rho
@@ -129,33 +134,25 @@ retry:
         param[2] = sqrt(param[2]);
 
 
-	
-        FILE *finp = fopen("HGG_InputParameters.txt", "w");
+	// 1.3 Simulation input parametes
         int i;
+	FILE *finp = fopen("InputParameters.txt", "w");
         for (i = 0; i < 3; i++) fprintf(finp, "%.16lf\n", param[i]);
         fclose(finp);
         
-        // 1.4 Initial Position of tumor = 4th param.
-        float icx = param[3];
-        float icy = param[4];
-        float icz = param[5];
-        
-        FILE * pFile;
-        float buffer[3] = { icx , icy , icz };
-        pFile = fopen ("HGG_TumorIC.bin", "wb");
-        fwrite (buffer , sizeof(float), sizeof(buffer), pFile);
-        fclose (pFile);
+        // 1.4 Tumor initial position
+        finp = fopen ("TumorIC.txt", "w");
+	for (i = 3; i < 6; i++) fprintf(finp, "%.4f \n", param[i]);
+        fclose (finp);
         
         // 1.5 write input parametes to the input file for likelihood evaluation
         // PETsigma2, PETscale, TIsigma2
         finp = fopen("LikelihoodInput.txt", "w");
-        int j;
-        for (j = 6; j < n; j++) fprintf(finp, "%.16lf\n", param[j]);
+        for (i = 6; i < n; i++) fprintf(finp, "%.16lf\n", param[i]);
         fclose(finp);
         
         /* 2. run simulation */
         sprintf(line, "./runAll.sh");
-        //printf("parameters are \t %e \t %e \t %e \t %e \t %e \t %e \t %e\n",x[0],x[1],x[2],x[3],x[4],x[5],x[6]);
         parse(line, largv);
         
 #if 1
@@ -178,7 +175,7 @@ retry:
             while ((wpid = waitpid(rf, &status, WNOHANG)) == 0) {
                  ctr++;
                  sleep(1);
-                if (ctr == 1200) {
+                if (ctr == 1100) {
                     printf("XXXX: KILLING %d\n", rf); fflush(0);
                     kill(rf, SIGKILL);
                     break;

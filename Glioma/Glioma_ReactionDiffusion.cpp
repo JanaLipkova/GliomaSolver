@@ -44,6 +44,10 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
             mydata >> tumor_ic[2];
             mydata.close();
         }
+        else{
+            printf("Aborting: missing input file TumorIC.txt \n");
+            abort();
+        }
     }
     else{
         tumor_ic[0] = 0.315;
@@ -282,6 +286,10 @@ void Glioma_ReactionDiffusion::run()
             mydata >> rho;
             mydata >> tend;
             mydata.close();
+        }
+        else{
+            printf("Aborting: missing input file InputParameters.txt \n");
+            abort();
         }
     }
     else
