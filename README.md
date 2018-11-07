@@ -18,7 +18,7 @@ In the following notes, files with a word *kraken* in the name refer to files fo
 2) Create local makefile for your enviroment.  Folder ```makefile``` contains two examples of local makefiles ```make.kraken``` and ```make.lrz.sh```. 
     * Copy one of the example make file to ```make.your_host_name```, where *your_host_name* is your hostname, i.e. ```make.jana```. 
     * Inside your ```make.jana``` change ```LIB_BASE``` variabel to point to your libraries
-3) Main ```Makefile``` calls corresponding local  ```make.* ``` file depending on the hostname. Modify it so it calls your  ```make.jana ```.
+3) Main ```Makefile``` calls corresponding local  ```make.* ``` file depending on the hostname. Modify it so it calls your  ```make.jana ```
 
 ### Compilation & Running
 Set up enviroment and compile:
