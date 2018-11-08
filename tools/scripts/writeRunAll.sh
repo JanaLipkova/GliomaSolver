@@ -19,7 +19,7 @@ export OMP_NUM_THREADS=\$N
 #------------------
 program=brain
 model=RD
-verbose=1
+verbose=0
 adaptive=1
 vtk=0
 UQ=1
