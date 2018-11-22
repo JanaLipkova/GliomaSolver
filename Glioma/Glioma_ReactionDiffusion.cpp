@@ -129,7 +129,7 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real
                     int mappedBrainY = (int)floor( x[1] / brainHy  );
                     int mappedBrainZ = (int)floor( x[2] / brainHz  );
                     
-                    // aspect ratio correction
+//                    // aspect ratio correction
 //                    mappedBrainX -= (int) ( (brainSizeMax - brainSizeX) * 0.5);
 //                    mappedBrainY -= (int) ( (brainSizeMax - brainSizeY) * 0.5);
 //                    mappedBrainZ -= (int) ( (brainSizeMax - brainSizeZ) * 0.5);

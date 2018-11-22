@@ -31,9 +31,22 @@ Glioma_UQ_DataPreprocessing::Glioma_UQ_DataPreprocessing(int argc, const char **
     grid->setRefiner(refiner);
     stSorter.connect(*grid);
     
-    PatientFileName = parser("-PatFileName").asString();
     L = 1;
-    _ic(*grid, PatientFileName, L);
+    PatientFileName = parser("-PatFileName").asString();
+    int ICtype = parser("-ICtype").asInt(1);
+    
+    switch (ICtype) {
+        case 0:
+            _ic_Synthetic(*grid, PatientFileName, L);
+            break;
+            
+        case 1:
+            _ic(*grid, PatientFileName, L);
+            break;
+            
+        default:
+            break;
+    }
     
     isDone              = false;
 }
@@ -148,6 +161,100 @@ void Glioma_UQ_DataPreprocessing::_ic(Grid<W,B>& grid, string PatientFileName, R
         
     }
 }
+
+
+
+#pragma mark InitialCondition
+// Patient 01 data
+// 1) read in anatomies - rescaled to [0,1]^3
+// 2) read in tumor center of mass + initialize tumor around
+// 3) set the characteristic length L as the length of the data
+void Glioma_UQ_DataPreprocessing::_ic_Synthetic(Grid<W,B>& grid, string PatientFileName, Real &L)
+{
+    printf("Reading data from file: %s \n", PatientFileName.c_str());
+    
+    char anatomy      [200];
+    sprintf(anatomy, "%sHGG_data.dat", PatientFileName.c_str());
+    MatrixD3D GT(anatomy);
+    
+    int brainSizeX = (int) GT.getSizeX();
+    int brainSizeY = (int) GT.getSizeY();
+    int brainSizeZ = (int) GT.getSizeZ();
+    printf("dataSizeX=%i, dataSizeY=%i, dataSizeZ= %i \n", brainSizeX, brainSizeY, brainSizeZ);
+    
+    int brainSizeMax = max(brainSizeX, max(brainSizeY,brainSizeZ));
+    L   = brainSizeMax * 0.1;   // voxel spacing 1mm, convert from mm to cm  // L = 25.6 cm
+    
+    double brainHx = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
+    double brainHy = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
+    double brainHz = 1.0 / ((double)(brainSizeMax)); // should be w.r.t. longest dimension for correct aspect ratio
+    
+    Real data;
+    Real ucFLAIR = 0.25;
+    Real ucT1    = 0.7;
+    
+    double xi_1, xi_2;
+    double alpha = 0.02;  // 5% noise
+    int n = 0;
+    
+    vector<BlockInfo> vInfo = grid.getBlocksInfo();
+    
+#pragma omp parallel for schedule(static)
+    for(int i=0; i<vInfo.size(); i++)
+    {
+        BlockInfo& info = vInfo[i];
+        B& block = grid.getBlockCollection()[info.blockID];
+        
+        for(int iz=0; iz<B::sizeZ; iz++)
+            for(int iy=0; iy<B::sizeY; iy++)
+                for(int ix=0; ix<B::sizeX; ix++)
+                {
+                    double x[3];
+                    info.pos(x, ix, iy, iz);
+                    
+                    int mappedBrainX = (int)floor( x[0] / brainHx  );
+                    int mappedBrainY = (int)floor( x[1] / brainHy  );
+                    int mappedBrainZ = (int)floor( x[2] / brainHz  );
+                    
+//                    // aspect ratio correction
+//                    mappedBrainX -= (int) ( (brainSizeMax - brainSizeX) * 0.5);
+//                    mappedBrainY -= (int) ( (brainSizeMax - brainSizeY) * 0.5);
+//                    mappedBrainZ -= (int) ( (brainSizeMax - brainSizeZ) * 0.5);
+                    
+                    if ( (mappedBrainX >= 0 && mappedBrainX < brainSizeX) & (mappedBrainY >= 0 && mappedBrainY < brainSizeY) && (mappedBrainZ >= 0 && mappedBrainZ < brainSizeZ) )
+                    {
+                        data =  GT( mappedBrainX,mappedBrainY,mappedBrainZ);
+                        
+                        // transfer GT to synthetic tumor observations
+                        block(ix,iy,iz).wm  = (data > ucT1)    ? 1. : 0.;
+                        block(ix,iy,iz).gm  = (data > ucFLAIR) ? 1. : 0.;
+                        block(ix,iy,iz).phi = ( block(ix,iy,iz).wm + block(ix,iy,iz).gm >= 0.9 ) ? data : 0.;
+                        
+                        // add noise to pet signal
+                        // Box-Muller
+                        if(  (n % 2) == 0 ){
+                            double u1 = drand48();
+                            double u2 = drand48();
+                            
+                            xi_1 = sqrt( - 2.0*log( u1 ) ) * cos( 2.0*M_PI*u2 );
+                            xi_2 = sqrt( - 2.0*log( u1 ) ) * sin( 2.0*M_PI*u2 );
+                        }
+                        
+                        if( block(ix,iy,iz).phi > 0.  ){
+                            block(ix,iy,iz).phi = max( 0., block(ix,iy,iz).phi + alpha * xi_1);
+                            xi_1 = xi_2;
+                            n++;
+                        }
+                    
+                    }
+                    
+                }
+        
+        
+        grid.getBlockCollection().release(info.blockID);
+    }
+}
+
 
 
 #pragma mark Preprocessing

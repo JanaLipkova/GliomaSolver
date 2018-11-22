@@ -36,6 +36,7 @@ private:
 
     
     static void _ic(Grid<W,B>& grid, string PatientFileName, Real& L);
+    static void _ic_Synthetic(Grid<W,B>& grid, string PatientFileName, Real& L);
     void        _normalisePET();
     void        _computePriorRange();
     void        _dumpUQdata();
