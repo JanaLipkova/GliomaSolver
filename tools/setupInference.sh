@@ -2,7 +2,7 @@
 
 # USER INPUT HERE:
 #------------------------------------------------------
-DataPath="/Users/lipkova 1/WORK/GliomaSolver/Simulations/PatientInference/InputData_dat/"
+DataPath="/Users/lipkova 1/WORK/GliomaSolver/Simulations/PatientInferenceTest/InputData"
 SolverPath="/Users/lipkova 1/WORK/GliomaSolver/"
 Nsamples=1000
 #------------------- User input stops here --------------
@@ -12,6 +12,19 @@ echo "------------------------------------------------------"
 echo "          SETTING-UP INFERENCE ENVIROMENT             "
 echo "------------------------------------------------------"
 echo " "
+
+
+echo ">>> Converting Input data nii2dat <<<"
+echo "---------------------------------------"
+MatlabTools="${SolverPath}tools/DataProcessing/source"
+MyBase=$(pwd)
+cd "${MatlabTools}"
+matlab -nodisplay -nojvm -nosplash -r "nii2dat('${DataPath}'); exit"
+cd "$MyBase"
+
+InputDataLocation=$(dirname "${DataPath}")
+InputDataFolderName=$(basename "${DataPath}")
+MRAGInputData="${InputDataLocation}/${InputDataFolderName}_dat/"
 
 # Folders name
 PrepFolder=Preprocessing
@@ -36,13 +49,13 @@ cp scripts/GenericPrior.txt $PrepFolder/
 
 
 cd $PrepFolder
-./mapDataToMRAGrid.sh "$DataPath"
+./mapDataToMRAGrid.sh "$MRAGInputData"
 echo "---------------------------------------"
 
 echo " "
 echo ">>> Setting up Patient-Specific Enviroment <<<"
 echo "---------------------------------------"
-./writeRunAll.sh "$DataPath"
+./writeRunAll.sh "$MRAGInputData"
 ./writeTMCMCpar.sh $Nsamples
 
 # Copy where they belong

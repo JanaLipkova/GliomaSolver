@@ -5,9 +5,14 @@ export LANG=C
 export LC_ALL=C
 GSL_INC_DIR=/lrz/sys/libraries/gsl/2.3/include
 GSL_LIB_DIR=/lrz/sys/libraries/gsl/2.3/lib
+endif
+
+ifneq "$(findstring kraken, $(shell hostname))" ""
+GSL_INC_DIR=/usr/include/gsl
+GSL_LIB_DIR=/usr/local/lib
 else
-GSL_INC_DIR=${HOME}/usr/gsl/include
-GSL_LIB_DIR=${HOME}/usr/gsl/lib
+GSL_INC_DIR=/opt/local/include/gsl
+GSL_LIB_DIR=/opt/local/lib
 endif
 
 #GSLROOT=${HOME}/usr/gsl
