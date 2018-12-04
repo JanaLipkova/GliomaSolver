@@ -131,6 +131,8 @@
 		F9941E36215250B5006FE110 /* GridViewer.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DDA215250B5006FE110 /* GridViewer.h */; };
 		F9941E37215250B5006FE110 /* MRAGVisualTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DDB215250B5006FE110 /* MRAGVisualTypes.h */; };
 		F9941E38215250B5006FE110 /* Texture2D.h in Headers */ = {isa = PBXBuildFile; fileRef = F9941DDC215250B5006FE110 /* Texture2D.h */; };
+		F99DF81521B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99DF81321B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.cpp */; };
+		F99DF81621B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.h in Headers */ = {isa = PBXBuildFile; fileRef = F99DF81421B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -266,6 +268,8 @@
 		F9941DDA215250B5006FE110 /* GridViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridViewer.h; sourceTree = "<group>"; };
 		F9941DDB215250B5006FE110 /* MRAGVisualTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MRAGVisualTypes.h; sourceTree = "<group>"; };
 		F9941DDC215250B5006FE110 /* Texture2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture2D.h; sourceTree = "<group>"; };
+		F99DF81321B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Glioma_UQ_DataPreprocessing.cpp; sourceTree = "<group>"; };
+		F99DF81421B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glioma_UQ_DataPreprocessing.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -331,6 +335,8 @@
 		F9941D4021525093006FE110 /* Glioma */ = {
 			isa = PBXGroup;
 			children = (
+				F99DF81321B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.cpp */,
+				F99DF81421B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.h */,
 				F9941D4121525093006FE110 /* Glioma.h */,
 				F9941D4221525093006FE110 /* Glioma_BrainDeformation.cpp */,
 				F9941D4321525093006FE110 /* Glioma_BrainDeformation.h */,
@@ -603,6 +609,7 @@
 				F9941D6D21525093006FE110 /* HelmholtzSolver3D_Hypre_MPI.h in Headers */,
 				F9941E29215250B5006FE110 /* MRAGBlockProcessing_TBB.h in Headers */,
 				F9941DF8215250B5006FE110 /* MRAGRefiner_Greedy.h in Headers */,
+				F99DF81621B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.h in Headers */,
 				F9941DF5215250B5006FE110 /* MRAGProfiler.h in Headers */,
 				F9941E21215250B5006FE110 /* MRAGAddressable_CUDA.h in Headers */,
 				F9941E2F215250B5006FE110 /* MRAGSpaceTimeSorter.h in Headers */,
@@ -714,6 +721,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F9941DE5215250B5006FE110 /* MRAGBoundaryBlockInfo.cpp in Sources */,
+				F99DF81521B183BC005BAAF5 /* Glioma_UQ_DataPreprocessing.cpp in Sources */,
 				F9941D5E21525093006FE110 /* Glioma_BrainDeformation.cpp in Sources */,
 				F9941D6221525093006FE110 /* Glioma_ReactionDiffusion.cpp in Sources */,
 				F9941D7021525093006FE110 /* Test.cpp in Sources */,

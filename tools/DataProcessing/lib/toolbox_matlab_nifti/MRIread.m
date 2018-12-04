@@ -50,7 +50,7 @@ function mri = MRIread(fstring,headeronly)
 %    $Date: 2011/03/11 23:48:45 $
 %    $Revision: 1.22 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright ?? 2011 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

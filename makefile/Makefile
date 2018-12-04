@@ -32,8 +32,8 @@ endif
 dim ?= 3
 bpd ?= 16
 bs=8
-#bpd ?= 8
-#bs ?= 16
+#bpd ?= 16
+#bs ?= 8
 
 CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd)  
 

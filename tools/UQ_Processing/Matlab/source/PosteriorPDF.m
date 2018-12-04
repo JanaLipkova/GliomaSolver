@@ -17,20 +17,18 @@ addpath('../lib/tightfig')
 addpath('../lib/freezeColors')
 addpath('../lib/tmcmcTools')
 addpath('../lib')
-path2output=InputPath(1:end-13)
+path2output=InputPath(1:end-13);
 
 names =       ['D   ' ;'rho '  ;'Tend' ;'ix  ';'iy  ';'iz  ';'PETn';'b   ';'T1uc' ;'T2uc';'Tn  '];
-bSynthetic = 1;
+bSynthetic = 0;
 groundTruth = [ 1.3e-03 , 2.5e-02, 302 , 0.28, 0.67,   0.42,  0.0624,  0.801831, 0.7,   0.25,  5.0e-02  ];
 
 
 mydata = importdata(InputPath);
 [Nx,Ny] = size(mydata);
 
-mydata(:,3) = mydata(:,3)./mydata(:,2);
-mydata(:,3) = sqrt(mydata(:,3));
 
-% Generic range
+% Generic prio range
 B0  = [ 0.0002   0.0130 ];
 B1  = [ 0.0027   0.1900 ];
 B2  = [ 30.0     1500.0 ];

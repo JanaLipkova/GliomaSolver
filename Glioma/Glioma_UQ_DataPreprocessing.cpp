@@ -33,15 +33,16 @@ Glioma_UQ_DataPreprocessing::Glioma_UQ_DataPreprocessing(int argc, const char **
     
     L = 1;
     PatientFileName = parser("-PatFileName").asString();
-    int ICtype = parser("-ICtype").asInt(1);
+    int bSynt = parser("-bSynt").asInt(0);
     
-    switch (ICtype) {
-        case 0:
-            _ic_Synthetic(*grid, PatientFileName, L);
-            break;
+    switch (bSynt) {
             
-        case 1:
+        case 0:
             _ic(*grid, PatientFileName, L);
+            break;
+
+        case 1:
+            _ic_Synthetic(*grid, PatientFileName, L);
             break;
             
         default:
@@ -174,7 +175,7 @@ void Glioma_UQ_DataPreprocessing::_ic_Synthetic(Grid<W,B>& grid, string PatientF
     printf("Reading data from file: %s \n", PatientFileName.c_str());
     
     char anatomy      [200];
-    sprintf(anatomy, "%sHGG_data.dat", PatientFileName.c_str());
+    sprintf(anatomy, "%sHGG_data_GT.dat", PatientFileName.c_str());
     MatrixD3D GT(anatomy);
     
     int brainSizeX = (int) GT.getSizeX();
@@ -381,6 +382,13 @@ void Glioma_UQ_DataPreprocessing::_computePriorRange()
     Real Tmin = FLAIRradius/vmax;
     Real Tmax = (FLAIRradius + 2.) / vmin + 300.; // add 2cm infiltration + 300 days
     
+    if(bVerbose) printf("Tmin =%f, Tmax=%f \n",  Tmin, Tmax);
+
+    // Restrict prior range to min 30 days and max 5 years
+    Tmin = max( (Real) 30., Tmin);
+    Tmax = min( (Real) 1800, Tmax);
+    if(bVerbose) printf("Restricted range: Tmin =%f, Tmax=%f \n",  Tmin, Tmax);
+
     Real cmin = Tmin * Tmin * prior[3];
     Real cmax = Tmax * Tmax * prior[2];
     
@@ -394,7 +402,6 @@ void Glioma_UQ_DataPreprocessing::_computePriorRange()
     prior[10] = ICprior[4];
     prior[11] = ICprior[5];
 
-    if(bVerbose) printf("Tmin =%f, Tmax=%f \n",  Tmin, Tmax);
     if(bVerbose) printf("FLAIRradius = %f, vmin =%f, vmax=%f \n", FLAIRradius, vmin, vmax);
     
     FILE * pFile;

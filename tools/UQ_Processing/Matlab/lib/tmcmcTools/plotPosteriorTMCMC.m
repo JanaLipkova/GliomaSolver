@@ -58,10 +58,10 @@ N = length(param);
 %2) report statistic
 %----------------------------------------------------------------
 bestC = find( max(mydata(:,end)) == mydata(:,end));
-best = mydata(bestC,:)
-meanData = mean(mydata)
+best = mydata(bestC,:);
+meanData = mean(mydata);
 varData = var(mydata);
-stdData = sqrt(varData)
+stdData = sqrt(varData);
 
 
 % 3) Processed and plot results
@@ -187,6 +187,6 @@ tightfig;
 if(dump)
     set(gcf,'papersize',[50,40]);
     set(gcf,'PaperPositionMode','auto')
-    print([path2output,'PosteriorPDF'],'-dpdf')
+%     print([path2output,'PosteriorPDF'],'-dpdf')
     print([path2output,'PosteriorPDF'],'-djpeg')
 end

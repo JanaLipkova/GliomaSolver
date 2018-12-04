@@ -37,3 +37,5 @@ echo "Running program on $SLURM_TASKS nodes with $SLURM_CPUS_PER_TASK tasks, eac
 
 mpirun -env TORC_WORKERS 1 ./engine_tmcmc
 #mpirun -np 64 -env TORC_WORKERS 1 ./engine_tmcmc
+
+./extractInferenceOutput.sh

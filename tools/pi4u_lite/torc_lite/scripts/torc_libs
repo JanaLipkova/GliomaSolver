@@ -1,0 +1,1 @@
+echo -L/Users/lipkova 1/usr/torc/lib -ltorc -lpthread

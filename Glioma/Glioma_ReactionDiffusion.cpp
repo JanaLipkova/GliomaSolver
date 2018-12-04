@@ -18,6 +18,7 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
     bVerbose    = parser("-verbose").asBool(1);
     bVTK        = parser("-vtk").asBool(1);
     bUQ         = parser("-UQ").asBool(0);
+    bDumpIC     = parser("-bDumpIC").asBool(1);	
     bAdaptivity = parser("-adaptive").asBool(1);
     PatientFileName = parser("-PatFileName").asString();
     
@@ -57,8 +58,7 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
     
     _ic(*grid, PatientFileName, L, tumor_ic);
     
-    if(!bUQ) _dump(0);
-    _dump(0);
+    if(bDumpIC) _dump(0);
     
     isDone              = false;
     whenToWriteOffset	= parser("-dumpfreq").asDouble();
@@ -91,7 +91,7 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real
     int brainSizeX = (int) GM.getSizeX();
     int brainSizeY = (int) GM.getSizeY();
     int brainSizeZ = (int) GM.getSizeZ();
-    printf("brainSizeX=%i, brainSizeY=%i, brainSizeZ= %i \n", brainSizeX, brainSizeY, brainSizeZ);
+    printf("brainSizeX=%i, brainSizeY=%i, brainSizeZ=%i \n", brainSizeX, brainSizeY, brainSizeZ);
     
     int brainSizeMax = max(brainSizeX, max(brainSizeY,brainSizeZ));
     L   = brainSizeMax * 0.1;   // voxel spacing 1mm, convert from mm to cm  // L = 25.6 cm
@@ -141,16 +141,16 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real
                         pWM     =  WM( mappedBrainX,mappedBrainY,mappedBrainZ);
                         pCSF    =  CSF(mappedBrainX,mappedBrainY,mappedBrainZ);
                         
-                        // separat tissue and fluid + normalise
-                        pCSF = (pCSF > 0.1)  ? 1. : pCSF;
-                        pWM  = (pCSF > 0.1)  ? 0. : pWM;
-                        pGM  = (pCSF > 0.1)  ? 0. : pGM;
-                        
-                        block(ix,iy,iz).p_csf = pCSF;
-                        
+                        // separat tissue and fluid based on majority voting
                         double tissue = pWM + pGM;
+                        pCSF = (pCSF > tissue) ? 1. : 0.;
+                        pWM  = (pCSF > tissue) ? 0. : pWM;
+                        pGM  = (pCSF > tissue) ? 0. : pGM;
+
+                        tissue = pWM + pGM;
                         block(ix,iy,iz).p_w = (tissue > 0.) ? (pWM / tissue) : 0.;
                         block(ix,iy,iz).p_g = (tissue > 0.) ? (pGM / tissue) : 0.;
+                        block(ix,iy,iz).p_csf = pCSF;
                         
                         // tumor
                         const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};

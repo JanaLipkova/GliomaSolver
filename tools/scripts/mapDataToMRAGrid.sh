@@ -13,10 +13,11 @@ export OMP_NUM_THREADS=$N
 # brain simulation set up
 program=brain
 model=UQprep
-verbose=0
+verbose=1
 vtk=1
+bSynt=0
 
 # Path to patient data
 PatFileName="$1"
 
-./$program -nthreads $N -model $model -verbose $verbose -PatFileName $PatFileName -vtk $vtk
+./$program -nthreads $N -model $model -verbose $verbose -PatFileName $PatFileName -vtk $vtk -bSynt $bSynt

@@ -34,6 +34,7 @@ private:
     bool                                    bVerbose;
     bool                                    bVTK;
     bool                                    bUQ;
+    bool                                    bDumpIC;
     string                                  PatientFileName;
     Real                                    L;
     Real                                    tumor_ic[3];

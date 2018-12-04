@@ -56,6 +56,8 @@ if DIM == 2
     N = [N(2), N(1)];
     A = A';
 end
+
+
 fwrite(fid, N, 'integer*4');
 fwrite(fid, typeId, 'integer*4');
 fwrite(fid, A, fType);
