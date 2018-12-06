@@ -4,19 +4,21 @@ SHELL := /bin/bash
 hn ?= $(shell hostname)
 
 ifneq "$(findstring kraken,$(shell hostname))" ""
-CPPFLAGS += -D KRAKEN
 include make.kraken
 endif
 
 ifneq "$(findstring mpp,$(shell hostname))" ""
-CPPFLAGS += -D LRZ_CLUSTER
 include make.lrz
 endif
 
 ifneq "$(findstring Jana,$(shell hostname))" ""
-CPPFLAGS += -D JANA
 include make.jana
 endif
+
+ifneq "$(findstring _USER_NAME_,$(shell hostname))" ""
+include make._USER_NAME_
+endif
+
 
 # Compilations options
 ifeq "$(helmholtz)" "hypre"
