@@ -12,6 +12,7 @@ echo "--------------------------------------"
 cd "${SolverDir}"
 wget tdo.sk/~janka/GliomaSolverHome/lib/lib.tgz
 tar -zxf lib.tgz
+rm lib.tgz
 cd lib
 
 LibBase=$(pwd)

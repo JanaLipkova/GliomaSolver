@@ -10,3 +10,4 @@ source/makefile/brain
 *.nii
 *.nii.gz
 brain
+lib/
