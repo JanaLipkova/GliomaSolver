@@ -15,6 +15,7 @@ wget tdo.sk/~janka/GliomaSolverHome/libs/lib-linux-64-bit/inference_libs.tgz
 tar -zxf inference_libs.tgz
 mv inference_libs/* .
 rm inference_libs.tgz
+rm -r inference_libs
 
 echo " "
 echo "--------------------------------------"
@@ -22,12 +23,9 @@ echo ">>> Installing libraries   <<<"
 echo "--------------------------------------"
 gsl_src=gsl-src
 mpich_src=mpich-3.2.1-src
-torc=torc
 
 tar -zxf ${gsl_src}.tgz
 tar -zxf ${mpich_src}.tgz
-rm ${gsl_src}.tgz
-rm ${mpich_src}.tgz
 
 mkdir -p gsl-install
 mkdir -p mpich-install
@@ -43,7 +41,10 @@ echo "---------------"
 echo "mpicc is set to"
 which mpicc
 echo "---------------"
-cd ..
+cd ../
+rm ${mpich_src}.tgz
+rm -r rm ${mpich_src}
+
 
 echo " Installing gsl:"
 echo "--------------------------------------"
@@ -54,6 +55,8 @@ sudo apt-get install libtool
 make
 make install
 cd ../
+rm ${gsl_src}.tgz
+rm ${gsl_src}
 
 echo " Installing torc:"
 echo "--------------------------------------"
