@@ -10,5 +10,10 @@ source/makefile/brain
 *.nii
 *.nii.gz
 *.tgz
-brain
 lib/
+
+brain
+tools/pi4u_lite/Inference/display_gen
+tools/pi4u_lite/Inference/engine_cmaes
+tools/pi4u_lite/Inference/engine_tmcmc
+tools/pi4u_lite/Inference/propagation_tool

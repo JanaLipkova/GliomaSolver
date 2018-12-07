@@ -11,9 +11,9 @@ LIB_BASE=$(pwd)
 
 echo ">>> Downloading the libraries   <<<"
 echo "--------------------------------------"
-#wget tdo.sk/~janka/GliomaSolverHome/libs/lib-linux-64-bit/inference_libs.tgz
-#tar -zxf inference_libs.tgz
-#mv inference_libs/* .
+wget tdo.sk/~janka/GliomaSolverHome/libs/lib-linux-64-bit/inference_libs.tgz
+tar -zxf inference_libs.tgz
+mv inference_libs/* .
 rm inference_libs.tgz
 
 echo " "
@@ -26,8 +26,8 @@ torc=torc
 
 tar -zxf ${gsl_src}.tgz
 tar -zxf ${mpich_src}.tgz
-#rm ${gsl_src}.tgz
-#rm ${mpich_src}.tgz
+rm ${gsl_src}.tgz
+rm ${mpich_src}.tgz
 
 mkdir -p gsl-install
 mkdir -p mpich-install
@@ -77,6 +77,15 @@ cp tools.make/run_inference.sh .
 sed -i 's|_USER_LIB_BASE_|'"${LIB_BASE}"'|g' Makefile
 sed -i 's|_USER_LIB_BASE_|'"${LIB_BASE}"'|g' setup_${UserName}.sh
 sed -i 's|_USER_LIB_BASE_|'"${LIB_BASE}"'|g' run_inference.sh
+
+source setup_${UserName}.sh
+make clean
+make
+
+echo " Installing pandoc:"
+echo "--------------------------------------"
+sudo apt-get install pandoc pandoc-citeproc texlive
+
 
 echo "  "
 echo "==============================================="
