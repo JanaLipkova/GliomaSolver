@@ -9,5 +9,6 @@ source/makefile/brain
 *.out
 *.nii
 *.nii.gz
+*.tgz
 brain
 lib/

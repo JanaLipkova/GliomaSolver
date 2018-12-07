@@ -1,21 +1,19 @@
 #!/bin/bash
-
 echo "==============================================="
 echo "  Installing libraries for the GliomaSolver    "
 echo "==============================================="
 InstallDir=$(pwd)
 SolverDir=$(dirname "${InstallDir}")
 
-
 echo ">>> Downloading externa libraries   <<<"
 echo "--------------------------------------"
 cd "${SolverDir}"
-wget tdo.sk/~janka/GliomaSolverHome/lib/lib.tgz
+wget tdo.sk/~janka/GliomaSolverHome/libs/lib-linux-64-bit/lib.tgz
 tar -zxf lib.tgz
 rm lib.tgz
 cd lib
 
-LibBase=$(pwd)
+LIB_BASE=$(pwd)
 
 echo " "
 echo "--------------------------------------"
@@ -29,18 +27,15 @@ tar -zxf ${tbb}.tgz
 tar -zxf ${vtk}.tgz
 tar -zxf ${hypre}.tgz
 
-#rm ${tbb}.tgz
-#rm ${vtk}.tgz
-#rm ${hypre}.tgz
-
-
+rm ${tbb}.tgz
+rm ${vtk}.tgz
+rm ${hypre}.tgz
 
 echo " Installing tbb:"
 echo "--------------------------------------"
 cd ${tbb}
 make clean
 make
-echo "I am in tbb: $(pwd)"
 cd ../
 
 echo "--------------------------------------"
@@ -52,7 +47,6 @@ make clean
 make install
 cd ../../../
 
-
 echo " "
 echo "--------------------------------------"
 echo ">>>       Creating Makefile       <<<"
@@ -63,9 +57,9 @@ cp tools.make/make.linux make.${UserName}
 cp tools.make/Makefile .
 cp tools.make/setup_linux.sh setup_${UserName}.sh
 
-sed -i 's|_USER_LIB_BASE_|'"${LibBase}"'|g' make.${UserName}
+sed -i 's|_USER_LIB_BASE_|'"${LIB_BASE}"'|g' make.${UserName}
 sed -i 's|_USER_NAME_|'"${UserName}"'|g' Makefile
-sed -i 's|_USER_LIB_BASE_|'"${LibBase}"'|g' setup_${UserName}.sh
+sed -i 's|_USER_LIB_BASE_|'"${LIB_BASE}"'|g' setup_${UserName}.sh
 
 source setup_${UserName}.sh
 

@@ -1,70 +1,64 @@
 #!/bin/bash
-
 echo "==============================================="
 echo "  Installing libraries for the GliomaSolver    "
 echo "==============================================="
 InstallDir=$(pwd)
 SolverDir=$(dirname "${InstallDir}")
 
-
 echo ">>> Downloading externa libraries   <<<"
 echo "--------------------------------------"
 cd "${SolverDir}"
-#wget tdo.sk/~janka/GliomaSolverHome/lib/lib.tgz
-#tar -zxf lib.tgz
+wget tdo.sk/~janka/GliomaSolverHome/libs/lib-mac-64-bit/lib.tgz
+tar -zxf lib.tgz
 cd lib
 
-LibBase=$(pwd)
+LIB_BASE=$(pwd)
 
 echo " "
 echo "--------------------------------------"
 echo ">>> Installing libraries   <<<"
 echo "--------------------------------------"
 tbb=tbb40_20120613oss
-vtk=myVTK
 hypre=hypre-2.10.0b
-
-#tar -zxf ${tbb}.tgz
-#tar -zxf ${vtk}.tgz
-#tar -zxf ${hypre}.tgz
-#
-#rm ${tbb}.tgz
-#rm ${vtk}.tgz
-#rm ${hypre}.tgz
-#
-
 
 echo " Installing tbb:"
 echo "--------------------------------------"
+tar -zxf ${tbb}.tgz
 cd ${tbb}
-#make clean
-#make
-echo "I am in tbb: $(pwd)"
+make clean
+make
 cd ../
+rm ${tbb}.tgz
 
 echo "--------------------------------------"
 echo " Installing Hypre:"
 echo "--------------------------------------"
+tar -zxf ${hypre}.tgz
 cd ${hypre}/src
-#make clean
-#./configure 
-#make install
-cd ../../../
+make clean
+./configure 
+make install
+cd ../../
+rm ${hypre}.tgz
 
+echo "--------------------------------------"
+echo " Installing VTK:"
+echo "--------------------------------------"
+sudo port install vtk5
 
 echo " "
 echo "--------------------------------------"
 echo ">>>       Creating Makefile       <<<"
 echo "--------------------------------------"
-cd makefile
+cd ../makefile
 UserName=$(hostname -s)
 cp tools.make/make.mac make.${UserName}
 cp tools.make/Makefile .
 cp tools.make/setup_mac.sh setup_${UserName}.sh
 
-sed -i 's|_USER_LIB_BASE_|'"${LibBase}"'|g' make.${UserName}
+sed -i 's|_USER_LIB_BASE_|'"${LIB_BASE}"'|g' make.${UserName}
 sed -i 's|_USER_NAME_|'"${UserName}"'|g' Makefile
-sed -i 's|_USER_LIB_BASE_|'"${LibBase}"'|g' setup_${UserName}.sh
+sed -i 's|_USER_LIB_BASE_|'"${LIB_BASE}"'|g' setup_${UserName}.sh
 
 source setup_${UserName}.sh
 
