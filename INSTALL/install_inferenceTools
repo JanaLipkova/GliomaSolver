@@ -14,10 +14,12 @@ if [ "${machine}" = "Linux" ]; then
 cp tools/install_InferenceTools_on_linux-64-bit.sh .
 ./install_InferenceTools_on_linux-64-bit.sh
 rm install_InferenceTools_on_linux-64-bit.sh
-elif [ "${machine}" = "Mac" ]; then 
+elif  [ "${machine}" = "Darwin" ]; then
+cp tools/install_InferenceTools_on_mac-64-bit.sh .
+./install_InferenceTools_on_mac-64-bit.sh
+rm install_InferenceTools_on_mac-64-bit.sh
 else
 echo "${machine} OS is not supported"
-echo 
 fi;
 
 
