@@ -3,41 +3,24 @@ SHELL := /bin/bash
 # Select makefile for your computer
 hn ?= $(shell hostname)
 
-ifneq "$(findstring kraken,$(shell hostname))" ""
-include make.kraken
-endif
-
-ifneq "$(findstring mpp,$(shell hostname))" ""
+ifneq "$(findstring _USER_NAME_,$(shell hostname))" ""
+include make._USER_NAME_
+else ifneq "$(findstring mpp,$(shell hostname))" ""
 include make.lrz
-endif
-
-ifneq "$(findstring Jana,$(shell hostname))" ""
+else ifneq "$(findstring kraken,$(shell hostname))" ""
+include make.kraken
+else ifneq "$(findstring Jana,$(shell hostname))" ""
 include make.jana
 endif
 
-ifneq "$(findstring _USER_NAME_,$(shell hostname))" ""
-include make._USER_NAME_
-endif
-
-
-# Compilations options
-ifeq "$(helmholtz)" "hypre"
-	CPPFLAGS += -DHYPRE
-endif
-
-ifeq "$(config)" "production"
-CPPFLAGS += -DNDEBUG
-CPPFLAGS += -D_FMMSILENT
-endif
-
-#MRAG grid parameters
+#---------MRAG grid parameters-----------
 dim ?= 3
 bpd ?= 16
 bs=8
-#bpd ?= 16
-#bs ?= 8
+resjump=1
+#----------------------------------------
 
-CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd)  
+CPPFLAGS += -D_DIM=$(dim) -D_BLOCKSIZE_=$(bs) -D_BPD_=$(bpd) -D_RESJUMP_=$(resjump)
 
 ifeq "$(dim)" "2"
 	bsz ?= 1
@@ -47,11 +30,25 @@ endif
 ifeq "$(bpd)" "16"
         ml ?= 4
         CPPFLAGS += -D _MAXLEVEL_=$(ml)
-endif
-
-ifeq "$(bpd)" "8"
+else ifeq "$(bpd)" "8"
         ml ?= 3
         CPPFLAGS += -D _MAXLEVEL_=$(ml)
+endif
+
+
+# Compilations options
+
+ifeq "$(helmholtz)" "hypre"
+        CC=mpic++
+        LD=$(CC)
+        CPPFLAGS += -I$(HYPRE_INC_DIR)
+        LIBS += -L$(HYPRE_LIB_DIR) -lHYPRE
+        CPPFLAGS += -DHYPRE
+endif
+
+ifeq "$(config)" "production"
+CPPFLAGS += -DNDEBUG
+CPPFLAGS += -D_FMMSILENT
 endif
 	
 
@@ -91,14 +88,6 @@ LIBS += \
 	-ldl \
 	$(OPENMP_FLAG)
 	
-	
-ifeq "$(helmholtz)" "hypre"
-	CC=mpic++
-	LD=$(CC)
-	CPPFLAGS += -I$(HYPRE_INC_DIR)
-	LIBS += -L$(HYPRE_LIB_DIR) -lHYPRE 
-endif	
-
 
 
 CPPFLAGS += -I../Glioma/ -I../MRAG/ -I../Glioma/Operators/ -I../Glioma/Tests/
