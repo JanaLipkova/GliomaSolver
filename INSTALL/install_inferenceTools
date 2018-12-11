@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Get the OS
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     machine=Linux;;
+    Darwin*)    machine=Mac;;
+    CYGWIN*)    machine=Cygwin;;
+    MINGW*)     machine=MinGw;;
+    *)          machine="UNKNOWN:${unameOut}"
+esac
+
+if [ "${machine}" = "Linux" ]; then
+cp tools/install_InferenceTools_on_linux-64-bit.sh .
+./install_InferenceTools_on_linux-64-bit.sh
+rm install_InferenceTools_on_linux-64-bit.sh
+elif [ "${machine}" = "Mac" ]; then 
+else
+echo "${machine} OS is not supported"
+echo 
+fi;
+
+
