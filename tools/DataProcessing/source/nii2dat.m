@@ -6,7 +6,7 @@
 %         - Path to nifty data (folder or file)
 %  Optional parameters:
 %         - bRotate = rotate data to avoid issue with MRIread rotation
-%         - bResize = resize data to 256 resolution
+%         - bResize = resize data to 256 resolution by padding with zeros
 %  OUTPUT: Folder or file converted to dat -> used as MRAG input
 %
 % IMPORTANT: Output is padd with zeros to 256^3 resolution to ensure
@@ -30,7 +30,7 @@ addpath('../lib/Matlab2C/matrixMatlab2Cpp/matlab/')
 addpath('../lib/')
 
 % Optional parameters
-bRotate=0;
+bRotate=1;
 bResize=0;
 
 switch nargin

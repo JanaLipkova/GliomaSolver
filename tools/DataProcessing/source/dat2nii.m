@@ -30,7 +30,7 @@ addpath('../lib/vi');
 addpath('../lib/Matlab2C/matrixMatlab2Cpp/matlab/')
 addpath('../lib/')
 
-bRotate=0;
+bRotate=1;
 bResize=0;
 
 switch nargin

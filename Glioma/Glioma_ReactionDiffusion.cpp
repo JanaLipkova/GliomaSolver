@@ -51,9 +51,9 @@ Glioma_ReactionDiffusion::Glioma_ReactionDiffusion(int argc, const char ** argv)
         }
     }
     else{
-        tumor_ic[0] = 0.315;
-        tumor_ic[1] = 0.71;
-        tumor_ic[2] = 0.4;
+        tumor_ic[0] = parser("-icx").asDouble(0.28);
+        tumor_ic[1] = parser("-icy").asDouble(0.67);
+        tumor_ic[2] = parser("-icz").asDouble(0.35);
     }
     
     _ic(*grid, PatientFileName, L, tumor_ic);
@@ -308,6 +308,12 @@ void Glioma_ReactionDiffusion::run()
     Real dt         = 0.99 * h*h / ( 2.* _DIM * max(Dw, Dg) );
     int iCounter    = 1;
     if(bVerbose) printf("Dg=%e, Dw=%e, dt= %f, rho=%f , h=%f\n", Dg, Dw, dt, rho,h);
+
+    // Initial compression, later just refinment since tumor just grow
+    Science::AutomaticRefinement    <0,0>(*grid, blockfwt, refinement_tolerance, maxLevel, 1, &profiler);
+    Science::AutomaticCompression   <0,0>(*grid, blockfwt, compression_tolerance, -1, &profiler);
+
+
     
     while (t <= tend)
     {
