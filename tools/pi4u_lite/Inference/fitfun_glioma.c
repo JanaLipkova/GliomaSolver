@@ -113,7 +113,7 @@ retry:
             abort();
         }
         
-        
+        /*--------------USER INPUT STARTS HERE------------------- */        
         // Convert from log- to real space
         double param[n];
         param[0] = exp( x[0] );         // D
@@ -155,6 +155,7 @@ retry:
         sprintf(line, "./runAll.sh");
         parse(line, largv);
         
+        /*--------------USER INPUT STOPS HERE------------------- */        
 #if 1
         int fd = open("output", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
         

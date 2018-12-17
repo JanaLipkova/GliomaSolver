@@ -19,7 +19,7 @@ Dw=0.0013
 rho=0.025
 Tend=300
 icx=0.28
-icy=0.67
+icy=0.75
 icz=0.35
 
 echo "In the directory: $PWD"

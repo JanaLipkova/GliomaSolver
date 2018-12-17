@@ -1,17 +1,29 @@
 #!/bin/sh
 
-# USER INPUT HERE:
-#------------------------------------------------------
-DataPath="/Users/lipkova 1/WORK/GliomaSolver/Simulations/PatientInference/InputData_dat/"
-SolverPath="/Users/lipkova 1/WORK/GliomaSolver/"
-Nsamples=1000
-#------------------- User input stops here --------------
-
 
 echo "------------------------------------------------------"
 echo "          SETTING-UP INFERENCE ENVIROMENT             "
 echo "------------------------------------------------------"
-echo " "
+
+
+InputFile=Input.txt
+DataPath=$(  cat ${InputFile} | awk -F '=' '/^DataPath/ {print $2}')
+SolverPath=$(cat ${InputFile} | awk -F '=' '/^SolverPath/ {print $2}')
+Nsamples=$(  cat ${InputFile} | awk -F '=' '/^Nsamples/ {print $2}')
+
+echo ">>> Converting Input data nii2dat <<<"
+echo "---------------------------------------"
+MatlabTools="${SolverPath}tools/DataProcessing/source"
+MyBase=$(pwd)
+cd "${MatlabTools}"
+bRotate=1
+bResize=1
+matlab -nodisplay -nojvm -nosplash -nodesktop -r "nii2dat('${DataPath}',${bRotate},${bResize}); exit"
+cd "$MyBase"
+
+InputDataLocation=$(dirname "${DataPath}")
+InputDataFolderName=$(basename "${DataPath}")
+MRAGInputData="${InputDataLocation}/${InputDataFolderName}_dat/"
 
 # Folders name
 PrepFolder=Preprocessing
@@ -21,9 +33,10 @@ LIKE=Inference/Likelihood/makefile/
 
 # Get Inference tools and scripts
 cp -r "$SolverPath/tools/pi4u_lite/Inference" .
-cp -r "$SolverPath/tools/scripts" .
+cp -r "$SolverPath/tools/scripts" . 
 
-
+echo " "
+echo "---------------------------------------"
 echo ">>> Data Preprocessing <<<"
 echo "---------------------------------------"
 # Map data to MRAG grid
@@ -32,15 +45,16 @@ cp brain $PrepFolder
 cp scripts/mapDataToMRAGrid.sh $PrepFolder
 cp scripts/writeRunAll.sh $PrepFolder/
 cp scripts/writeTMCMCpar.sh $PrepFolder/
+cp scripts/GenericPrior.txt $PrepFolder/
+
 
 cd $PrepFolder
-./mapDataToMRAGrid.sh "$DataPath"
-echo "---------------------------------------"
-
+./mapDataToMRAGrid.sh "$MRAGInputData" > PreprocessingReport.txt
 echo " "
+echo "---------------------------------------"
 echo ">>> Setting up Patient-Specific Enviroment <<<"
 echo "---------------------------------------"
-./writeRunAll.sh "$DataPath"
+./writeRunAll.sh "$MRAGInputData"
 ./writeTMCMCpar.sh $Nsamples
 
 # Copy where they belong
@@ -48,21 +62,14 @@ cp brain ../$TMP
 cp *dat ../$TMP
 cp runAll.sh ../$TMP
 cp tmcmc_glioma.par ../Inference/ 
+cp ../${InputFile} ../Inference/
 
-#echo " "
-echo ">>> Creating executables <<<"
-echo "---------------------------------------"
-cd ../$LIKE
-make clean && make
-cp likelihood ../../TMPTMP
-cd ../../
-make clean && make
-
+echo " "
+echo " "
 echo "------------------------------------------------------"
 echo "              DONE WITH THE SET-UP                    "
 echo "------------------------------------------------------"
-echo "Run the inference by:"
-echo "./run_inference.sh"
-echo "For long simulation it is recomend to use tmux"
-
-
+echo "To run the inference, please go to folder Inference/ and use run_inference.sh or run_inference_lrz.sh script (depending on your enviroment)."
+echo "..........................................................."
+echo "NOTE: Consider using tmux or cluster job handling system to run the inference."
+echo "..........................................................."
