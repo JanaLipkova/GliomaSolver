@@ -16,6 +16,6 @@ _Tool for simulating tumor dynamics in patient-specific anatomy reconstructed fr
  * Compatible with **Linux/Mac OS**
 
 #### Software home page
-Please visit the [GliomaSolver](http://tdo.sk/~janka/GliomaWebsite//index.html)-homepage for isntallation, tutorials and much more :panda_face:.
+Please visit the [GliomaSolver](http://tdo.sk/~janka/GliomaWebsite//index.html) homepage for installation, tutorials and much more :panda_face:.
 
 
