@@ -5,7 +5,7 @@ _Tool for simulating tumor dynamics in patient-specific anatomy reconstructed fr
  * Tumor growth (Reaction-diffusion model)
  * Tumor mass effect and intracranial pressure (Brain deformation model)
  * Tumor hypoxia and necrosis
- * Bayesian model calibration for personalized radiotherapy planning (see [Lipkova 2018] in [bibliography](references.html))
+ * Bayesian model calibration for personalized radiotherapy planning 
 
 #### Features:
  * **Fast execution** thanks to *highly-parallel architecture* and *adaptive grid refinement*
