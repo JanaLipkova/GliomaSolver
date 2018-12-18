@@ -61,9 +61,14 @@ Glioma_BrainDeformation::Glioma_BrainDeformation(int argc, const char ** argv): 
     L               = 1;
         
     if(parser("-ICtype").asInt(1)==0)
-    _icSphere3Parts(*grid,rank,L);
+        _icSphere3Parts(*grid,rank,L);
     else
-    _ic(*grid, rank, PatientFileName, L);
+    {
+        tumor_ic[0] = parser("-icx").asDouble(0.6);
+        tumor_ic[1] = parser("-icy").asDouble(0.7);
+        tumor_ic[2] = parser("-icz").asDouble(0.5);
+        _ic(*grid, rank, PatientFileName, L, tumor_ic);
+    }
     
     if((parser("-bDumpIC").asBool(0))&&(rank==0)) _dump(0);
     
@@ -160,7 +165,7 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, int rank, Real& L
 
 
 
-void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L )
+void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L, Real tumor_ic )
 {
     if(rank==0) printf("Reading data from file: %s \n", PatientFileName.c_str());
     
@@ -193,7 +198,6 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFile
     // tumour parameters
     const Real tumorRadius = 3./(blockSize * blocksPerDimension);//0.01;//0.005;//0.01;
     const Real smooth_sup  = 4.;		// suppor of smoothening, over how many gp to smooth
-    const Real c[3] = { 0.6, 0.7, 0.5};;
     
     double pGM, pWM, pCSF, pPFF;
     const double tau = 1.e-10;
@@ -231,47 +235,43 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFile
                         pWM     = WM(mappedBrainX,mappedBrainY,mappedBrainZ);
                         pCSF    = CSF(mappedBrainX,mappedBrainY,mappedBrainZ);
                         pPFF    = PFF(mappedBrainX,mappedBrainY,mappedBrainZ);
-                    }
-                    else
-                        pGM = pWM = pCSF = pPFF = 0.;
-                    
-                    double all = pGM + pWM + pCSF;
-                    if(all > 0.1)
-                    {
-                        // enhance fluid:
-                        //pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;
                         
-                        if(pCSF< 1.)
-                        {
-                            block(ix,iy,iz).p_g   = pGM  / (pCSF + pWM + pGM);
-                            block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
-                            block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM);
-                        }
+                        
+                        // separat tissue and fluid based on majority voting
+                        double tissue = pWM + pGM;
+                        pCSF = (pCSF > tissue) ? 1. : 0.;
+                        pWM  = (pCSF > tissue) ? 0. : pWM;
+                        pGM  = (pCSF > tissue) ? 0. : pGM;
+                        
+                        tissue = pWM + pGM;
+                        block(ix,iy,iz).p_w = (tissue > 0.) ? (pWM / tissue) : 0.;
+                        block(ix,iy,iz).p_g = (tissue > 0.) ? (pGM / tissue) : 0.;
+                        block(ix,iy,iz).p_csf = pCSF;
                         
                         //tissue concetration
                         block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
                         block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
                         block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
+                        
+                        
+                        // tumor
+                        const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};
+                        const Real dist = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);    // distance of curent voxel from tumor center
+                        const Real psi  = (dist - tumorRadius)*iw;
+                        
+                        bool bTissue = ( block(ix,iy,iz).p_w + block(ix,iy,iz).p_g > 0. ) ? 1 : 0 ;
+                        
+                        if ((psi < -1) && bTissue )		// we are in tumor
+                            block(ix,iy,iz).phi = 1.0;
+                        else if(( (-1 <= psi) && (psi <= 1) )&& (bTissue) )
+                            block(ix,iy,iz).phi = 1.0 * 0.5 * (1 - psi - sin(M_PI*psi)/(M_PI));
+                        else
+                            block(ix,iy,iz).phi = 0.0;
+                        
+                        // auxiliary functions
+                        block(ix,iy,iz).pff = max(tau, pPFF);
+                        block(ix,iy,iz).chi = (pPFF >= 0.5) ? 1. : 0.;   // domain char. func
                     }
-                    
-                    // tumor
-                    const Real p[3] = {x[0] - c[0], x[1] - c[1], x[2] - c[2]};
-                    const Real dist = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);    // distance of curent voxel from tumor center
-                    const Real psi  = (dist - tumorRadius)*iw;
-                    
-                    bool bTissue = ( block(ix,iy,iz).p_w + block(ix,iy,iz).p_g > 0. ) ? 1 : 0 ;
-                    
-                    if ((psi < -1) && bTissue )		// we are in tumor
-                        block(ix,iy,iz).phi = 1.0;
-                    else if(( (-1 <= psi) && (psi <= 1) )&& (bTissue) )
-                        block(ix,iy,iz).phi = 1.0 * 0.5 * (1 - psi - sin(M_PI*psi)/(M_PI));
-                    else
-                        block(ix,iy,iz).phi = 0.0;
-                    
-                    // auxiliary functions
-                    block(ix,iy,iz).pff = max(tau, pPFF);
-                    block(ix,iy,iz).chi = (pPFF >= 0.5) ? 1. : 0.;   // domain char. func
-                    
                 }
         
         grid.getBlockCollection().release(info.blockID);

@@ -22,15 +22,18 @@ kWM=10
 kGM=1
 bMobility=0
 ICtype=1
+icx=0.6
+icy=0.7
+icz=0.5
 
 # Path to patient data
-DATA_BASE=../../Anatomy 
-PatFileName=$DATA_BASE/Patient00/P00_
+PatFileName=../../Anatomy/Patient00/P00_
 
 echo "In the directory: $PWD"
 echo "Running program with total $M MPI tasks,each with $N OMP threads."
 
 
-mpirun -np $M ./$program -nthreads $N -model $model -verbose $verbose -profiler $profiler -PatFileName $PatFileName -vtk $vtk -bDumpIC $bDumpIC -dumpfreq $dumpfreq -CFL $CFL -tend $tend -rho $rho -Dw $Dw -kCSF $kCSF -kWM $kWM -kGM $kGM -bMobility $bMobility -ICtype $ICtype
+
+mpirun -np $M ./$program -nthreads $N -model $model -verbose $verbose -profiler $profiler -PatFileName $PatFileName -vtk $vtk -bDumpIC $bDumpIC -dumpfreq $dumpfreq -CFL $CFL -tend $tend -rho $rho -Dw $Dw -kCSF $kCSF -kWM $kWM -kGM $kGM -bMobility $bMobility -ICtype $ICtype -icx $icx -icy $icy -icz $icz
 
 
