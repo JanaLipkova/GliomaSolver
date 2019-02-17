@@ -21,6 +21,7 @@ Please visit the [GliomaSolver](http://tdo.sk/~janka/GliomaWebsite//index.html) 
 #### References
 Pleace cite:
 Lipkova et al., *Personalized Radiotherapy Design for Glioblastoma Using Mathematical Tumor Modelling, Multimodal Scans and Bayesian Inference. IEEE Transactions on Medical Imaging (2019).* 
+
 (At the time of uptading this README file, --early 2019--, the manuscript is accepted for publication, while the preprint is available on ArXive as: arXiv: 1807.00499)
 
 
