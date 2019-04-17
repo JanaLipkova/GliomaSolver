@@ -28,7 +28,7 @@ MRAGInputData="${InputDataLocation}/${InputDataFolderName}_dat/"
 # Folders name
 PrepFolder=Preprocessing
 TMP=Inference/TMPTMP/
-LIKE=Inference/Likelihood/makefile/
+LIKELIHOOD=Inference/Likelihood/makefile/
 
 
 # Get Inference tools and scripts
@@ -63,6 +63,12 @@ cp *dat ../$TMP
 cp runAll.sh ../$TMP
 cp tmcmc_glioma.par ../Inference/ 
 cp ../${InputFile} ../Inference/
+
+# Likelihood
+cd ${LIKELIHOOD}
+make clean && make
+cp likelihood ../../TMPTMP
+
 
 echo " "
 echo " "
