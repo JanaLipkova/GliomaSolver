@@ -165,7 +165,7 @@ void Glioma_BrainDeformation::_icSphere3Parts(Grid<W,B>& grid, int rank, Real& L
 
 
 
-void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L, Real tumor_ic )
+void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L, Real tumor_ic[3] )
 {
     if(rank==0) printf("Reading data from file: %s \n", PatientFileName.c_str());
     

@@ -43,7 +43,7 @@ private:
     Real                                    tumor_ic[3];
 
     
-    static void _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L, Real tumor_ic[3]; );
+    static void _ic(Grid<W,B>& grid, int rank, string PatientFileName, Real& L, Real tumor_ic[3] );
     static void _icSphere3Parts(Grid<W,B>& grid, int rank, Real& L);
     double      _estimate_dt(double Diff_dt, double CFL);
     Real        _compute_maxvel();
