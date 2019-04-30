@@ -86,7 +86,7 @@ void Glioma_ComputePFF_CahnHilliard::_ic(Grid<W,B>& grid, string PatientFileName
     
     vector<BlockInfo> vInfo = grid.getBlocksInfo();
     
-#pragma omp paraller for
+#pragma omp parallel for
     for(int i=0; i<vInfo.size(); i++)
     {
         BlockInfo& info = vInfo[i];
