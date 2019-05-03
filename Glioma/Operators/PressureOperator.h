@@ -32,7 +32,7 @@ struct PressureSourceOperator
             for(int iz=0; iz<BlockType::sizeZ; iz++)
                 for(int iy=0; iy<BlockType::sizeY; iy++)
                     for(int ix=0; ix<BlockType::sizeX; ix++)
-                        o(ix, iy, iz).f   = rho * o(ix, iy,iz).phi * (1. - o(ix,iy,iz).phi) ;
+                        o(ix, iy, iz).f   =  rho * o(ix,iy,iz).phi * (1. - o(ix,iy,iz).phi);
             
         }
     }
@@ -130,12 +130,10 @@ struct PressureGradient
                             _mean(p, pW, pE, pS, pN, pB, pF);
                             
                             Real M = (bMobility) ? (Mwm * lab(ix,iy,iz).p_w + Mgm * lab(ix,iy,iz).p_g + Mcsf * lab(ix,iy,iz).p_csf) : 1.;
-                            M = M * (1. - o(ix,iy,iz).phi);
 
                             o(ix,iy,iz).ux = -ih * M * (pE - pW) * lab(ix,iy,iz).chi;
                             o(ix,iy,iz).uy = -ih * M * (pN - pS) * lab(ix,iy,iz).chi;
-                            o(ix,iy,iz).uz = -ih * M * (pF - pB) * lab(ix,iy,iz).chi;
-                            
+                            o(ix,iy,iz).uz = -ih * M * (pF - pB) * lab(ix,iy,iz).chi;                            
                         }
                         else
                         {

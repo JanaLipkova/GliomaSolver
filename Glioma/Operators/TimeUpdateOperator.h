@@ -43,10 +43,9 @@ struct TimeUpdate
                     
                     // reduce numerical roundings errors
                     o(ix,iy).phi = ( o(ix,iy).phi > 1. ) ? 1. : o(ix,iy).phi;
-                    o(ix,iy).phi = fabs( o(ix,iy).phi );
-                    o(ix,iy).wm  = fabs( o(ix,iy).wm  );
-                    o(ix,iy).gm  = fabs( o(ix,iy).gm  );
-                    o(ix,iy).csf = fabs( o(ix,iy).csf );
+                    o(ix,iy).phi = ( o(ix,iy).phi < 0. ) ? 0. : o(ix,iy).phi;
+                    o(ix,iy).wm  = ( o(ix,iy).wm  < 0. ) ? 0. : o(ix,iy).wm;
+                    o(ix,iy).gm  = ( o(ix,iy).gm  < 0. ) ? 0. : o(ix,iy).gm;
                     
 //                    // if 100% tumore, remove the tissue
 //                    o(ix,iy).wm  = ( fabs(o(ix,iy).phi - 1.) < eps ) ? 0. : o(ix,iy).wm;
@@ -85,18 +84,17 @@ struct TimeUpdate
                         
                         // reduce numerical roundings errors
                         o(ix,iy,iz).phi = ( o(ix,iy,iz).phi > 1. ) ? 1. : o(ix,iy,iz).phi;
-                        o(ix,iy,iz).phi = fabs( o(ix,iy,iz).phi );
-                        o(ix,iy,iz).wm  = fabs( o(ix,iy,iz).wm  );
-                        o(ix,iy,iz).gm  = fabs( o(ix,iy,iz).gm  );
-                        o(ix,iy,iz).csf = fabs( o(ix,iy,iz).csf );
-                        
+                        o(ix,iy,iz).phi = ( o(ix,iy,iz).phi < 0. ) ? 0. : o(ix,iy,iz).phi;
+                        o(ix,iy,iz).wm  = ( o(ix,iy,iz).wm  < 0. ) ? 0. : o(ix,iy,iz).wm;
+                        o(ix,iy,iz).gm  = ( o(ix,iy,iz).gm  < 0. ) ? 0. : o(ix,iy,iz).gm;
+                        o(ix,iy,iz).csf = ( o(ix,iy,iz).csf < 0. ) ? 0. : o(ix,iy,iz).csf;
                         // if 100% tumore, remove the tissue
 //                        o(ix,iy,iz).wm  = ( fabs(o(ix,iy,iz).phi - 1.) < eps ) ? 0. : o(ix,iy,iz).wm;
 //                        o(ix,iy,iz).gm  = ( fabs(o(ix,iy,iz).phi - 1.) < eps ) ? 0. : o(ix,iy,iz).gm;
 //                        o(ix,iy,iz).csf = ( fabs(o(ix,iy,iz).phi - 1.) < eps ) ? 0. : o(ix,iy,iz).csf;
                         
                         // recompute the tissue percentage
-                        Real tissue = o(ix,iy,iz).wm + o(ix,iy,iz).gm + o(ix,iy,iz).csf ;
+                        Real tissue = o(ix,iy,iz).wm + o(ix,iy,iz).gm + o(ix,iy,iz).csf;
                         
                         if(tissue > 0.)
                         {

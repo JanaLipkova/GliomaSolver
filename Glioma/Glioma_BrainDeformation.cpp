@@ -198,6 +198,8 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFile
     // tumour parameters
     const Real tumorRadius = 3./(blockSize * blocksPerDimension);//0.01;//0.005;//0.01;
     const Real smooth_sup  = 4.;		// suppor of smoothening, over how many gp to smooth
+    const Real h           = 1./(blockSize*blocksPerDimension);    // use fixed h, for same IC smoothening at all resolutions
+    const Real iw          = 1./(smooth_sup * h); // widht of smoothening
     
     double pGM, pWM, pCSF, pPFF;
     const double tau = 1.e-10;
@@ -208,9 +210,6 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFile
     {
         BlockInfo& info = vInfo[i];
         B& block = grid.getBlockCollection()[info.blockID];
-        
-        const float h = vInfo[0].h[0]; //i.e.ersusres same initialisaition for grids of different resolution
-        const float iw = 1./(smooth_sup * h);   // width of smoothening => now it is over two grid points
         
         for(int iz=0; iz<B::sizeZ; iz++)
             for(int iy=0; iy<B::sizeY; iy++)
@@ -235,51 +234,71 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFile
                         pWM     = WM(mappedBrainX,mappedBrainY,mappedBrainZ);
                         pCSF    = CSF(mappedBrainX,mappedBrainY,mappedBrainZ);
                         pPFF    = PFF(mappedBrainX,mappedBrainY,mappedBrainZ);
+                    }
+                    else
+                        pGM = pWM = pCSF = pPFF = 0.;
+                    
+//                    // separat tissue and fluid based on majority voting
+//                    double tissue = pWM + pGM;
+//                    pCSF = (pCSF > tissue) ? 1. : 0.;
+//                    pWM  = (pCSF > tissue) ? 0. : pWM;
+//                    pGM  = (pCSF > tissue) ? 0. : pGM;
+//                    
+//                    tissue = pWM + pGM;
+//                    block(ix,iy,iz).p_w = (tissue > 0.) ? (pWM / tissue) : 0.;
+//                    block(ix,iy,iz).p_g = (tissue > 0.) ? (pGM / tissue) : 0.;
+//                    block(ix,iy,iz).p_csf = pCSF;
+//                    
+//                    //tissue concetration
+//                    block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
+//                    block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
+//                    block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
+                    
+                    double all = pGM + pWM + pCSF;
+                    if(all > 0.1)
+                    {
+                        // enhance fluid:
+                        //pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;
                         
-                        
-                        // separat tissue and fluid based on majority voting
-                        double tissue = pWM + pGM;
-                        pCSF = (pCSF > tissue) ? 1. : 0.;
-                        pWM  = (pCSF > tissue) ? 0. : pWM;
-                        pGM  = (pCSF > tissue) ? 0. : pGM;
-                        
-                        tissue = pWM + pGM;
-                        block(ix,iy,iz).p_w = (tissue > 0.) ? (pWM / tissue) : 0.;
-                        block(ix,iy,iz).p_g = (tissue > 0.) ? (pGM / tissue) : 0.;
-                        block(ix,iy,iz).p_csf = pCSF;
+                        if(pCSF< 1.)
+                        {
+                            block(ix,iy,iz).p_g   = pGM  / (pCSF + pWM + pGM);
+                            block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
+                            block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM);
+                        }
                         
                         //tissue concetration
                         block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
                         block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
                         block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
-                        
-                        
-                        // tumor
-                        const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};
-                        const Real dist = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);    // distance of curent voxel from tumor center
-                        const Real psi  = (dist - tumorRadius)*iw;
-                        
-                        bool bTissue = ( block(ix,iy,iz).p_w + block(ix,iy,iz).p_g > 0. ) ? 1 : 0 ;
-                        
-                        if ((psi < -1) && bTissue )		// we are in tumor
-                            block(ix,iy,iz).phi = 1.0;
-                        else if(( (-1 <= psi) && (psi <= 1) )&& (bTissue) )
-                            block(ix,iy,iz).phi = 1.0 * 0.5 * (1 - psi - sin(M_PI*psi)/(M_PI));
-                        else
-                            block(ix,iy,iz).phi = 0.0;
-                        
-                        // auxiliary functions
-                        block(ix,iy,iz).pff = max(tau, pPFF);
-                        block(ix,iy,iz).chi = (pPFF >= 0.5) ? 1. : 0.;   // domain char. func
                     }
+                    
+                    // tumor
+                    const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};
+                    const Real dist = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);    // distance of curent voxel from tumor center
+                    const Real psi  = (dist - tumorRadius)*iw;
+                    
+                    bool bTissue = ( block(ix,iy,iz).p_w + block(ix,iy,iz).p_g > 0. ) ? 1 : 0 ;
+                    
+                    if ((psi < -1) && bTissue )		// we are in tumor
+                        block(ix,iy,iz).phi = 1.0;
+                    else if(( (-1 <= psi) && (psi <= 1) )&& (bTissue) )
+                        block(ix,iy,iz).phi = 1.0 * 0.5 * (1 - psi - sin(M_PI*psi)/(M_PI));
+                    else
+                        block(ix,iy,iz).phi = 0.0;
+                    
+                    // avoid rounding errors
+                    block(ix,iy,iz).phi = (block(ix,iy,iz).phi < 0.) ? 0. : block(ix,iy,iz).phi;
+                    
+                    // auxiliary functions
+                    block(ix,iy,iz).pff = max(tau, pPFF);
+                    block(ix,iy,iz).chi = (pPFF >= 0.5) ? 1. : 0.;   // domain char. func
                 }
         
         grid.getBlockCollection().release(info.blockID);
         
     }
 }
-
-
 
 
 #pragma mark TimeStepEstimation
@@ -291,11 +310,10 @@ double Glioma_BrainDeformation::_estimate_dt(double Diff_dt, double CFL)
     
     const double largest_dt = CFL * max_dx/(maxvel * _DIM);
     const double smallest_dt = CFL * min_dx/(maxvel * _DIM);
-    
     assert(largest_dt >= smallest_dt);
     
-    if ((largest_dt <= Diff_dt)&&(rank==0))
-        printf("Advection dominated time step Adts = %f, ADLdt=%f, Ddt=%f, returning=%f \n", smallest_dt, largest_dt, Diff_dt, (largest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt) );
+    if ((largest_dt <= Diff_dt))
+        printf("Advection dominated time ADdt=%f, Ddt=%f \n", largest_dt, Diff_dt );
     
     return (smallest_dt < 1.e-10) ? Diff_dt : min(largest_dt, Diff_dt);
 }
@@ -315,7 +333,7 @@ Real Glioma_BrainDeformation::_compute_maxvel()
     Real maxvel = 0;
     for(map< int, Real>::iterator it=velocities.begin(); it!=velocities.end(); it++)
         maxvel = max(maxvel, it->second);
-    
+        
     return maxvel;
 }
 
@@ -354,20 +372,27 @@ void Glioma_BrainDeformation::_reactionDiffusionStep(BoundaryInfo* boundaryInfo,
     blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhs);
 }
 
-void Glioma_BrainDeformation::_advectionConvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt)
+void Glioma_BrainDeformation::_advectionConvectionStep(BoundaryInfo* boundaryInfo)
 {
     vector<BlockInfo> vInfo				= grid->getBlocksInfo();
     const BlockCollection<B>& collecton = grid->getBlockCollection();
     
     TissueTumorAdvectionWeno5 <_DIM> rhsA;      // v grad(E) & v grad(tumor)
     TissueConvection          <_DIM> rhsB;      // E div(v)
-    TimeUpdate                <_DIM> update(dt);
     
     blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhsA);
     blockProcessing.pipeline_process(vInfo, collecton, *boundaryInfo, rhsB);
-    BlockProcessing::process(vInfo, collecton, update, nParallelGranularity);
 }
 
+
+void Glioma_BrainDeformation::_timeUpdate(const int nParallelGranularity, double dt)
+{
+    vector<BlockInfo> vInfo				= grid->getBlocksInfo();
+    const BlockCollection<B>& collecton = grid->getBlockCollection();
+
+    TimeUpdate                <_DIM> update(dt);
+    BlockProcessing::process(vInfo, collecton, update, nParallelGranularity);
+}
 
 #pragma mark ingOutput
 void Glioma_BrainDeformation:: _dump(int counter)
@@ -413,19 +438,18 @@ void Glioma_BrainDeformation::run()
     vector<Real> mobility(3,1);   // CSF, WM, GM
 
     if(bRelaxation){
-        kappa.push_back(parser("-kCSF").asDouble()); //  [m.s / kg] * Kstar = [L* T* / M* ]
-        kappa.push_back(parser("-kWM").asDouble());  //  [m.s / kg] * Kstar = [L* T* / M* ]
-        kappa.push_back(parser("-kGM").asDouble());  //  [m.s / kg] * Kstar = [L* T* / M* ]
-        if(rank==0) printf("kCSF=%f, kWM=%f, kGM=%f \n", kappa[0], kappa[1], kappa[2]);
+        kappa[0] = (Real) parser("-kCSF").asDouble(0.2) * L * L;
+        kappa[1] = (Real) parser("-kWM").asDouble(0.02)  * L * L;
+        kappa[2] = (Real) parser("-kGM").asDouble(0.002)  * L * L;
+       if(rank==0) printf("kCSF=%f, kWM=%f, kGM=%f \n", kappa[0], kappa[1], kappa[2]);
     }
     
     if(bMobility){
-        mobility.push_back(parser("-mCSF").asDouble(1)); //[m^3 s/ kg] * Mstar = [L*^3 T* / M*]
-        mobility.push_back(parser("-mWM").asDouble(1));
-        mobility.push_back(parser("-mGM").asDouble(1));
+        mobility[0] = (Real) parser("-mCSF").asDouble(1);  //[m^3 s/ kg] * Mstar = [L*^3 T* / M*]
+        mobility[1] = (Real) parser("-mWM").asDouble(1);
+        mobility[2] = (Real) parser("-mGM").asDouble(1);
         if(rank==0) printf("mCSF=%f, mWM=%f, mGM=%f\n", mobility[0], mobility[1], mobility[2]);
     }
-    
     
     /* Set up Hypre solver */
     bool bCG = 1;
@@ -434,52 +458,74 @@ void Glioma_BrainDeformation::run()
     
     while (t <= tend)
     {
-        if(bProfiler) profiler.getAgent("TimeStep").start();
-        dt = _estimate_dt(Diff_dt, CFL);
-        if(bProfiler) profiler.getAgent("TimeStep").stop();
-        
-        if(bProfiler) profiler.getAgent("PressureSource").start();
-        _computePressureSource(nParallelGranularity,rho);
-        if(bProfiler) profiler.getAgent("PressureSource").stop();
-
-        if(bProfiler) profiler.getAgent("Helmholtz").start();
-        helmholtz_solver.solve();
-        if(bProfiler) profiler.getAgent("Helmholtz").stop();
-
-        if(bProfiler) profiler.getAgent("Velocity").start();
-        _computeVelocities(boundaryInfo, bMobility, &mobility);
-        if(bProfiler) profiler.getAgent("Velocity").stop();
-        
-        if(bProfiler) profiler.getAgent("RD").start();
-        _reactionDiffusionStep(boundaryInfo, Dw, Dg, rho);
-        if(bProfiler) profiler.getAgent("RD").stop();
-        
-        if(bProfiler) profiler.getAgent("Advect-Conv").start();
-        _advectionConvectionStep(boundaryInfo, nParallelGranularity, dt);
-        if(bProfiler) profiler.getAgent("Advect-Conv").stop();
-        
-        t                   += dt   ;
-        numberOfIterations  ++      ;
-        
-        if ( t >= ((double)(whenToWrite)) )
-        {
-            if(bProfiler) profiler.getAgent("I/O").start();
-            if(rank==0) _dump(iCounter++);
-            if(bProfiler) profiler.getAgent("I/O").stop();
+        if(!bProfiler){
+            dt = _estimate_dt(Diff_dt, CFL);
+            _computePressureSource(nParallelGranularity,rho);
+            helmholtz_solver.solve();
+            _computeVelocities(boundaryInfo, bMobility, &mobility);
+            _reactionDiffusionStep(boundaryInfo, Dw, Dg, rho);
+            _advectionConvectionStep(boundaryInfo);
+            _timeUpdate(nParallelGranularity, dt);
             
-            whenToWrite = whenToWrite + whenToWriteOffset;
+            t                   += dt   ;
+            numberOfIterations  ++      ;
+            
+            if ( t >= ((double)(whenToWrite)) ){
+                if(rank==0) _dump(iCounter++);
+                whenToWrite = whenToWrite + whenToWriteOffset;
+            }
+        }
+        else{
+            profiler.getAgent("TimeStep").start();
+            dt = _estimate_dt(Diff_dt, CFL);
+            profiler.getAgent("TimeStep").stop();
+            
+            profiler.getAgent("PressureSource").start();
+            _computePressureSource(nParallelGranularity,rho);
+            profiler.getAgent("PressureSource").stop();
+            
+            profiler.getAgent("Helmholtz").start();
+            helmholtz_solver.solve();
+            profiler.getAgent("Helmholtz").stop();
+            
+            profiler.getAgent("Velocity").start();
+            _computeVelocities(boundaryInfo, bMobility, &mobility);
+            profiler.getAgent("Velocity").stop();
+            
+            profiler.getAgent("RD").start();
+            _reactionDiffusionStep(boundaryInfo, Dw, Dg, rho);
+            profiler.getAgent("RD").stop();
+            
+            profiler.getAgent("Advect-Conv").start();
+            _advectionConvectionStep(boundaryInfo);
+            profiler.getAgent("Advect-Conv").stop();
+            
+            profiler.getAgent("TimeUpdate").start();
+            _timeUpdate(nParallelGranularity, dt);
+            profiler.getAgent("TimeUpdate").stop();
+            
+            t                   += dt   ;
+            numberOfIterations  ++      ;
+            
+            if ( t >= ((double)(whenToWrite))) {
+                profiler.getAgent("I/O").start();
+                if(rank==0) _dump(iCounter++);
+                profiler.getAgent("I/O").stop();
+                whenToWrite = whenToWrite + whenToWriteOffset;
+            }
+            
         }
     }
     
-  // if(rank == 0)      _dump(iCounter);
+   //if(rank == 0)      _dump(iCounter);
     
-    isDone = 1;
     helmholtz_solver.clean();
     
     if(rank==0){
     if(bVerbose) profiler.printSummary();
     if(bVerbose) printf("**** Dumping done\n");
     if(bVerbose) printf("\n\n Run Finished \n\n");
+    isDone = 1;
     }
 }
 

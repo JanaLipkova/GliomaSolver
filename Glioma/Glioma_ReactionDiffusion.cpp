@@ -101,7 +101,6 @@ void Glioma_ReactionDiffusion::_ic(Grid<W,B>& grid, string PatientFileName, Real
     double brainHy = 1.0 / ((double)(brainSizeMax)); //  w.r.t. longest dimension for correct aspect ratio
     double brainHz = 1.0 / ((double)(brainSizeMax)); //  w.r.t. longest dimension for correct aspect ratio
     
-    
     // Tumor set up
     const Real tumorRadius = 0.005;
     const Real smooth_sup  = 2.;		// suppor of smoothening

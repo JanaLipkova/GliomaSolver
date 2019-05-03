@@ -402,37 +402,37 @@ class HelmholtzSolver3D_Hypre_MPI
             
         }
         
-        /*2) Collect all the results into the mrag_grid owned by master rank */
+
+        /* 2) Collect all the results from processes, so each process has the complete results, not just those which it computed */
         MPI_Request request[N];
         MPI_Status  status[N];
         
-        if(nprocs > 1)
-        {
-            if(rank>0)
-            {
-                // send
-                for(int i = 0; i < blocksPerProcesor; i++){
-                    int blockID     = rank + (blocksPerProcesor - 1) * rank + i;
+        if(nprocs > 1){
+            for(int blockID = 0; blockID<nMRAGblocks; blockID++ ){
+                int blockOwner = (int) floor(blockID/blocksPerProcesor);  // process owning the blockID
+                
+                if(rank == blockOwner) // if you own the block, get it and send it to others
+                {
                     BlockInfo& info = vInfo[blockID];
                     B& block        = mrag_grid->getBlockCollection()[info.blockID];
                     
-                    int ierror = MPI_Isend(&block, sizeof(block), MPI_BYTE, 0, blockID, MPI_COMM_WORLD, &request[blockID]);
+                    for(int p = 0; p<nprocs; p++)
+                        if(p!=blockOwner) // exclude self sending
+                            int ierror = MPI_Isend(&block, sizeof(block), MPI_BYTE, p, blockID, MPI_COMM_WORLD, &request[blockID]);
                 }
-            }
-            else
-            {
-                // recieve
-                for(int prcs=1; prcs<nprocs; prcs++)
-                    for(int i = 0; i < blocksPerProcesor; i++)
-                    {
-                        int blockID     = prcs + (blocksPerProcesor - 1) * prcs + i;
-                        BlockInfo& info = vInfo[blockID];
-                        B& block        = mrag_grid->getBlockCollection()[info.blockID];
-                        
-                        int ierror = MPI_Recv(&block, sizeof(block), MPI_BYTE, prcs, blockID, MPI_COMM_WORLD, &status[blockID]);
-                    }
+                else {
+                    // recieve the block from its owner
+                    BlockInfo& info = vInfo[blockID];
+                    B& block        = mrag_grid->getBlockCollection()[info.blockID];
+                    
+                    int ierror = MPI_Recv(&block, sizeof(block), MPI_BYTE, blockOwner, blockID, MPI_COMM_WORLD, &status[blockID]);
+                }
+                
             }
         }
+        
+        
+        
     }
 
 
@@ -504,25 +504,29 @@ public:
         _solveSystem();
         _getResults();
         MPI_Barrier(MPI_COMM_WORLD);
+
     }
     
     void inline clean()
-    {        
-        HYPRE_StructGridDestroy(hypre_grid);
-        HYPRE_StructStencilDestroy(stencil);
-        HYPRE_StructMatrixDestroy(matrix);
-        HYPRE_StructVectorDestroy(rhs);
-        HYPRE_StructVectorDestroy(solution);
-        
-        if(bCG==0)
-            HYPRE_StructSMGDestroy(solver);
-        else
-        {
-            HYPRE_StructPCGDestroy(solver);
-            HYPRE_StructSMGDestroy(precond);
+    {
+        if(bAlreadyAllocated){
+            HYPRE_StructGridDestroy(hypre_grid);
+            HYPRE_StructStencilDestroy(stencil);
+            HYPRE_StructMatrixDestroy(matrix);
+            HYPRE_StructVectorDestroy(rhs);
+            HYPRE_StructVectorDestroy(solution);
+            
+            if(bCG==0)
+                HYPRE_StructSMGDestroy(solver);
+            else
+            {
+                HYPRE_StructPCGDestroy(solver);
+                HYPRE_StructSMGDestroy(precond);
+            }
+            
+            bAlreadyAllocated = false;
         }
-        
-        bAlreadyAllocated = false;
+
     }
     
 };

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <xmmintrin.h>
 
-#include "../Tests/Test.h"
+#include "Tests/Test.h"
 #include "Glioma_ReactionDiffusion.h"
 #include "Glioma_UQ_DataPreprocessing.h"
 #include "Glioma_ComputePFF_CahnHilliard.h"
@@ -41,6 +41,7 @@ int main(int argc,const char ** argv)
         printf("\n\n       MRAG Launched         \n\n");
         printf("Running with %d MPI processes: \n", size);
     }
+    
 #else
     printf("\n\n       MRAG Launched         \n\n");
 #endif
@@ -75,16 +76,15 @@ int main(int argc,const char ** argv)
    
 
 #ifdef HYPRE
-   delete s;
     MPI_Finalize();
+    delete s;
     
-    if(rank==0){
-        printf("we spent: %2.2f \n",(t1-t0).seconds());
-        std::cout << std::endl << "MRAG Terminated" << std::endl;
-    }
+    if(rank==0) printf("we spent: %2.2f sec \n",(t1-t0).seconds());
+    if(rank==0) std::cout << std::endl << "MRAG Terminated" << std::endl;
+
 #else
     delete s;
-    printf("we spent: %2.2f \n",(t1-t0).seconds());
+    printf("we spent: %2.2f sec \n",(t1-t0).seconds());
     std::cout << std::endl << "MRAG Terminated" << std::endl;
 #endif
     

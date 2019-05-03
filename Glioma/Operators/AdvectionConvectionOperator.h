@@ -562,23 +562,19 @@ struct TissueConvection
                     {
                         if( lab(ix,iy,iz).chi > 0)
                         {
-                            Real uzm = lab(ix  ,iy  ,iz-1).uz;
-                            Real uzp = lab(ix  ,iy  ,iz+1).uz;
-                            Real uz  = lab(ix,iy,iz).uz;
+                            Real uzm = lab(ix  ,iy  ,iz-1).uz * lab(ix  ,iy  ,iz-1).chi;
+                            Real uzp = lab(ix  ,iy  ,iz+1).uz * lab(ix  ,iy  ,iz+1).chi;
+                            Real uz  = lab(ix,  iy,  iz  ).uz * lab(ix,  iy,  iz  ).chi;
                             
-                            Real uym = lab(ix  ,iy-1,iz  ).uy;
-                            Real uyp = lab(ix  ,iy+1,iz  ).uy;
-                            Real uy  = lab(ix,iy,iz).uy;
+                            Real uym = lab(ix  ,iy-1,iz  ).uy * lab(ix  ,iy-1,iz  ).chi;
+                            Real uyp = lab(ix  ,iy+1,iz  ).uy * lab(ix  ,iy+1,iz  ).chi;
+                            Real uy  = lab(ix,  iy,  iz  ).uy * lab(ix,  iy,   iz ).chi;
                             
-                            Real uxm = lab(ix-1,iy  ,iz  ).ux;
-                            Real uxp = lab(ix+1,iy  ,iz  ).ux;
-                            Real ux = lab(ix,iy,iz).ux;
+                            Real uxm = lab(ix-1,iy  ,iz  ).ux * lab(ix-1,iy  ,iz  ).chi;
+                            Real uxp = lab(ix+1,iy  ,iz  ).ux * lab(ix+1,iy  ,iz  ).chi;
+                            Real ux  = lab(ix,  iy,  iz  ).ux * lab(ix,  iy,  iz  ).chi;
                             
-                            _mean(uz,uzm,uzp);
-                            _mean(uy,uym,uyp);
-                            _mean(ux,uxm,uxp);
-                            
-                            Real div_v = ih * (uxp - uxm + uyp - uym + uzp - uzm);
+                            Real div_v = 0.5 * ih * (uxp - uxm + uyp - uym + uzp - uzm);
                             
                             o(ix,iy,iz).dwmdt  -= lab(ix,iy,iz).wm  * div_v;
                             o(ix,iy,iz).dgmdt  -= lab(ix,iy,iz).gm  * div_v;

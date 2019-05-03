@@ -50,7 +50,8 @@ private:
     void        _computePressureSource(const int nParallelGranularity, const Real rho);
     void        _computeVelocities(BoundaryInfo* boundaryInfo ,const bool bMobility, std::vector<Real>* mobility);
     void        _reactionDiffusionStep(BoundaryInfo* boundaryInfo, const Real Dw, const Real Dg, const Real rho);
-    void        _advectionConvectionStep(BoundaryInfo* boundaryInfo, const int nParallelGranularity, double dt);
+    void        _advectionConvectionStep(BoundaryInfo* boundaryInfo);
+    void        _timeUpdate(const int nParallelGranularity, double dt);
     void		_dump(int counter);
     
 public:

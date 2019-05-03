@@ -68,19 +68,12 @@ struct ReactionDiffusionOperator
                         df[2]  = lab(ix  ,iy-1).p_w * Dw + lab(ix  ,iy-1).p_g * Dg;
                         df[3]  = lab(ix  ,iy+1).p_w * Dw + lab(ix  ,iy+1).p_g * Dg;
                         
-                        // include phi to n to account for the case where phi=1, but tissue=0 due to deformation
-                        chf_loc = lab(ix ,iy    ).p_w + lab(ix  ,iy   ).p_g ;
-                        chf[0]  = lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_g ;
-                        chf[1]  = lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_g ;
-                        chf[2]  = lab(ix  , iy-1).p_w + lab(ix  , iy-1).p_g ;
-                        chf[3]  = lab(ix  , iy+1).p_w + lab(ix  , iy+1).p_g ;
-                        
-                        _harmonic_mean(df, df_loc, chf, chf_loc);
-                        
-                        chf[0] +=  lab(ix-1, iy  ).phi;
-                        chf[1] += lab(ix+1, iy  ).phi;
-                        chf[2] += lab(ix  , iy-1).phi;
-                        chf[3] += lab(ix  , iy+1).phi;
+                        _harmonic_mean(df, df_loc);
+
+                        chf[0]  = lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_g ;
+                        chf[1]  = lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_g ;
+                        chf[2]  = lab(ix,   iy-1).p_w + lab(ix  , iy-1).p_w + lab(ix  , iy-1).p_g ;
+                        chf[3]  = lab(ix,   iy+1).p_w + lab(ix  , iy+1).p_w + lab(ix  , iy+1).p_g ;
                         
                         _applyNoFluxBC(df,chf);
                         
@@ -116,23 +109,15 @@ struct ReactionDiffusionOperator
                             df[3]  = lab(ix  ,iy+1,iz  ).p_w * Dw + lab(ix  ,iy+1,iz  ).p_g * Dg;
                             df[4]  = lab(ix  ,iy  ,iz-1).p_w * Dw + lab(ix  ,iy  ,iz-1).p_g * Dg;
                             df[5]  = lab(ix  ,iy  ,iz+1).p_w * Dw + lab(ix  ,iy  ,iz+1).p_g * Dg;
-                            
-                            chf_loc = lab(ix ,iy,  iz  ).p_w + lab(ix  ,iy,  iz  ).p_g ;
-                            chf[0] = lab(ix-1,iy,  iz  ).p_w + lab(ix-1,iy,  iz  ).p_g ;
-                            chf[1] = lab(ix+1,iy,  iz  ).p_w + lab(ix+1,iy,  iz  ).p_g ;
-                            chf[2] = lab(ix  ,iy-1,iz  ).p_w + lab(ix  ,iy-1,iz  ).p_g ;
-                            chf[3] = lab(ix  ,iy+1,iz  ).p_w + lab(ix  ,iy+1,iz  ).p_g ;
-                            chf[4] = lab(ix  ,iy,  iz-1).p_w + lab(ix  ,iy,  iz-1).p_g ;
-                            chf[5] = lab(ix  ,iy,  iz+1).p_w + lab(ix  ,iy,  iz+1).p_g ;
-                            
-                            _harmonic_mean(df, df_loc, chf, chf_loc);
-                            
-                            chf[0] += lab(ix-1,iy,  iz  ).phi;
-                            chf[1] += lab(ix+1,iy,  iz  ).phi;
-                            chf[2] += lab(ix  ,iy-1,iz  ).phi;
-                            chf[3] += lab(ix  ,iy+1,iz  ).phi;
-                            chf[4] += lab(ix  ,iy,  iz-1).phi;
-                            chf[5] += lab(ix  ,iy,  iz+1).phi;
+                    
+                           _harmonic_mean(df, df_loc);
+
+                            chf[0] = lab(ix-1,iy,  iz  ).phi + lab(ix-1,iy,  iz  ).p_w + lab(ix-1,iy,  iz  ).p_g ;
+                            chf[1] = lab(ix+1,iy,  iz  ).phi + lab(ix+1,iy,  iz  ).p_w + lab(ix+1,iy,  iz  ).p_g ;
+                            chf[2] = lab(ix  ,iy-1,iz  ).phi + lab(ix  ,iy-1,iz  ).p_w + lab(ix  ,iy-1,iz  ).p_g ;
+                            chf[3] = lab(ix  ,iy+1,iz  ).phi + lab(ix  ,iy+1,iz  ).p_w + lab(ix  ,iy+1,iz  ).p_g ;
+                            chf[4] = lab(ix  ,iy,  iz-1).phi + lab(ix  ,iy,  iz-1).p_w + lab(ix  ,iy,  iz-1).p_g ;
+                            chf[5] = lab(ix  ,iy,  iz+1).phi + lab(ix  ,iy,  iz+1).p_w + lab(ix  ,iy,  iz+1).p_g ;
                             
                             _applyNoFluxBC(df,chf);
                             
@@ -147,7 +132,7 @@ struct ReactionDiffusionOperator
                             double diffusionFluxOut = -( (df[0] + df[1] + df[2] + df[3] + df[4] + df[5]) * lab(ix, iy, iz).phi * ih2 );
                             double reactionFlux		= rho * lab(ix,iy,iz).phi * ( 1. - lab(ix,iy,iz).phi );
                             
-                            o(ix, iy, iz).dphidt =   diffusionFluxOut + diffusionFluxIn + reactionFlux ;
+                            o(ix, iy, iz).dphidt =  diffusionFluxOut + diffusionFluxIn + reactionFlux ;
                         }
                         else
                             o(ix, iy, iz).dphidt = 0.;
@@ -157,25 +142,26 @@ struct ReactionDiffusionOperator
     }
     
     
+    
     // Di,j = 2 * (Di * Dj / (Di + Dj)
-    // Di,j = 2 * (p_tissue[i] / Di + p_tissue[j]/Di)^-1 (p_tissue helps to prevent separation of csf and tissue), p_tissue = p_w + p_g
     // set Di,j to zero if (Di + Dj = 0) i.e. no update and avoid division by zero
-    inline void _harmonic_mean( Real (&df)[6], Real df_loc, Real chf[6], Real chf_loc) const
+    inline void _harmonic_mean( Real (&df)[6], Real df_loc) const
     {
         Real eps = 1.0e-08; // to avoid divisin by zero
         
-        df[0] = (df[0] + df_loc < eps) ? 0. : 2. * df[0] * df_loc / (df[0] * chf_loc + df_loc * chf[0]);
-        df[1] = (df[1] + df_loc < eps) ? 0. : 2. * df[1] * df_loc / (df[1] * chf_loc + df_loc * chf[1]);
-        df[2] = (df[2] + df_loc < eps) ? 0. : 2. * df[2] * df_loc / (df[2] * chf_loc + df_loc * chf[2]);
-        df[3] = (df[3] + df_loc < eps) ? 0. : 2. * df[3] * df_loc / (df[3] * chf_loc + df_loc * chf[3]);
+        df[0] = (df[0] + df_loc < eps) ? 0. : 2. * df[0] * df_loc / (df[0] + df_loc );
+        df[1] = (df[1] + df_loc < eps) ? 0. : 2. * df[1] * df_loc / (df[1] + df_loc );
+        df[2] = (df[2] + df_loc < eps) ? 0. : 2. * df[2] * df_loc / (df[2] + df_loc );
+        df[3] = (df[3] + df_loc < eps) ? 0. : 2. * df[3] * df_loc / (df[3] + df_loc );
         
         if(nDim > 2)
         {
-            df[4] = (df[4] + df_loc < eps) ? 0. : 2. * df[4] * df_loc / (df[4] * chf_loc + df_loc * chf[4]);
-            df[5] = (df[5] + df_loc < eps) ? 0. : 2. * df[5] * df_loc / (df[5] * chf_loc + df_loc * chf[5]);
+            df[4] = (df[4] + df_loc < eps) ? 0. : 2. * df[4] * df_loc / (df[4]  + df_loc );
+            df[5] = (df[5] + df_loc < eps) ? 0. : 2. * df[5] * df_loc / (df[5]  + df_loc );
         }
         
     }
+    
     
     inline void _applyNoFluxBC( Real (&df)[6], Real n[6] ) const
     {
