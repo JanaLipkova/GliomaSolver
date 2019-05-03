@@ -39,7 +39,8 @@ endif
 # Compilations options
 
 ifeq "$(helmholtz)" "hypre"
-        CC=mpic++ -O3 -Wno-deprecated $(OPENMP_FLAG)
+        #CC=mpic++ -O3 -Wno-deprecated $(OPENMP_FLAG)
+        CC=mpic++ 
         LD=$(CC) 
         CPPFLAGS += -I$(HYPRE_INC_DIR)  
         LIBS += -L$(HYPRE_LIB_DIR) -lHYPRE 
