@@ -107,6 +107,7 @@ struct TissueTumorAdvectionWeno5
         
         // n is domain charact. function -> used to apply bc
         Real n[6]; // neighbours [-3,-2,-1,1,2,3]
+        Real tissue[6]; // used to makr brain tissue: wm+gm -> use for tumor BC at csf
         
         if(nDim==2)
         {
@@ -153,14 +154,21 @@ struct TissueTumorAdvectionWeno5
                               csf_flux_x );
                         
                         // tumor
-                        n[0] = lab(ix-3,iy).p_w + lab(ix-3,iy).p_g + lab(ix-3,iy).phi;
-                        n[1] = lab(ix-2,iy).p_w + lab(ix-2,iy).p_g + lab(ix-2,iy).phi;
-                        n[2] = lab(ix-1,iy).p_w + lab(ix-1,iy).p_g + lab(ix-1,iy).phi;
-                        n[3] = lab(ix+1,iy).p_w + lab(ix+1,iy).p_g + lab(ix+1,iy).phi;
-                        n[4] = lab(ix+2,iy).p_w + lab(ix+2,iy).p_g + lab(ix+2,iy).phi;
-                        n[5] = lab(ix+3,iy).p_w + lab(ix+3,iy).p_g + lab(ix+3,iy).phi;
-
-                        _applyNoFluxBC(n);
+                        tissue[0] = lab(ix-3,iy).p_w + lab(ix-3,iy).p_g + lab(ix-3,iy).phi;
+                        tissue[1] = lab(ix-2,iy).p_w + lab(ix-2,iy).p_g + lab(ix-2,iy).phi;
+                        tissue[2] = lab(ix-1,iy).p_w + lab(ix-1,iy).p_g + lab(ix-1,iy).phi;
+                        tissue[3] = lab(ix+1,iy).p_w + lab(ix+1,iy).p_g + lab(ix+1,iy).phi;
+                        tissue[4] = lab(ix+2,iy).p_w + lab(ix+2,iy).p_g + lab(ix+2,iy).phi;
+                        tissue[5] = lab(ix+3,iy).p_w + lab(ix+3,iy).p_g + lab(ix+3,iy).phi;
+                        
+                        n[0] = lab(ix-3,iy).p_w + lab(ix-3,iy).p_g;
+                        n[1] = lab(ix-2,iy).p_w + lab(ix-2,iy).p_g;
+                        n[2] = lab(ix-1,iy).p_w + lab(ix-1,iy).p_g;
+                        n[3] = lab(ix+1,iy).p_w + lab(ix+1,iy).p_g;
+                        n[4] = lab(ix+2,iy).p_w + lab(ix+2,iy).p_g;
+                        n[5] = lab(ix+3,iy).p_w + lab(ix+3,iy).p_g;
+                        
+                        _applyNoFluxBCTumor(n,tissue);
                         
                         weno5(  ifactor * ( n[1] * lab(ix-2,iy).phi - n[0] * lab(ix-3,iy).phi ),
                               ifactor   * ( n[2] * lab(ix-1,iy).phi - n[1] * lab(ix-2,iy).phi ),
@@ -209,14 +217,21 @@ struct TissueTumorAdvectionWeno5
                               csf_flux_y );
                         
                         // tumor
-                        n[0] = lab(ix,iy-3).p_w + lab(ix,iy-3).p_g + lab(ix,iy-3).phi;
-                        n[1] = lab(ix,iy-2).p_w + lab(ix,iy-2).p_g + lab(ix,iy-2).phi;
-                        n[2] = lab(ix,iy-1).p_w + lab(ix,iy-1).p_g + lab(ix,iy-1).phi;
-                        n[3] = lab(ix,iy+1).p_w + lab(ix,iy+1).p_g + lab(ix,iy+1).phi;
-                        n[4] = lab(ix,iy+2).p_w + lab(ix,iy+2).p_g + lab(ix,iy+2).phi;
-                        n[5] = lab(ix,iy+3).p_w + lab(ix,iy+3).p_g + lab(ix,iy+3).phi;
+                        tissue[0] = lab(ix,iy-3).p_w + lab(ix,iy-3).p_g + lab(ix,iy-3).phi;
+                        tissue[1] = lab(ix,iy-2).p_w + lab(ix,iy-2).p_g + lab(ix,iy-2).phi;
+                        tissue[2] = lab(ix,iy-1).p_w + lab(ix,iy-1).p_g + lab(ix,iy-1).phi;
+                        tissue[3] = lab(ix,iy+1).p_w + lab(ix,iy+1).p_g + lab(ix,iy+1).phi;
+                        tissue[4] = lab(ix,iy+2).p_w + lab(ix,iy+2).p_g + lab(ix,iy+2).phi;
+                        tissue[5] = lab(ix,iy+3).p_w + lab(ix,iy+3).p_g + lab(ix,iy+3).phi;
                         
-                        _applyNoFluxBC(n);
+                        n[0] = lab(ix,iy-3).p_w + lab(ix,iy-3).p_g;
+                        n[1] = lab(ix,iy-2).p_w + lab(ix,iy-2).p_g;
+                        n[2] = lab(ix,iy-1).p_w + lab(ix,iy-1).p_g;
+                        n[3] = lab(ix,iy+1).p_w + lab(ix,iy+1).p_g;
+                        n[4] = lab(ix,iy+2).p_w + lab(ix,iy+2).p_g;
+                        n[5] = lab(ix,iy+3).p_w + lab(ix,iy+3).p_g;
+                        
+                        _applyNoFluxBCTumor(n,tissue);
                         
                         weno5( ifactor * ( n[1] * lab(ix,iy-2).phi - n[0] * lab(ix,iy-3).phi ),
                               ifactor  * ( n[2] * lab(ix,iy-1).phi - n[1] * lab(ix,iy-2).phi ),
@@ -306,15 +321,23 @@ struct TissueTumorAdvectionWeno5
                                   csf_flux_x );
                            
                             /* In X for Tumour*/
-                            // reset n so the BC is applied to csf and skull, excluding the case where u=1 and tissue=0
-                            n[0] = lab(ix-3,iy,iz).p_w + lab(ix-3,iy,iz).p_g + lab(ix-3,iy,iz).phi;
-                            n[1] = lab(ix-2,iy,iz).p_w + lab(ix-2,iy,iz).p_g + lab(ix-2,iy,iz).phi;
-                            n[2] = lab(ix-1,iy,iz).p_w + lab(ix-1,iy,iz).p_g + lab(ix-1,iy,iz).phi;
-                            n[3] = lab(ix+1,iy,iz).p_w + lab(ix+1,iy,iz).p_g + lab(ix+1,iy,iz).phi;
-                            n[4] = lab(ix+2,iy,iz).p_w + lab(ix+2,iy,iz).p_g + lab(ix+2,iy,iz).phi;
-                            n[5] = lab(ix+3,iy,iz).p_w + lab(ix+3,iy,iz).p_g + lab(ix+3,iy,iz).phi;
-
-                            _applyNoFluxBC(n);
+                            // tissue - defines domain for tumor advection
+                            // n[] is where the BC is applied, the idea is: the more CSF at voxel -> the less tumor is advected there
+                            tissue[0] = lab(ix-3,iy,iz).p_w + lab(ix-3,iy,iz).p_g + lab(ix-3,iy,iz).phi;
+                            tissue[1] = lab(ix-2,iy,iz).p_w + lab(ix-2,iy,iz).p_g + lab(ix-2,iy,iz).phi;
+                            tissue[2] = lab(ix-1,iy,iz).p_w + lab(ix-1,iy,iz).p_g + lab(ix-1,iy,iz).phi;
+                            tissue[3] = lab(ix+1,iy,iz).p_w + lab(ix+1,iy,iz).p_g + lab(ix+1,iy,iz).phi;
+                            tissue[4] = lab(ix+2,iy,iz).p_w + lab(ix+2,iy,iz).p_g + lab(ix+2,iy,iz).phi;
+                            tissue[5] = lab(ix+3,iy,iz).p_w + lab(ix+3,iy,iz).p_g + lab(ix+3,iy,iz).phi;
+                            
+                            n[0] = lab(ix-3,iy,iz).p_w + lab(ix-3,iy,iz).p_g;
+                            n[1] = lab(ix-2,iy,iz).p_w + lab(ix-2,iy,iz).p_g;
+                            n[2] = lab(ix-1,iy,iz).p_w + lab(ix-1,iy,iz).p_g;
+                            n[3] = lab(ix+1,iy,iz).p_w + lab(ix+1,iy,iz).p_g;
+                            n[4] = lab(ix+2,iy,iz).p_w + lab(ix+2,iy,iz).p_g;
+                            n[5] = lab(ix+3,iy,iz).p_w + lab(ix+3,iy,iz).p_g;
+                            
+                            _applyNoFluxBCTumor(n,tissue);
                             
                             weno5(  ifactor * ( n[1] * lab(ix-2,iy,iz).phi - n[0] * lab(ix-3,iy,iz).phi ),
                                   ifactor   * ( n[2] * lab(ix-1,iy,iz).phi - n[1] * lab(ix-2,iy,iz).phi ),
@@ -363,14 +386,21 @@ struct TissueTumorAdvectionWeno5
                                   csf_flux_y );
                            
                             /* In Y for Tumour*/
-                            n[0] = lab(ix,iy-3,iz).p_w + lab(ix,iy-3,iz).p_g + lab(ix,iy-3,iz).phi;
-                            n[1] = lab(ix,iy-2,iz).p_w + lab(ix,iy-2,iz).p_g + lab(ix,iy-2,iz).phi;
-                            n[2] = lab(ix,iy-1,iz).p_w + lab(ix,iy-1,iz).p_g + lab(ix,iy-1,iz).phi;
-                            n[3] = lab(ix,iy+1,iz).p_w + lab(ix,iy+1,iz).p_g + lab(ix,iy+1,iz).phi;
-                            n[4] = lab(ix,iy+2,iz).p_w + lab(ix,iy+2,iz).p_g + lab(ix,iy+2,iz).phi;
-                            n[5] = lab(ix,iy+3,iz).p_w + lab(ix,iy+3,iz).p_g + lab(ix,iy+3,iz).phi;
-
-                            _applyNoFluxBC(n);
+                            tissue[0] = lab(ix,iy-3,iz).p_w + lab(ix,iy-3,iz).p_g + lab(ix,iy-3,iz).phi;
+                            tissue[1] = lab(ix,iy-2,iz).p_w + lab(ix,iy-2,iz).p_g + lab(ix,iy-2,iz).phi;
+                            tissue[2] = lab(ix,iy-1,iz).p_w + lab(ix,iy-1,iz).p_g + lab(ix,iy-1,iz).phi;
+                            tissue[3] = lab(ix,iy+1,iz).p_w + lab(ix,iy+1,iz).p_g + lab(ix,iy+1,iz).phi;
+                            tissue[4] = lab(ix,iy+2,iz).p_w + lab(ix,iy+2,iz).p_g + lab(ix,iy+2,iz).phi;
+                            tissue[5] = lab(ix,iy+3,iz).p_w + lab(ix,iy+3,iz).p_g + lab(ix,iy+3,iz).phi;
+                            
+                            n[0] = lab(ix,iy-3,iz).p_w + lab(ix,iy-3,iz).p_g;
+                            n[1] = lab(ix,iy-2,iz).p_w + lab(ix,iy-2,iz).p_g;
+                            n[2] = lab(ix,iy-1,iz).p_w + lab(ix,iy-1,iz).p_g;
+                            n[3] = lab(ix,iy+1,iz).p_w + lab(ix,iy+1,iz).p_g;
+                            n[4] = lab(ix,iy+2,iz).p_w + lab(ix,iy+2,iz).p_g;
+                            n[5] = lab(ix,iy+3,iz).p_w + lab(ix,iy+3,iz).p_g;
+                            
+                            _applyNoFluxBCTumor(n,tissue);
                             
                             // tumor
                             weno5( ifactor * ( n[1] * lab(ix,iy-2,iz).phi - n[0] * lab(ix,iy-3,iz).phi ),
@@ -421,14 +451,21 @@ struct TissueTumorAdvectionWeno5
                             
 
                             /* In Z for tumour */
-                            n[0] = lab(ix,iy,iz-3).p_w + lab(ix,iy,iz-3).p_g + lab(ix,iy,iz-3).phi;
-                            n[1] = lab(ix,iy,iz-2).p_w + lab(ix,iy,iz-2).p_g + lab(ix,iy,iz-2).phi;
-                            n[2] = lab(ix,iy,iz-1).p_w + lab(ix,iy,iz-1).p_g + lab(ix,iy,iz-1).phi;
-                            n[3] = lab(ix,iy,iz+1).p_w + lab(ix,iy,iz+1).p_g + lab(ix,iy,iz+1).phi;
-                            n[4] = lab(ix,iy,iz+2).p_w + lab(ix,iy,iz+2).p_g + lab(ix,iy,iz+2).phi;
-                            n[5] = lab(ix,iy,iz+3).p_w + lab(ix,iy,iz+3).p_g + lab(ix,iy,iz+3).phi;
+                            tissue[0] = lab(ix,iy,iz-3).p_w + lab(ix,iy,iz-3).p_g + lab(ix,iy,iz-3).phi;
+                            tissue[1] = lab(ix,iy,iz-2).p_w + lab(ix,iy,iz-2).p_g + lab(ix,iy,iz-2).phi;
+                            tissue[2] = lab(ix,iy,iz-1).p_w + lab(ix,iy,iz-1).p_g + lab(ix,iy,iz-1).phi;
+                            tissue[3] = lab(ix,iy,iz+1).p_w + lab(ix,iy,iz+1).p_g + lab(ix,iy,iz+1).phi;
+                            tissue[4] = lab(ix,iy,iz+2).p_w + lab(ix,iy,iz+2).p_g + lab(ix,iy,iz+2).phi;
+                            tissue[5] = lab(ix,iy,iz+3).p_w + lab(ix,iy,iz+3).p_g + lab(ix,iy,iz+3).phi;
                             
-                            _applyNoFluxBC(n);
+                            n[0] = lab(ix,iy,iz-3).p_w + lab(ix,iy,iz-3).p_g;
+                            n[1] = lab(ix,iy,iz-2).p_w + lab(ix,iy,iz-2).p_g;
+                            n[2] = lab(ix,iy,iz-1).p_w + lab(ix,iy,iz-1).p_g;
+                            n[3] = lab(ix,iy,iz+1).p_w + lab(ix,iy,iz+1).p_g;
+                            n[4] = lab(ix,iy,iz+2).p_w + lab(ix,iy,iz+2).p_g;
+                            n[5] = lab(ix,iy,iz+3).p_w + lab(ix,iy,iz+3).p_g;
+                            
+                            _applyNoFluxBCTumor(n,tissue);
                             
                             // tumor
                             weno5( ifactor * ( n[1] * lab(ix,iy,iz-2).phi - n[0] * lab(ix,iy,iz-3).phi ),
@@ -493,6 +530,19 @@ struct TissueTumorAdvectionWeno5
         if( n[3] < eps ){n[2] *= 2.; };
         if( n[4] < eps ){n[1] *= 2.; };
         if( n[5] < eps ){n[0] *= 2.; };
+    }
+    
+    inline void _applyNoFluxBCTumor(Real (&n)[6], Real tissue[6] ) const
+    {
+        // tissue - defines domain, n - is contains the values to which to apply the BC
+        // e.g. tissue > 0 -> wm+gm+tum  (can be >1, just used to mark the domain), tissue = 0 -> BC, n = p_w + p_g
+        Real eps = 0.1;
+        if( tissue[0] < eps ){n[5] *= 2.; };
+        if( tissue[1] < eps ){n[4] *= 2.; };
+        if( tissue[2] < eps ){n[3] *= 2.; };
+        if( tissue[3] < eps ){n[2] *= 2.; };
+        if( tissue[4] < eps ){n[1] *= 2.; };
+        if( tissue[5] < eps ){n[0] *= 2.; };
     }
     
 };

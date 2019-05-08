@@ -13,10 +13,10 @@ VTK_LIB_DIR=$(LIB_BASE)/myVTK/lib/vtk-5.4
 #HYPRE_INC_DIR=$HYPRE_INC
 #HYPRE_LIB_DIR=$HYPRE_LIB
 
-HYPRE_INC_DIR=/lrz/sys/libraries/hypre/2.11.2/include
-HYPRE_LIB_DIR=/lrz/sys/libraries/hypre/2.11.2/lib
-#HYPRE_INC_DIR=$(LIB_BASE)/hypre-2.10.0b/src/hypre/include
-#HYPRE_LIB_DIR=$(LIB_BASE)/hypre-2.10.0b/src/hypre/lib
+#HYPRE_INC_DIR=/lrz/sys/libraries/hypre/2.11.2/include
+#HYPRE_LIB_DIR=/lrz/sys/libraries/hypre/2.11.2/lib
+HYPRE_INC_DIR=$(LIB_BASE)/hypre-2.10.0b/src/hypre/include
+HYPRE_LIB_DIR=$(LIB_BASE)/hypre-2.10.0b/src/hypre/lib
 
 export LD_LIBRARY_PATH:=$(VTK_LIB_DIR):$(LD_LIBRARY_PATH)
 export LD_LIBRARY_PATH:=$(TBB_LIB_DIR):$(LD_LIBRARY_PATH)

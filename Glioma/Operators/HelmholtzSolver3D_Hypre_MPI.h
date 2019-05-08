@@ -484,27 +484,30 @@ public:
         }
         
         assert( (nMRAGblocks % nprocs) == 0);
-        
-        if (bAlreadyAllocated)
-            clean();
-        
-        _setup_grid();
-        _setup_stencil();
-        _setup_solver();
-        
-        bAlreadyAllocated = true;
-        if ((bVerbose)&&(rank==0)) printf("Done with hypre setup!\n"); //exit(0);
     }
     
     
     void inline solve()
     {
+        /* NOTE: The allocation could be done in theory in the hypre setup, but it doesn't work well with long simulations, probably it runs out of memory, so re-alocating and cleaning every time step ensurs that at every iterations only the actual data are in the hypre memory */
+        
+        // allocate
+        clean();
+        _setup_grid();
+        _setup_stencil();
+        _setup_solver();
+        bAlreadyAllocated = true;
+        
+        // solve
         _setupMatrix();
         _setupVectors();
         _solveSystem();
         _getResults();
+        
+        // clean
+        clean();
         MPI_Barrier(MPI_COMM_WORLD);
-
+        
     }
     
     void inline clean()

@@ -46,28 +46,13 @@ struct TimeUpdate
                     o(ix,iy).phi = ( o(ix,iy).phi < 0. ) ? 0. : o(ix,iy).phi;
                     o(ix,iy).wm  = ( o(ix,iy).wm  < 0. ) ? 0. : o(ix,iy).wm;
                     o(ix,iy).gm  = ( o(ix,iy).gm  < 0. ) ? 0. : o(ix,iy).gm;
+                    o(ix,iy).csf = ( o(ix,iy).csf < 0. ) ? 0. : o(ix,iy).csf;
                     
-//                    // if 100% tumore, remove the tissue
-//                    o(ix,iy).wm  = ( fabs(o(ix,iy).phi - 1.) < eps ) ? 0. : o(ix,iy).wm;
-//                    o(ix,iy).gm  = ( fabs(o(ix,iy).phi - 1.) < eps ) ? 0. : o(ix,iy).gm;
-//                    o(ix,iy).csf = ( fabs(o(ix,iy).phi - 1.) < eps ) ? 0. : o(ix,iy).csf;
-                    
-                    // recompute the tissue percentage
-                    Real tissue = o(ix,iy).wm + o(ix,iy).gm + o(ix,iy).csf;
-                    
-                    if(tissue > 0.)
-                    {
-                        Real iTissue = 1./tissue;
-                        o(ix,iy).p_w   = o(ix,iy).wm  * iTissue;
-                        o(ix,iy).p_g   = o(ix,iy).gm  * iTissue;
-                        o(ix,iy).p_csf = o(ix,iy).csf * iTissue;
-                    }
-                    else
-                    {
-                        o(ix,iy).p_w   = 0.;
-                        o(ix,iy).p_g   = 0.;
-                        o(ix,iy).p_csf = 0.;
-                    }
+                    // compute tissue percantge
+                    Real all = o(ix,iy).wm + o(ix,iy).gm + o(ix,iy).csf;
+                    o(ix,iy).p_csf = (all > 0.) ? o(ix,iy).csf / all : 0.;
+                    o(ix,iy).p_w   = (all > 0.) ? o(ix,iy).wm  / all : 0.;
+                    o(ix,iy).p_g   = (all > 0.) ? o(ix,iy).gm  / all : 0.;
                 }
         }
         else
@@ -88,27 +73,13 @@ struct TimeUpdate
                         o(ix,iy,iz).wm  = ( o(ix,iy,iz).wm  < 0. ) ? 0. : o(ix,iy,iz).wm;
                         o(ix,iy,iz).gm  = ( o(ix,iy,iz).gm  < 0. ) ? 0. : o(ix,iy,iz).gm;
                         o(ix,iy,iz).csf = ( o(ix,iy,iz).csf < 0. ) ? 0. : o(ix,iy,iz).csf;
-                        // if 100% tumore, remove the tissue
-//                        o(ix,iy,iz).wm  = ( fabs(o(ix,iy,iz).phi - 1.) < eps ) ? 0. : o(ix,iy,iz).wm;
-//                        o(ix,iy,iz).gm  = ( fabs(o(ix,iy,iz).phi - 1.) < eps ) ? 0. : o(ix,iy,iz).gm;
-//                        o(ix,iy,iz).csf = ( fabs(o(ix,iy,iz).phi - 1.) < eps ) ? 0. : o(ix,iy,iz).csf;
                         
-                        // recompute the tissue percentage
-                        Real tissue = o(ix,iy,iz).wm + o(ix,iy,iz).gm + o(ix,iy,iz).csf;
+                        // compute tissue percantge
+                        Real all = o(ix,iy,iz).wm + o(ix,iy,iz).gm + o(ix,iy,iz).csf;
+                        o(ix,iy,iz).p_csf = (all > 0.) ? o(ix,iy,iz).csf / all : 0.;
+                        o(ix,iy,iz).p_w   = (all > 0.) ? o(ix,iy,iz).wm  / all : 0.;
+                        o(ix,iy,iz).p_g   = (all > 0.) ? o(ix,iy,iz).gm  / all : 0.;
                         
-                        if(tissue > 0.)
-                        {
-                            Real iTissue = 1./tissue;
-                            o(ix,iy,iz).p_w   = o(ix,iy,iz).wm  * iTissue;
-                            o(ix,iy,iz).p_g   = o(ix,iy,iz).gm  * iTissue;
-                            o(ix,iy,iz).p_csf = o(ix,iy,iz).csf * iTissue;
-                        }
-                        else
-                        {
-                            o(ix,iy,iz).p_w   = 0.;
-                            o(ix,iy,iz).p_g   = 0.;
-                            o(ix,iy,iz).p_csf = 0.;
-                        }
                     }
         }
     }

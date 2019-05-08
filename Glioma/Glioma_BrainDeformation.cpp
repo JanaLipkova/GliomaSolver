@@ -238,40 +238,25 @@ void Glioma_BrainDeformation:: _ic(Grid<W,B>& grid, int rank, string PatientFile
                     else
                         pGM = pWM = pCSF = pPFF = 0.;
                     
-//                    // separat tissue and fluid based on majority voting
-//                    double tissue = pWM + pGM;
-//                    pCSF = (pCSF > tissue) ? 1. : 0.;
-//                    pWM  = (pCSF > tissue) ? 0. : pWM;
-//                    pGM  = (pCSF > tissue) ? 0. : pGM;
-//                    
-//                    tissue = pWM + pGM;
-//                    block(ix,iy,iz).p_w = (tissue > 0.) ? (pWM / tissue) : 0.;
-//                    block(ix,iy,iz).p_g = (tissue > 0.) ? (pGM / tissue) : 0.;
-//                    block(ix,iy,iz).p_csf = pCSF;
-//                    
-//                    //tissue concetration
-//                    block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
-//                    block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
-//                    block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
-                    
                     double all = pGM + pWM + pCSF;
                     if(all > 0.1)
                     {
-                        // enhance fluid:
-                        //pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;
+                        // enhance fluid -> ensures hemisphere separaiton
+                        pCSF = ( pCSF > 0.1 ) ? 1. : pCSF;
+                        pWM  = ( pCSF > 0.1 ) ? 0. : pWM;
+                        pGM  = ( pCSF > 0.1 ) ? 0. : pGM;
                         
-                        if(pCSF< 1.)
-                        {
-                            block(ix,iy,iz).p_g   = pGM  / (pCSF + pWM + pGM);
-                            block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
-                            block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM);
-                        }
+                        // alows low level tissue mixing -> smooth interface
+                        block(ix,iy,iz).p_g   = pGM  / (pCSF + pWM + pGM);
+                        block(ix,iy,iz).p_w   = pWM  / (pCSF + pWM + pGM);
+                        block(ix,iy,iz).p_csf = pCSF / (pCSF + pWM + pGM);
                         
-                        //tissue concetration
-                        block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
-                        block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
-                        block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
                     }
+                    
+                    //tissue concetration
+                    block(ix,iy,iz).wm  = block(ix,iy,iz).p_w;
+                    block(ix,iy,iz).gm  = block(ix,iy,iz).p_g;
+                    block(ix,iy,iz).csf = block(ix,iy,iz).p_csf;
                     
                     // tumor
                     const Real p[3] = {x[0] - tumor_ic[0], x[1] - tumor_ic[1], x[2] - tumor_ic[2]};
@@ -472,6 +457,7 @@ void Glioma_BrainDeformation::run()
             
             if ( t >= ((double)(whenToWrite)) ){
                 if(rank==0) _dump(iCounter++);
+                if(rank==0) printf(" dumping at time t=%f, as Data_%04d \n", t, iCounter-1);
                 whenToWrite = whenToWrite + whenToWriteOffset;
             }
         }
