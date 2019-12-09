@@ -65,7 +65,7 @@ cp tmcmc_glioma.par ../Inference/
 cp ../${InputFile} ../Inference/
 
 # Likelihood
-cd ${LIKELIHOOD}
+cd ../${LIKELIHOOD}
 make clean && make
 cp likelihood ../../TMPTMP
 
