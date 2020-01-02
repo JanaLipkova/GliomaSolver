@@ -70,10 +70,10 @@ struct ReactionDiffusionOperator
                         
                         _harmonic_mean(df, df_loc);
 
-                        chf[0]  = lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_g ;
-                        chf[1]  = lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_g ;
-                        chf[2]  = lab(ix,   iy-1).p_w + lab(ix  , iy-1).p_w + lab(ix  , iy-1).p_g ;
-                        chf[3]  = lab(ix,   iy+1).p_w + lab(ix  , iy+1).p_w + lab(ix  , iy+1).p_g ;
+                        chf[0]  = lab(ix-1, iy  ).phi + lab(ix-1, iy  ).p_w + lab(ix-1, iy  ).p_g ;
+                        chf[1]  = lab(ix+1, iy  ).phi + lab(ix+1, iy  ).p_w + lab(ix+1, iy  ).p_g ;
+                        chf[2]  = lab(ix,   iy-1).phi + lab(ix  , iy-1).p_w + lab(ix  , iy-1).p_g ;
+                        chf[3]  = lab(ix,   iy+1).phi + lab(ix  , iy+1).p_w + lab(ix  , iy+1).p_g ;
                         
                         _applyNoFluxBC(df,chf);
                         
