@@ -20,8 +20,8 @@ Please visit the [GliomaSolver](http://tdo.sk/~janka/GliomaWebsite//index.html) 
 
 #### Data & Resources
 For additioanl data and softwares, please visit the solver's homepage, section [References](http://tdo.sk/~janka/GliomaWebsite/references.html). The most used links are also listed below.
- * Data used for the personalized radiotherhpy planning in [1] are avaialble [here](37.9.171.25/~janka/GliomaSolverHome/GlioblastomaDATA.tgz)
- * A brain atlas and precomputed phase-field function, used for the deformation model, can be found [here](37.9.171.25//~janka/GliomaSolverHome/TutorialTestData/AtlasPFF.tgz)
+ * Data used for the personalized radiotherhpy planning in [1] are avaialble [here](http://tdo.sk/~janka/GliomaSolverHome/GlioblastomaDATA.tgz)
+ * A brain atlas and precomputed phase-field function, used for the deformation model, can be found [here](http://tdo.sk/~janka/GliomaSolverHome/TutorialTestData/AtlasPFF.tgz)
  * For automated image-registration tool see [here](https://github.com/JanaLipkova/Registration)
  * For automated skull-stripping and brain tissue segmentation tool see [here](https://github.com/JanaLipkova/s3)
  
