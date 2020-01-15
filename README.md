@@ -18,12 +18,20 @@ _Tool for simulating tumor dynamics in patient-specific anatomy reconstructed fr
 #### Software home-page
 Please visit the [GliomaSolver](http://tdo.sk/~janka/GliomaWebsite//index.html) homepage for installation, tutorials, sample of glioma data, and much more :panda_face:.
 
+#### Data & Resources
+For additioanl data and softwares, please visit the solver's homepage, section [References](http://tdo.sk/~janka/GliomaWebsite/references.html). The most used links are also listed below.
+ * Data used for the personalized radiotherhpy planning in [1] are avaialble [here](37.9.171.25/~janka/GliomaSolverHome/GlioblastomaDATA.tgz)
+ * A brain atlas and precomputed phase-field function, used for the deformation model, can be found [here](37.9.171.25//~janka/GliomaSolverHome/TutorialTestData/AtlasPFF.tgz)
+ * For automated image-registration tool see [here](https://github.com/JanaLipkova/Registration)
+ * For automated skull-stripping and brain tissue segmentation tool see [here](https://github.com/JanaLipkova/s3)
+ 
+
 #### References
 In publications using GliomaSolver or data released with this solver pleace cite:
 
-Lipkova et al., *Personalized Radiotherapy Design for Glioblastoma Using Mathematical Tumor Modelling, Multimodal Scans and Bayesian Inference. IEEE Transactions on Medical Imaging (2019).* 
+[1] Lipkova et al., *Personalized Radiotherapy Design for Glioblastoma Using Mathematical Tumor Modelling, Multimodal Scans and Bayesian Inference. IEEE Transactions on Medical Imaging (2019).* 
 
-(At the time of uptading this README file, --early 2019--, the manuscript is accepted for publication, while the preprint is available on ArXive as: arXiv: 1807.00499)
+
 
 
 
