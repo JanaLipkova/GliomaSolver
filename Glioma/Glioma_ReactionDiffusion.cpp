@@ -324,7 +324,7 @@ void Glioma_ReactionDiffusion::run()
         {
             if(bAdaptivity){
                 Science::AutomaticRefinement	<0,0>(*grid, blockfwt, refinement_tolerance, maxLevel, 1, &profiler);
-                Science::AutomaticCompression	<0,0>(*grid, blockfwt, compression_tolerance, -1, &profiler);
+                //Science::AutomaticCompression	<0,0>(*grid, blockfwt, compression_tolerance, -1, &profiler);
             }
             
             _dump(iCounter++);
